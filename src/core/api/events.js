@@ -28,11 +28,11 @@ module.exports = {
         }
 
         function runCB(data){
-            if(options.consolidate){
+            if(options.consolidate || options.throttle){
                 clearTimeout(timeouts[template || '__global_event__']);
                 timeouts[template || '__global_event__'] = setTimeout(function(){
                     callback(data);
-                }, 50);
+                }, (typeof options.throttle === 'number')? options.throttle : 50);
             } else {
                 callback(data);
             }
