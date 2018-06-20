@@ -1,9 +1,9 @@
 import {send, request} from './utils/messenger.js';
 import {READY} from './utils/events.js';
-import {tacoData} from './core/tacodata.js';
+import {vffData} from './core/vffdata.js';
 import {start as startListener} from './utils/listener';
-import {init as initTacoDom} from './core/init';
-import tacoElement from './core/tacoElement';
+import {init as initVffDom} from './core/init';
+import vffElement from './core/vffElement';
 import './core/defaultExpose';
 import "./components/components.js";
 import {isMobile, isController, extend} from './utils/helpers';
@@ -13,31 +13,31 @@ import * as visibilityApi from './core/api/visibility';
 require('./core/interactionEvents');
 
 startListener();
-initTacoDom();
+initVffDom();
 
 window.addEventListener('load', () => {
     send(READY);
 });
 
 
-let taco = (selector) => {
-    return new tacoElement(selector);
+let vff = (selector) => {
+    return new vffElement(selector);
 };
 
-taco.addTemplate    = (name, data) => {return tacoData.addTemplate(name, data);};
-taco.onUpdate       = (cb) => {return tacoData.onUpdate(cb);};
-taco.getPages       = () => {return tacoData.getPages();};
-taco.getQueryParams = () => {return tacoData.getQueryParams();};
-taco.send           = (type, payload) => { send(type, payload); };
-taco.request        = (type, payload, cb) => { request(type, payload, cb); };
-taco.isMobile       = isMobile;
-taco.isController   = isController;
-taco.extend         = (name, extension) => { taco[name] = extension; };
-taco.define         = (name, element) => { customElements.define(name, element); };
+vff.addTemplate    = (name, data) => {return vffData.addTemplate(name, data);};
+vff.onUpdate       = (cb) => {return vffData.onUpdate(cb);};
+vff.getPages       = () => {return vffData.getPages();};
+vff.getQueryParams = () => {return vffData.getQueryParams();};
+vff.send           = (type, payload) => { send(type, payload); };
+vff.request        = (type, payload, cb) => { request(type, payload, cb); };
+vff.isMobile       = isMobile;
+vff.isController   = isController;
+vff.extend         = (name, extension) => { vff[name] = extension; };
+vff.define         = (name, element) => { customElements.define(name, element); };
 
-extend(taco, playerApi);
-extend(taco, visibilityApi);
-extend(taco, eventsApi);
+extend(vff, playerApi);
+extend(vff, visibilityApi);
+extend(vff, eventsApi);
 
 
-module.exports = taco;
+module.exports = vff;

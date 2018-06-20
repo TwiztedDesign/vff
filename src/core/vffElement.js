@@ -1,7 +1,7 @@
 import {observe} from '../observer/htmlAccessorObserver';
 
 
-class TacoElement{
+class VffElement{
     constructor(selector){
         this.selector = selector;
         this.element = null;
@@ -28,7 +28,7 @@ class TacoElement{
     onChange(){
         let prop = arguments.length > 1? arguments[0] : null;
         let cb   = arguments.length > 1? arguments[1] : arguments[0];
-        let event = prop? "taco-change-" + prop : 'taco-change';
+        let event = prop? "vff-change-" + prop : 'vff-change';
         let listener = function(e){
             if(prop){
                 cb(e.detail.value);
@@ -51,4 +51,4 @@ class TacoElement{
     }
 }
 
-export default TacoElement;
+export default VffElement;

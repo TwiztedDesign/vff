@@ -29,9 +29,9 @@ function observePrimitive(provider, prop, path, dispatcher){
         set (newValue) {
             if(newValue !== provider[prop]){
                 if(dispatcher){
-                    let event = 'taco-change-' + pathString + trim(prop, "_");
+                    let event = 'vff-change-' + pathString + trim(prop, "_");
                     dispatcher(event, { detail: {value : newValue}});
-                    dispatcher('taco-change', { detail: {value : newValue, property : prop, path : path}});
+                    dispatcher('vff-change', { detail: {value : newValue, property : prop, path : path}});
                 }
                 if(exposedPath){
                     setByPath(provider, exposedPath, newValue);

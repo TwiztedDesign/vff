@@ -1,4 +1,5 @@
 import * as handlers from '../core/handlers';
+import ACK from './events';
 
 
 function messageHandler(message){
@@ -6,7 +7,7 @@ function messageHandler(message){
     let type = messageData.type;
     let handler = handlers[type];
     if(messageData.cid && message.source && message.source.postMessage){
-        message.source.postMessage(JSON.stringify({type:'taco-ack', cid: messageData.cid}),'*');
+        message.source.postMessage(JSON.stringify({type : ACK, cid: messageData.cid}),'*');
     }
     if(handler){
         handler(messageData.payload);

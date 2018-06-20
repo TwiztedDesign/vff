@@ -1,8 +1,8 @@
-import {tacoData} from '../../core/tacodata.js';
+import {vffData} from '../../core/vffdata.js';
 
 
 module.exports = {
-    show        : (template) => {return tacoData.show(template);},
-    hide        : (template) => {return tacoData.hide(template);},
-    toggle      : (template) => {return tacoData.toggle(template);}
+    show        : (template) => {return vffData.show(template);},
+    hide        : (template) => {return vffData.hide(template);},
+    toggle      : (template) => {return vffData.toggle(template);}
 };

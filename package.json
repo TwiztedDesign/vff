@@ -1,8 +1,8 @@
 {
-  "name": "vf-taco",
+  "name": "vff",
   "version": "1.0.1-beta.12",
   "description": "Html graphics for broadcast",
-  "main": "dist/taco.js",
+  "main": "dist/vff.js",
   "scripts": {
     "test": "jest --watchAll",
     "cover": "jest --coverage",
@@ -14,26 +14,26 @@
     "build": "npm-run-all --parallel build:*",
     "!build:main": "babel --copy-files --out-dir npmdist --ignore *.test.js src",
     "build:umd": "webpack",
-    "!build:umd.min": "webpack --output-filename taco.min.js -p"
+    "!build:umd.min": "webpack --output-filename vff.min.js -p"
   },
   "files": [
     "dist"
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/TwiztedDesign/taco.git"
+    "url": "git+https://github.com/TwiztedDesign/vff.git"
   },
   "keywords": [
-    "taco",
+    "vff",
     "broadcast",
     "graphics"
   ],
   "author": "Danny Umansky <dok.umansky@twizted-design.com> (http://www.twizted-design.com/)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/TwiztedDesign/taco/issues"
+    "url": "https://github.com/TwiztedDesign/vff/issues"
   },
-  "homepage": "https://github.com/TwiztedDesign/taco#readme",
+  "homepage": "https://github.com/TwiztedDesign/vff#readme",
   "devDependencies": {
     "babel-cli": "6.26.0",
     "babel-core": "6.26.0",

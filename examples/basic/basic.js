@@ -18,7 +18,7 @@ app.controller("Ctrl", ['$scope',function($scope){
         "drag-area yValue" : 0
     };
 
-    taco.onUpdate(function(){
+    vff.onUpdate(function(){
         try{
             $scope.$apply();
         } catch(e){}
@@ -26,7 +26,7 @@ app.controller("Ctrl", ['$scope',function($scope){
 
     window.onload = function(){
 
-        var dragArea = taco('.drag-area');
+        var dragArea = vff('.drag-area');
 
         dragArea.onChange('dragging', function(val){
             console.log('Dragging: ', val);
@@ -48,12 +48,12 @@ app.controller("Ctrl", ['$scope',function($scope){
             // console.log("some value changed: ", prop, val, path);
         });
 
-        console.log("mobile: ", taco.isMobile);
-        console.log("controller: ", taco.isController);
+        console.log("mobile: ", vff.isMobile);
+        console.log("controller: ", vff.isController);
     };
 
 
-    taco.onEvent('test',function(e){
+    vff.onEvent('test',function(e){
         console.log('Event received: ', e);
     }, {consolidate : true});
 
@@ -70,7 +70,7 @@ app.controller("Ctrl", ['$scope',function($scope){
         document.dispatchEvent(new CustomEvent("taco-event-received", { detail: {test: {a:1}} }));
 
 
-        taco.emit({test: 3});
+        vff.emit({test: 3});
 
     }, 3000);
 

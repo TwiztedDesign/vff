@@ -1,7 +1,7 @@
-import {tacoData} from '../tacodata.js';
+import {vffData} from '../vffdata.js';
 
 function queryParams(data) {
-    tacoData.addQueryParams(data);
+    vffData.addQueryParams(data);
 }
 
 module.exports = {

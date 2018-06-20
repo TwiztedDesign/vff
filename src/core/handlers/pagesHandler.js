@@ -1,7 +1,7 @@
-import {tacoData} from '../tacodata.js';
+import {vffData} from '../vffdata.js';
 
 function pages(data) {
-    tacoData.addPages(data);
+    vffData.addPages(data);
 }
 
 module.exports = {

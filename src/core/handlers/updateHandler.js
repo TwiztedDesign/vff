@@ -1,18 +1,18 @@
 import {findKey, setByPath} from '../../utils/helpers.js';
-import {tacoData} from '../tacodata.js';
+import {vffData} from '../vffdata.js';
 import {EXPOSE_DELIMITER} from '../consts';
-import {TACO_EVENT} from '../../utils/events';
+import {VFF_EVENT} from '../../utils/events';
 
 function update(data){
     let isDataChanged = false;
 
-    document.dispatchEvent(new CustomEvent(TACO_EVENT, { detail: data }));
-    for(let template in tacoData._main) {
+    document.dispatchEvent(new CustomEvent(VFF_EVENT, { detail: data }));
+    for(let template in vffData._main) {
         let key = findKey(data, template);
         for(let item in data[key]){
-            let controlKey = findKey(tacoData._main[template], item);
+            let controlKey = findKey(vffData._main[template], item);
 
-            tacoData._main[template][controlKey || item] = data[key][item];
+            vffData._main[template][controlKey || item] = data[key][item];
             isDataChanged = true;
 
             updateDom(template, controlKey || item, data[key][item], data[key].__timecode__);
@@ -20,14 +20,14 @@ function update(data){
         }
     }
     if(isDataChanged) {
-        tacoData.updateCB();
+        vffData.updateCB();
     }
 }
 
 
 function updateDom(template, control, value, timecode){
-    let templateSelector = '[taco-template="' + template + '" i]';
-    let controlSelector = '[taco-name="' + control.split(EXPOSE_DELIMITER)[0] + '" i]';
+    let templateSelector = '[vff-template="' + template + '" i]';
+    let controlSelector = '[vff-name="' + control.split(EXPOSE_DELIMITER)[0] + '" i]';
     let selector = templateSelector + ' ' + controlSelector + ',' + templateSelector + controlSelector;
     let dom = document.querySelector(selector);
     if(dom){

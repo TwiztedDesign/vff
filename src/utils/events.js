@@ -9,7 +9,8 @@ module.exports = {
     "USER_UPDATE"   : "taco-user-update",
     "QUERY_PARAMS"  : "taco-query-params",
     "OUTGOING_EVENT": "taco-event-sent",
-    "TACO_EVENT"    : "taco-event-received",
+    "VFF_EVENT"     : "taco-event-received",
+    "ACK"           : "taco-ack",
 
 
     "TOUCH"         : "taco-touch-element",

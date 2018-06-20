@@ -4,15 +4,15 @@ import {EXPOSE_DELIMITER} from './consts';
 function init(){
     let untitledTemplateCount = 0;
     let templates = {};
-    let controls = document.querySelectorAll('[taco-name]');
+    let controls = document.querySelectorAll('[vff-name]');
     controls.forEach((control) => {
         if(control.expose){
-            let template = control.closest('[taco-template]');
+            let template = control.closest('[vff-template]');
             if(!template) {
-                control.setAttribute('taco-template', 'Untitled Template ' + (++untitledTemplateCount));
+                control.setAttribute('vff-template', 'Untitled Template ' + (++untitledTemplateCount));
             }
-            let templateName = (template || control).getAttribute('taco-template');
-            let controlName = control.getAttribute('taco-name');
+            let templateName = (template || control).getAttribute('vff-template');
+            let controlName = control.getAttribute('vff-name');
             let exposed = control.expose();
 
             let data = {};
@@ -42,7 +42,7 @@ function init(){
 
     });
     for (let template in templates) {
-        window.taco.addTemplate(template, templates[template]);
+        window.vff.addTemplate(template, templates[template]);
     }
 }
 

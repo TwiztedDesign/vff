@@ -1,24 +1,24 @@
-import TacoElement from '../../src/core/tacoElement';
+import VffElement from '../../src/core/vffElement';
 
-describe('Taco Element', () => {
+describe('VFF Element', () => {
 
     describe('New Element', () => {
 
-        it('Should initialize the taco element', () => {
+        it('Should initialize the vff element', () => {
 
             let headerElement = document.createElement('h1');
-            headerElement.setAttribute("taco-template", 'new template');
-            headerElement.setAttribute("taco-name", 'title');
+            headerElement.setAttribute("vff-template", 'new template');
+            headerElement.setAttribute("vff-name", 'title');
             document.body.appendChild(headerElement);
 
-            let tacoElementCreated = new TacoElement('h1');
-            expect(tacoElementCreated.element).toEqual(headerElement);
-            // let tacoElementCreated = new TacoElement('<h1>');
-            // expect(tacoElementCreated.element).toEqual(headerElement);
+            let vffElementCreated = new VffElement('h1');
+            expect(vffElementCreated.element).toEqual(headerElement);
+            // let vffElementCreated = new VffElement('<h1>');
+            // expect(vffElementCreated.element).toEqual(headerElement);
         });
 
         it('Should throw error, Invalid Node', () => {
-            expect(() =>{new TacoElement('<h1');}).toThrow();
+            expect(() =>{new VffElement('<h1');}).toThrow();
         });
     });
 

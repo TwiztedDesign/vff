@@ -3,7 +3,7 @@ import {ADD} from "../utils/events";
 import {findKey} from '../utils/helpers.js';
 import {send} from '../utils/messenger';
 
-class TacoData {
+class VffData {
     constructor(){
         this._main = {};
         this._proxy = {};
@@ -125,4 +125,4 @@ class TacoData {
     }
 }
 
-export let tacoData = new TacoData();
+export let vffData = new VffData();

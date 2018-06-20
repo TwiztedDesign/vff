@@ -1,16 +1,16 @@
 // let expect = require('chai').expect;
-import {tacoData} from '../src/core/tacodata.js';
+import {vffData} from '../src/core/vffdata.js';
 
-// describe('Taco', () => {
+// describe('VFF', () => {
 //     describe('first test', () => {
 //         it('should pass', () => {
 //             expect(true).to.be.true;
 //         })
 //     });
 //
-//     describe("Taco data", function(){
+//     describe("VFF data", function(){
 //         it("should work", function(){
-//             tacoData.addTemplate("name", {});
+//             vffData.addTemplate("name", {});
 //         })
 //     })
 //

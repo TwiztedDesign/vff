@@ -1,4 +1,4 @@
-import {TACO_EVENT, OUTGOING_EVENT} from '../../utils/events.js';
+import {VFF_EVENT, OUTGOING_EVENT} from '../../utils/events.js';
 import {findKey} from '../../utils/helpers';
 import {send} from '../../utils/messenger';
 let timeouts = {};
@@ -49,7 +49,7 @@ module.exports = {
             }
         }
 
-        document.addEventListener(TACO_EVENT, listener);
+        document.addEventListener(VFF_EVENT, listener);
     },
 
     emit : (payload) => {
