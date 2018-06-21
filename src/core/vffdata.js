@@ -39,8 +39,10 @@ class VffData {
         }
         if(window.angular){
             let $body = window.angular.element(document.body);
-            let $rootScope =  $body.injector().get('$rootScope');
-            $rootScope.$apply();
+            let $injector = $body.injector();
+            if($injector){
+                $injector.get('$rootScope').$apply();
+            }
         }
     }
 
