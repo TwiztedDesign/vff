@@ -29,6 +29,8 @@
     <link  href='https://cdn.rawgit.com/rstacruz/flatdoc/v0.9.0/theme-white/style.css' rel='stylesheet'>
     <script src='https://cdn.rawgit.com/rstacruz/flatdoc/v0.9.0/theme-white/script.js'></script>
 
+    <link href="style.css" rel="stylesheet">
+
     <!-- Meta -->
     <meta content="Videflow Framework" property="og:title">
     <meta content="Create graphic overlays for Videoflow player" name="description">
@@ -38,11 +40,9 @@
         Flatdoc.run({
             fetcher: window.location.origin.indexOf('localhost') > -1? Flatdoc.file('../README.md') : Flatdoc.github('TwiztedDesign/vff')
         });
-
-
     </script>
 </head>
-<body role='flatdoc'>
+<body role='flatdoc' id="documentation">
 
 <div class='header'>
     <div class='left'>
