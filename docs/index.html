@@ -36,16 +36,10 @@
     <!-- Initializer -->
     <script>
         Flatdoc.run({
-            fetcher: Flatdoc.github('TwiztedDesign/vff')
-//            fetcher: Flatdoc.file([
-//                '../docs/partials/_intro.md',
-//                '../docs/partials/_getting-started.md',
-//                'docs/partials/_core.md',
-//                'docs/partials/_player-control.md',
-//                'docs/partials/_visibility.md',
-//                'docs/partials/_globals.md'
-//            ])
+            fetcher: window.location.origin.indexOf('localhost') > -1? Flatdoc.file('../README.md') : Flatdoc.github('TwiztedDesign/vff')
         });
+
+
     </script>
 </head>
 <body role='flatdoc'>
