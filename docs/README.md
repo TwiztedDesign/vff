@@ -76,15 +76,11 @@ The above code will generate the same result as the code we used in the "Getting
 The function "addTemplate" will return a template object that will contain functions for events and additional data. Note that when registering the template via js, you can specify any name you want for the template,
 the first pram is the name of the template as it would be displayed in the controller (Lower Third) and the second param is the object that will be used to contain the data of the template.
 
-## Adding UI Elements
-So far we have been adding only primitive objects to our template. In the previous example have added two strings. Additional primitives you can added are numbers and booleans. In addition to the primitive types
-you can also create custom objects that will be used to extend the UI elements that can be used in the template.
-
-
 ## Working with DOM Frameworks
 VFF will update the registered object on any change, you can then bind you template object directly to the DOM using your favorite framework, here are a few examples using different frameworks:
 
 ### angular.js
+HTML
 ```html
 <html>
     <header>
@@ -99,6 +95,7 @@ VFF will update the registered object on any change, you can then bind you templ
     </body>
 </html>
 ```
+Javascript
 ```javascript
 angular.module('tfApp', [])
     .controller('lowerThirdController', ['$scope', function($scope) {
@@ -145,7 +142,79 @@ While the property "stockData" will not be shown by the controller, it will stil
 You can still access it via the Videoflow API. This is useful when you have to display a lot of data from a 3rd party source.
 You will not see it in the controller and will not be able to edit the data, since it arrives for an external source via the API, but you will still be able to use the data in your overlay app.
 Your entire template can be viewed as an object at any time in the data dashboard of the controller.
-cd doc
+
+## Custom UI Elements
+So far we have been adding only primitive objects to our template. In the previous example have added two strings. Additional primitives you can add are numbers and booleans. In addition to the primitive types
+you can also create custom objects that will be used to extend the UI elements that can be used in the template. Normally objects are now shown in the UI of the controller, unless you follow the UI element object structure.
+
+```javascript
+var myTemplate = {
+    myDropdown = {
+        type        : 'ui-dropdown',
+        value       : 'USA',
+        options     : [
+            'USA',
+            'Canada',
+            'Mexico',
+            'UK'
+        ]
+    }
+}
+```
+The above example will create a template, with a single ui element, that will be presented as a dropdown box, with the options 'USA', 'Canada', 'Mexico' & 'UK' to choose from, and 'USA' as the default selected value.
+When you make another selection from the drop down, the "value" property will be updated. Keep that in mind when binding your elements to the template object.
+The key part here is the "type" property. Without the type property & without the appropriate type value, this object would have been ignored by the controller and you would not see it in the UI.
+
+### Dropdown
+```javascript
+var myTemplate = {
+    myDropdown = {
+        //Declare the type of the ui element
+        type        : 'ui-dropdown',
+        //Bind your element to the value property
+        value       : 'USA',
+        options     : [
+            'USA',
+            'Canada',
+            'Mexico',
+            'UK'
+        ]
+    }
+}
+```
+### Radio Group
+```javascript
+var myTemplate = {
+    myRadioGroup = {
+        //Declare the type of the ui element
+        type        : 'ui-radio',
+        //Bind your element to the value property
+        value       : 'USA',
+        options     : [
+            'USA',
+            'Canada',
+            'Mexico',
+            'UK'
+        ]
+    }
+}
+```
+
+### Range Slider
+```javascript
+var myTemplate = {
+    mySlider = {
+        //Declare the type of the ui element
+        type        : 'ui-range',
+        //Bind your element to the value property
+        value       : '0',
+        min         : -50,
+        max         : 10,
+        step        : 0.1
+    }
+}
+```
+
 ## Template Events
 When the template get new data for the controller or the API an event is triggered, this event can be used to added extra functionality as a response to the new data. For example, to trigger an animation.
 We will register a new function for the event on our "Lower Third" template:
