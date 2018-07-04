@@ -1,7 +1,7 @@
 # Introduction
 
 VFF is lightweight JavaScript library built to create graphic overlays for Videoflow. VFF exposes properties in your HTML overlay to the Videoflow player. This way, when an overlay is loaded in Videoflow player,
-the properties that were registered via VFF will be visible to the user in the controller and the user will be able to change those properties from the controller of via the API. Simple put, VFF turns your HTML to a template.
+the properties that were registered via VFF will be visible to the user in the controller and the user will be able to change those properties from the controller or via the API. Simple put, VFF turns your HTML to a template.
 
 VFF also has a set of global function that are design to help you control the project from within the overlay. For example, you can use those global functions to call another page in the project, or to know that container is currently hosting
 the project. For example, you might want to display more data if the project is loaded in a controller and less data if the project is loaded on a regular or a mobile page.
@@ -42,7 +42,7 @@ Note that spaces are not allowed, but Videoflow will separate the names based on
 While adding templates and properties can be easily done in the HTML, for a more complex control over your content is recommended to add the templates and their properties via JavaScript.
 
 ## Publish your content
-In order to use you newly created overlay, you need to host it in a publicly available accessible location, for example Netlify. Once you project has been published, you can add it as an overlay by pusing the url of your
+In order to use your newly created overlay, you need to host it in a publicly available accessible location, for example Netlify. Once you project has been published, you can add it as an overlay by pusing the url of your
 project to the "Overlay" filed of you project. Here is the full basic core:
 ```html
 <html>
@@ -76,9 +76,10 @@ The above code will generate the same result as the code we used in the "Getting
 The function "addTemplate" will return a template object that will contain functions for events and additional data. Note that when registering the template via js, you can specify any name you want for the template,
 the first pram is the name of the template as it would be displayed in the controller (Lower Third) and the second param is the object that will be used to contain the data of the template.
 
-## Working with DOM Frameworks
+## Working with Frameworks
 VFF will update the registered object on any change, you can then bind you template object directly to the DOM using your favorite framework, here are a few examples using different frameworks:
 
+### AngularJS
 ### angular.js
 HTML
 ```html
@@ -109,10 +110,10 @@ angular.module('tfApp', [])
         }
     ]);
 ```
-### react.js
+<!--### React
     ///TODO
-### vue.js
-    ///TODO
+### Vue
+    ///TODO-->
 
 ## Complex objects as templates
 So far we have looked at simple objects with only primitives as properties, but what will we see if we register the following object as a template:
@@ -241,9 +242,6 @@ vff.getPages();
 ```
 Get all the project pages (for now, mainly used to build home screen overlays)
 
-## onUpdate
-
-### unused
 
 ## getQueryParams
 ```javascript
@@ -251,10 +249,7 @@ vff.getQueryParams();
 ```
 Get the project query params (can?t use window.location.search because the overlay can be opened in an iframe)
 
-## send
-### unused
-## request
-### unused
+<!--
 ## extend
 ```javascript
 vff.extend(name, extension)
@@ -266,7 +261,7 @@ vff.define(name, element)
 ```
 Define a vff custom element  
 Name - string - element name should be at least two words, dash separated (i.e vff-telestrator) **should consider auto ?vff-? prefix
-
+-->
 ## emit
 ```javascript
 vff.emit(payload);
@@ -291,18 +286,13 @@ Go to page
 
 
 
-## next
-## previous
-## home
-
-
 # Visibility
 
 ## show
 ```javascript
 vff.show(template)
 ```
-Set ?visibility? property in the template to true
+Set "visibility" property in the template to true
 
 * template - _string_ - the name of the template
 
@@ -310,7 +300,7 @@ Set ?visibility? property in the template to true
 ```javascript
 vff.hide(template)
 ```
-Set ?visibility? property in the template to false
+Set "visibility" property in the template to false
 
 * template - _string_ - the name of the template
 
@@ -318,7 +308,7 @@ Set ?visibility? property in the template to false
 ```javascript
 vff.toggle(template)
 ```
-Toggle ?visibility? property in the template
+Toggle "visibility" property in the template
 
 * template - _string_ - the name of the template
 
