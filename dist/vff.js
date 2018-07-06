@@ -80,6 +80,10 @@ return /******/ (function(modules) { // webpackBootstrap
 "use strict";
 
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 function findKey(data, keyToFind) {
     var keys = Object.keys(data);
     for (var i = 0; i < keys.length; i++) {
@@ -108,8 +112,23 @@ function getByPath(obj, path) {
 
     return result;
 }
+
+function setToValue(object, path, value) {
+    var a = path.split('.');
+    var o = object;
+    for (var i = 0; i < a.length - 1; i++) {
+        var n = a[i];
+        if (n in o) {
+            o = o[n];
+        } else {
+            o[n] = {};
+            o = o[n];
+        }
+    }
+    o[a[a.length - 1]] = value;
+}
 function setByPath(obj, path, value) {
-    if (arguments.length !== 3) {
+    if (arguments.length < 3) {
         throw new Error('Missing Arguments!');
     }
     path = path ? trim(path, '.').split('.') : [""];
@@ -181,6 +200,107 @@ function deepExtend(destination, source) {
     return destination;
 }
 
+function deepProxy(target, handler) {
+    var preproxy = new WeakMap();
+
+    function makeHandler(path) {
+        return {
+            set: function set(target, key, value, receiver) {
+                if ((typeof value === "undefined" ? "undefined" : _typeof(value)) === 'object') {
+                    value = proxify(value, [].concat(_toConsumableArray(path), [key]));
+                }
+                target[key] = value;
+
+                if (handler.set) {
+                    handler.set(target, [].concat(_toConsumableArray(path), [key]), value, receiver);
+                }
+                return true;
+            },
+            deleteProperty: function deleteProperty(target, key) {
+                if (Reflect.has(target, key)) {
+                    unproxy(target, key);
+                    var deleted = Reflect.deleteProperty(target, key);
+                    if (deleted && handler.deleteProperty) {
+                        handler.deleteProperty(target, [].concat(_toConsumableArray(path), [key]));
+                    }
+                    return deleted;
+                }
+                return false;
+            }
+        };
+    }
+
+    function unproxy(obj, key) {
+        if (preproxy.has(obj[key])) {
+            // console.log('unproxy',key);
+            obj[key] = preproxy.get(obj[key]);
+            preproxy.delete(obj[key]);
+        }
+
+        var _iteratorNormalCompletion = true;
+        var _didIteratorError = false;
+        var _iteratorError = undefined;
+
+        try {
+            for (var _iterator = Object.keys(obj[key])[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                var k = _step.value;
+
+                if (_typeof(obj[key][k]) === 'object') {
+                    unproxy(obj[key], k);
+                }
+            }
+        } catch (err) {
+            _didIteratorError = true;
+            _iteratorError = err;
+        } finally {
+            try {
+                if (!_iteratorNormalCompletion && _iterator.return) {
+                    _iterator.return();
+                }
+            } finally {
+                if (_didIteratorError) {
+                    throw _iteratorError;
+                }
+            }
+        }
+    }
+
+    function proxify(obj, path) {
+        var _iteratorNormalCompletion2 = true;
+        var _didIteratorError2 = false;
+        var _iteratorError2 = undefined;
+
+        try {
+            for (var _iterator2 = Object.keys(obj)[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+                var key = _step2.value;
+
+                if (_typeof(obj[key]) === 'object') {
+                    obj[key] = proxify(obj[key], [].concat(_toConsumableArray(path), [key]));
+                }
+            }
+        } catch (err) {
+            _didIteratorError2 = true;
+            _iteratorError2 = err;
+        } finally {
+            try {
+                if (!_iteratorNormalCompletion2 && _iterator2.return) {
+                    _iterator2.return();
+                }
+            } finally {
+                if (_didIteratorError2) {
+                    throw _iteratorError2;
+                }
+            }
+        }
+
+        var p = new Proxy(obj, makeHandler(path));
+        preproxy.set(p, obj);
+        return p;
+    }
+
+    return proxify(target, []);
+}
+
 function noop() {}
 
 module.exports = {
@@ -188,11 +308,13 @@ module.exports = {
     trim: trim,
     getByPath: getByPath,
     setByPath: setByPath,
+    setToValue: setToValue,
     camelize: camelize,
     decamelize: decamelize,
     uuid: uuid,
     extend: extend,
     deepExtend: deepExtend,
+    deepProxy: deepProxy,
     isMobile: mobilecheck(),
     isController: controllerCheck(),
     noop: noop
@@ -320,12 +442,20 @@ var VffData = function () {
         this._onChangeFunc = function (templateName) {
             return {
                 set: function set(target, prop, value) {
-                    target[prop] = value;
+
+                    (0, _helpers.setToValue)(target, prop.join('.'), value);
                     var payload = {};
                     payload[templateName] = {};
-                    payload[templateName][prop] = value;
+                    (0, _helpers.setToValue)(payload[templateName], prop.join('.'), value);
                     (0, _messenger.send)(_events.USER_UPDATE, payload);
                     return true;
+
+                    // target[prop] = value;
+                    // var payload = {};
+                    // payload[templateName] = {};
+                    // payload[templateName][prop] = value;
+                    // send(USER_UPDATE, payload);
+                    // return true;
                 }
             };
         };
@@ -387,7 +517,9 @@ var VffData = function () {
                 // Object.assign(this._proxy[name], data);
             } else {
                 this._main[name] = data;
-                this._proxy[name] = new Proxy(data, this._onChangeFunc(name));
+
+                this._proxy[name] = (0, _helpers.deepProxy)(data, this._onChangeFunc(name));
+                // this._proxy[name] = new Proxy(data, this._onChangeFunc(name));
             }
 
             (0, _messenger.send)(_events.ADD, {

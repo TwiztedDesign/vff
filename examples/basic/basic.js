@@ -57,6 +57,17 @@ app.controller("Ctrl", ['$scope',function($scope){
         console.log('Event received: ', e);
     }, {consolidate : true});
 
+
+    window.template = $scope.template = vff.addTemplate('template', {
+        num: 1,
+        string : "Test string",
+        object : {
+            ui: 'dropdown',
+            value: "",
+            options: [1, 2, 3, 4, 5]
+        }
+    });
+
     setTimeout(function(){
         vff.emit({test: 3});
 

@@ -1,6 +1,6 @@
 import {USER_UPDATE} from "../utils/events";
 import {ADD} from "../utils/events";
-import {findKey} from '../utils/helpers.js';
+import {findKey, deepProxy, setToValue} from '../utils/helpers.js';
 import {send} from '../utils/messenger';
 
 class VffData {
@@ -13,12 +13,21 @@ class VffData {
         this._onChangeFunc = function(templateName){
             return {
                 set: function (target, prop, value) {
-                    target[prop] = value;
+
+                    setToValue(target, prop.join('.'), value);
                     var payload = {};
                     payload[templateName] = {};
-                    payload[templateName][prop] = value;
+                    setToValue(payload[templateName], prop.join('.'), value);
                     send(USER_UPDATE, payload);
                     return true;
+
+
+                    // target[prop] = value;
+                    // var payload = {};
+                    // payload[templateName] = {};
+                    // payload[templateName][prop] = value;
+                    // send(USER_UPDATE, payload);
+                    // return true;
                 }
             };
 
@@ -75,7 +84,10 @@ class VffData {
             // Object.assign(this._proxy[name], data);
         }else{
             this._main[name] = data;
-            this._proxy[name] = new Proxy(data, this._onChangeFunc(name));
+
+
+            this._proxy[name] = deepProxy(data, this._onChangeFunc(name));
+            // this._proxy[name] = new Proxy(data, this._onChangeFunc(name));
         }
 
         send(ADD,{
