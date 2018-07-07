@@ -14,10 +14,10 @@ class VffData {
             return {
                 set: function (target, prop, value) {
 
-                    self.setToValue(target, prop, value);
+                    self.setByPath(target, prop, value);
                     let payload = {};
                     payload[templateName] = {};
-                    self.setToValue(payload[templateName], prop, value);
+                    self.setByPath(payload[templateName], prop, value);
                     send(USER_UPDATE, payload);
 
                     return true;
@@ -137,7 +137,7 @@ class VffData {
     getQueryParams(){
         return this._queryParams;
     }
-    setToValue(obj, path, value) {
+    setByPath(obj, path, value) {
         for (let i = 0; i < path.length - 1; i++) {
             let prop = path[i];
             if (prop in obj) {

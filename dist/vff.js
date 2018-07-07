@@ -429,10 +429,10 @@ var VffData = function () {
             return {
                 set: function set(target, prop, value) {
 
-                    self.setToValue(target, prop, value);
+                    self.setByPath(target, prop, value);
                     var payload = {};
                     payload[templateName] = {};
-                    self.setToValue(payload[templateName], prop, value);
+                    self.setByPath(payload[templateName], prop, value);
                     (0, _messenger.send)(_events.USER_UPDATE, payload);
 
                     return true;
@@ -573,8 +573,8 @@ var VffData = function () {
             return this._queryParams;
         }
     }, {
-        key: "setToValue",
-        value: function setToValue(obj, path, value) {
+        key: "setByPath",
+        value: function setByPath(obj, path, value) {
             for (var i = 0; i < path.length - 1; i++) {
                 var prop = path[i];
                 if (prop in obj) {
