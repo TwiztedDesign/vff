@@ -112,86 +112,23 @@ function getByPath(obj, path) {
 
     return result;
 }
-
-function setValue(object, path, value) {
-    var a = pathToArray(path);
-    var o = object;
-    for (var i = 0; i < a.length - 1; i++) {
-        var n = a[i];
-        if (n in o) {
-            o = o[n];
-        } else {
-            o[n] = {};
-            o = o[n];
-        }
-    }
-    o[a[a.length - 1]] = value;
-}
-
-function setToValue(obj, path, value) {
-    path = pathToArray(path);
-    for (var i = 0; i < path.length - 1; i++) {
-        var prop = path[i];
-        if (prop in obj) {
-            obj = obj[prop];
-        } else {
-            obj[prop] = {};
-            obj = obj[prop];
-        }
-    }
-    obj[path[path.length - 1]] = value;
-}
-
-function pathToArray(path) {
-    if (Array.isArray(path)) {
-        return path;
-    }
-    return path ? trim(path, '.').split('.') : [""];
-}
-
-// function hasPath(obj, path){
-//     path = pathToArray(path);
-//     let nestedObj = obj;
-//     for (let i = 0; i < path.length; i++) {
-//         if(!nestedObj || !nestedObj.hasOwnProperty(path[i])){
-//             return false;
-//         }
-//         nestedObj = nestedObj[path[i]];
-//     }
-//     return true;
-// }
-
-
 function setByPath(obj, path, value) {
-
-    setValue(obj, path, value);
-
-    // if(arguments.length < 3){
-    //     throw new Error('Missing Arguments!');
-    // }
-    // path = pathToArray(path);
-    // let result = obj;
-    // for (let i = 0; i < path.length - 1; i++) {
-    //     if(setNew){
-    //         let prop = path[i];
-    //         if(prop in result){
-    //             setByPath(result, path.slice(0,i))
-    //         } else {
-    //             obj[prop] = {};
-    //         }
-    //
-    //     } else {
-    //         if(i === path.length -1){
-    //             result[path[i]] = value;
-    //         } else {
-    //             if(result[path[i]] !== undefined){
-    //                 result = result[path[i]];
-    //             } else {
-    //                 return;
-    //             }
-    //         }
-    //     }
-    // }
+    if (arguments.length !== 3) {
+        throw new Error('Missing Arguments!');
+    }
+    path = path ? trim(path, '.').split('.') : [""];
+    var result = obj;
+    for (var i = 0; i < path.length; i++) {
+        if (i === path.length - 1) {
+            result[path[i]] = value;
+        } else {
+            if (result[path[i]] !== undefined) {
+                result = result[path[i]];
+            } else {
+                return;
+            }
+        }
+    }
 }
 
 function camelize(str) {
@@ -356,7 +293,6 @@ module.exports = {
     trim: trim,
     getByPath: getByPath,
     setByPath: setByPath,
-    setToValue: setToValue,
     camelize: camelize,
     decamelize: decamelize,
     uuid: uuid,

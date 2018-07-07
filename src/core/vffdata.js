@@ -86,7 +86,6 @@ class VffData {
         }else{
             this._main[name] = data;
 
-
             this._proxy[name] = deepProxy(data, this._onChangeFunc(name));
             // this._proxy[name] = new Proxy(data, this._onChangeFunc(name));
         }
@@ -153,9 +152,7 @@ class VffData {
         }
         obj[path[path.length - 1]] = value;
     }
-
 }
-
 
 
 export let vffData = new VffData();
