@@ -61,18 +61,6 @@ function setToValue(obj, path, value) {
     obj[path[path.length - 1]] = value;
 }
 
-var o1 = {
-    a: {
-        b: {
-            c : 1
-        }
-    }
-};
-
-var o2 = {
-    a : {}
-};
-//setByPath(0 , 'a.b.c', 2);
 
 function pathToArray(path){
     if(Array.isArray(path)){
@@ -81,20 +69,20 @@ function pathToArray(path){
     return path? trim(path, '.').split('.') : [""];
 }
 
-function hasPath(obj, path){
-    path = pathToArray(path);
-    let nestedObj = obj;
-    for (let i = 0; i < path.length; i++) {
-        if(!nestedObj || !nestedObj.hasOwnProperty(path[i])){
-            return false;
-        }
-        nestedObj = nestedObj[path[i]];
-    }
-    return true;
-}
+// function hasPath(obj, path){
+//     path = pathToArray(path);
+//     let nestedObj = obj;
+//     for (let i = 0; i < path.length; i++) {
+//         if(!nestedObj || !nestedObj.hasOwnProperty(path[i])){
+//             return false;
+//         }
+//         nestedObj = nestedObj[path[i]];
+//     }
+//     return true;
+// }
 
 
-function setByPath(obj, path, value, setNew){
+function setByPath(obj, path, value){
 
     setValue(obj, path, value);
 

@@ -142,19 +142,6 @@ function setToValue(obj, path, value) {
     obj[path[path.length - 1]] = value;
 }
 
-var o1 = {
-    a: {
-        b: {
-            c: 1
-        }
-    }
-};
-
-var o2 = {
-    a: {}
-};
-//setByPath(0 , 'a.b.c', 2);
-
 function pathToArray(path) {
     if (Array.isArray(path)) {
         return path;
@@ -162,19 +149,20 @@ function pathToArray(path) {
     return path ? trim(path, '.').split('.') : [""];
 }
 
-function hasPath(obj, path) {
-    path = pathToArray(path);
-    var nestedObj = obj;
-    for (var i = 0; i < path.length; i++) {
-        if (!nestedObj || !nestedObj.hasOwnProperty(path[i])) {
-            return false;
-        }
-        nestedObj = nestedObj[path[i]];
-    }
-    return true;
-}
+// function hasPath(obj, path){
+//     path = pathToArray(path);
+//     let nestedObj = obj;
+//     for (let i = 0; i < path.length; i++) {
+//         if(!nestedObj || !nestedObj.hasOwnProperty(path[i])){
+//             return false;
+//         }
+//         nestedObj = nestedObj[path[i]];
+//     }
+//     return true;
+// }
 
-function setByPath(obj, path, value, setNew) {
+
+function setByPath(obj, path, value) {
 
     setValue(obj, path, value);
 
@@ -480,6 +468,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.vffData = undefined;
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _events = __webpack_require__(1);
@@ -503,11 +493,12 @@ var VffData = function () {
             return {
                 set: function set(target, prop, value) {
 
-                    (0, _helpers.setToValue)(target, prop.join('.'), value);
+                    self.setToValue(target, prop, value);
                     var payload = {};
                     payload[templateName] = {};
-                    (0, _helpers.setToValue)(payload[templateName], prop.join('.'), value);
+                    self.setToValue(payload[templateName], prop, value);
                     (0, _messenger.send)(_events.USER_UPDATE, payload);
+
                     return true;
 
                     // target[prop] = value;
@@ -644,6 +635,23 @@ var VffData = function () {
         key: "getQueryParams",
         value: function getQueryParams() {
             return this._queryParams;
+        }
+    }, {
+        key: "setToValue",
+        value: function setToValue(obj, path, value) {
+            for (var i = 0; i < path.length - 1; i++) {
+                var prop = path[i];
+                if (prop in obj) {
+                    obj = obj[prop];
+                } else {
+                    obj[prop] = {};
+                    obj = obj[prop];
+                }
+            }
+            if ((typeof value === "undefined" ? "undefined" : _typeof(value)) === 'object') {
+                value = (0, _helpers.deepProxy)(value, this._onChangeFunc(path[0]));
+            }
+            obj[path[path.length - 1]] = value;
         }
     }]);
 

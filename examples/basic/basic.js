@@ -68,6 +68,67 @@ app.controller("Ctrl", ['$scope',function($scope){
         }
     });
 
+
+    $scope.lowerThird= {
+        visibility: true,
+        expand: true,
+        driverName: 'Larson',
+        driverNumber: 42,
+        cameraTitle: 'ISO Cam 1',
+        name: {
+            ui: 'dropdown',
+            value: "Jan",
+            options: [
+                "Jan",
+                "Oxana",
+                "Saimon"
+            ]
+        },
+        number: {
+            ui: 'dropdown',
+            value: "",
+            options: [1, 2, 3, 4, 5]
+        },
+        type: {
+            ui: 'radio',
+            value: "Beginner",
+            options: [
+                "beginner",
+                "professional"
+            ]
+        },
+        range: {
+            ui:'range',
+            visibility:true,
+            enabled:true,
+            value:0,
+            min:-50,
+            max:10,
+            step:0.1
+        },
+        list: {
+            ui:'list',
+            value: "Beginner",
+            options: [
+                "beginner",
+                "professional"
+            ]
+        },
+        apiData: {
+            test: "Some data"
+        }
+    };
+
+    window.lt = $scope.lowerThird =  vff.addTemplate("lowerThird", $scope.lowerThird);
+
+    vff.onEvent("lowerThird", function(data){
+        if(data && data.name && data.name.value==="Saimon"){
+            $scope.lowerThird.number.options = [66,77,88,99]
+        }
+    });
+
+
+
     setTimeout(function(){
         vff.emit({test: 3});
 

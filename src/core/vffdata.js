@@ -1,6 +1,6 @@
 import {USER_UPDATE} from "../utils/events";
 import {ADD} from "../utils/events";
-import {findKey, deepProxy, setToValue} from '../utils/helpers.js';
+import {findKey, deepProxy} from '../utils/helpers.js';
 import {send} from '../utils/messenger';
 
 class VffData {
@@ -14,11 +14,12 @@ class VffData {
             return {
                 set: function (target, prop, value) {
 
-                    setToValue(target, prop.join('.'), value);
-                    var payload = {};
+                    self.setToValue(target, prop, value);
+                    let payload = {};
                     payload[templateName] = {};
-                    setToValue(payload[templateName], prop.join('.'), value);
+                    self.setToValue(payload[templateName], prop, value);
                     send(USER_UPDATE, payload);
+
                     return true;
 
 
@@ -137,6 +138,24 @@ class VffData {
     getQueryParams(){
         return this._queryParams;
     }
+    setToValue(obj, path, value) {
+        for (let i = 0; i < path.length - 1; i++) {
+            let prop = path[i];
+            if (prop in obj) {
+                obj = obj[prop];
+            } else {
+                obj[prop] = {};
+                obj = obj[prop];
+            }
+        }
+        if(typeof value === 'object'){
+            value = deepProxy(value, this._onChangeFunc(path[0]));
+        }
+        obj[path[path.length - 1]] = value;
+    }
+
 }
+
+
 
 export let vffData = new VffData();
