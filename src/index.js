@@ -6,7 +6,7 @@ import {init as initVffDom} from './core/init';
 import vffElement from './core/vffElement';
 import './core/defaultExpose';
 import "./components/components.js";
-import {isMobile, isController, extend} from './utils/helpers';
+import {isMobile, isController, mode, extend} from './utils/helpers';
 import * as eventsApi from './core/api/events';
 import * as playerApi from './core/api/player';
 import * as visibilityApi from './core/api/visibility';
@@ -32,6 +32,7 @@ vff.send           = (type, payload) => { send(type, payload); };
 vff.request        = (type, payload, cb) => { request(type, payload, cb); };
 vff.isMobile       = isMobile;
 vff.isController   = isController;
+vff.mode           = mode;
 vff.extend         = (name, extension) => { vff[name] = extension; };
 vff.define         = (name, element) => { customElements.define(name, element); };
 

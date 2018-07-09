@@ -84,7 +84,6 @@ function controllerCheck(){
     } catch (err){
         return false;
     }
-
 }
 
 function extend(a, b){
@@ -167,6 +166,21 @@ function deepProxy(target, handler) {
     return proxify(target, []);
 }
 
+function modeCheck(){
+    //"controller_preview" "controller_program" "editor" "player_external" "player_internal"
+    var mode = 'normal';
+    try{
+        var frame = window.frameElement.ownerDocument.defaultView.frameElement;
+        if(frame.hasAttribute('controller-preview')) mode = 'controller_preview';
+        if(frame.hasAttribute('controller-program')) mode = 'controller_program';
+
+    } catch (err){
+        // not in iframe
+    }
+
+    return mode;
+}
+
 
 function noop(){}
 
@@ -185,5 +199,6 @@ module.exports = {
     deepProxy   : deepProxy,
     isMobile    : mobilecheck(),
     isController: controllerCheck(),
+    mode        : modeCheck(),
     noop        : noop
 };
