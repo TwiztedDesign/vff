@@ -169,15 +169,13 @@ function deepProxy(target, handler) {
 function modeCheck(){
     //"controller_preview" "controller_program" "editor" "player_external" "player_internal"
     let mode = 'normal';
+
     try{
         let frame = window.frameElement.ownerDocument.defaultView.frameElement;
-        if(frame.hasAttribute('controller-preview')) mode = 'controller-preview';
-        if(frame.hasAttribute('controller-program')) mode = 'controller-program';
-
+        mode = frame.getAttribute('vff-mode') || mode;
     } catch (err){
         // not in iframe
     }
-
     return mode;
 }
 
