@@ -87,7 +87,7 @@ function controllerCheck(){
 }
 
 function extend(a, b){
-    for(var key in b)
+    for(let key in b)
         if(b.hasOwnProperty(key))
             a[key] = b[key];
     return a;
@@ -168,11 +168,11 @@ function deepProxy(target, handler) {
 
 function modeCheck(){
     //"controller_preview" "controller_program" "editor" "player_external" "player_internal"
-    var mode = 'normal';
+    let mode = 'normal';
     try{
-        var frame = window.frameElement.ownerDocument.defaultView.frameElement;
-        if(frame.hasAttribute('controller-preview')) mode = 'controller_preview';
-        if(frame.hasAttribute('controller-program')) mode = 'controller_program';
+        let frame = window.frameElement.ownerDocument.defaultView.frameElement;
+        if(frame.hasAttribute('controller-preview')) mode = 'controller-preview';
+        if(frame.hasAttribute('controller-program')) mode = 'controller-program';
 
     } catch (err){
         // not in iframe

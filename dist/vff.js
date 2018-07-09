@@ -291,8 +291,8 @@ function modeCheck() {
     var mode = 'normal';
     try {
         var frame = window.frameElement.ownerDocument.defaultView.frameElement;
-        if (frame.hasAttribute('controller-preview')) mode = 'controller_preview';
-        if (frame.hasAttribute('controller-program')) mode = 'controller_program';
+        if (frame.hasAttribute('controller-preview')) mode = 'controller-preview';
+        if (frame.hasAttribute('controller-program')) mode = 'controller-program';
     } catch (err) {
         // not in iframe
     }

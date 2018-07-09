@@ -146,12 +146,12 @@ Your entire template can be viewed as an object at any time in the data dashboar
 
 ## Custom UI Elements
 So far we have been adding only primitive objects to our template. In the previous example have added two strings. Additional primitives you can add are numbers and booleans. In addition to the primitive types
-you can also create custom objects that will be used to extend the UI elements that can be used in the template. Normally objects are now shown in the UI of the controller, unless you follow the UI element object structure.
+you can also create custom objects that will be used to extend the UI elements that can be used in the template. Normally objects are not shown in the UI of the controller, unless you follow the UI element object structure.
 
 ```javascript
 var myTemplate = {
-    myDropdown = {
-        type        : 'ui-dropdown',
+    myDropdown : {
+        ui          : 'dropdown',
         value       : 'USA',
         options     : [
             'USA',
@@ -164,14 +164,14 @@ var myTemplate = {
 ```
 The above example will create a template, with a single ui element, that will be presented as a dropdown box, with the options 'USA', 'Canada', 'Mexico' & 'UK' to choose from, and 'USA' as the default selected value.
 When you make another selection from the drop down, the "value" property will be updated. Keep that in mind when binding your elements to the template object.
-The key part here is the "type" property. Without the type property & without the appropriate type value, this object would have been ignored by the controller and you would not see it in the UI.
+The key part here is the "ui" property. Without the ui property & without the appropriate ui value, this object would have been ignored by the controller and you would not see it in the UI.
 
 ### Dropdown
 ```javascript
 var myTemplate = {
-    myDropdown = {
+    myDropdown : {
         //Declare the type of the ui element
-        type        : 'ui-dropdown',
+        ui          : 'dropdown',
         //Bind your element to the value property
         value       : 'USA',
         options     : [
@@ -186,9 +186,9 @@ var myTemplate = {
 ### Radio Group
 ```javascript
 var myTemplate = {
-    myRadioGroup = {
+    myRadioGroup : {
         //Declare the type of the ui element
-        type        : 'ui-radio',
+        ui          : 'radio',
         //Bind your element to the value property
         value       : 'USA',
         options     : [
@@ -204,9 +204,9 @@ var myTemplate = {
 ### Range Slider
 ```javascript
 var myTemplate = {
-    mySlider = {
+    mySlider : {
         //Declare the type of the ui element
-        type        : 'ui-range',
+        ui        : 'range',
         //Bind your element to the value property
         value       : '0',
         min         : -50,
@@ -317,9 +317,16 @@ Toggle "visibility" property in the template
 
 ## isMobile
 
+**boolean**
+
+
 ## isController
 
+**boolean**
 
+## mode
+
+**String:** _normal_ | _controller-preview_ | _controller-program_
 
 [![travis build](https://img.shields.io/travis/TwiztedDesign/vff.svg)](https://travis-ci.org/TwiztedDesign/vff)
 ![version](https://img.shields.io/npm/v/vff.svg)
