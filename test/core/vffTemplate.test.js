@@ -1,10 +1,28 @@
 import {vffData} from '../../src/core/vffData.js';
+import {USER_UPDATE} from "../../src/utils/events";
+const messenger = require('../../src/utils/messenger.js');
+let send = jest.spyOn(messenger, 'send');
 
 
 describe('VffTemplate', () => {
 
     beforeEach(() => {
         vffData.clear();
+    });
+
+    describe('properties', () => {
+        let template = vffData.registerTemplate('test', {visibility : true});
+        describe('getter', () => {
+            it('it should access proxy', () => {
+                expect(template.visibility).toBe(true);
+            });
+        });
+        describe('setter', () => {
+            it('should trigger user update', () => {
+               template.visibility = false;
+                expect(send).toHaveBeenCalledWith(USER_UPDATE, expect.anything());
+            });
+        });
     });
 
     describe('addData', () => {
@@ -15,6 +33,11 @@ describe('VffTemplate', () => {
             template.addData({newProp : 'some value'});
             expect(template.newProp).toBe('some value');
             expect(template.visibility).toBeTruthy();
+        });
+        it("shouldn't trigger user update", () => {
+            let template = vffData.registerTemplate('test', {visibility : true});
+            template.addData({prop : true});
+            expect(send).not.toHaveBeenCalledWith(USER_UPDATE, expect.anything());
         });
     });
     describe('show', () => {

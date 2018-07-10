@@ -11,9 +11,7 @@ class Template{
     }
     addData(data){
         deepExtend(this._data, data);
-        // let proxy = deepProxy(this._data, this._onChangeFunc(this._name));
         this._proxy = deepProxy(this._data, this._onChangeFunc(this._name));
-        // deepExtend(this._proxy, proxy);
     }
     show(){
         this._setValue("visibility", true);

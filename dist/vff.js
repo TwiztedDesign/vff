@@ -856,9 +856,7 @@ var Template = function () {
         key: 'addData',
         value: function addData(data) {
             (0, _helpers.deepExtend)(this._data, data);
-            // let proxy = deepProxy(this._data, this._onChangeFunc(this._name));
             this._proxy = (0, _helpers.deepProxy)(this._data, this._onChangeFunc(this._name));
-            // deepExtend(this._proxy, proxy);
         }
     }, {
         key: 'show',
