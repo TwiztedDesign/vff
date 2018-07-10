@@ -40,9 +40,6 @@ class Template{
 
                 return true;
 
-            },
-            get: function (target, prop) {
-                return self._proxy[prop];
             }
         };
 

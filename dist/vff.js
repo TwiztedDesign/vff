@@ -890,9 +890,6 @@ var Template = function () {
                     (0, _messenger.send)(_events.USER_UPDATE, payload);
 
                     return true;
-                },
-                get: function get(target, prop) {
-                    return self._proxy[prop];
                 }
             };
         }
