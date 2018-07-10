@@ -1048,7 +1048,7 @@ function update(data) {
             // template.addData(data[templateName]);
             _vffData.vffData.registerTemplate(templateName, data[templateName]);
             isDataChanged = true;
-            for (var key in data[template.name]) {
+            for (var key in data[templateName]) {
                 updateDom(templateName, key, data[templateName][key], data[templateName].__timecode__);
             }
         }

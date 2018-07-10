@@ -15,10 +15,9 @@ function update(data){
             // template.addData(data[templateName]);
             vffData.registerTemplate(templateName, data[templateName]);
             isDataChanged = true;
-            for(let key in data[template.name]){
+            for(let key in data[templateName]){
                 updateDom(templateName, key, data[templateName][key], data[templateName].__timecode__);
             }
-
         }
     }
 
