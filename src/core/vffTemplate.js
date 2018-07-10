@@ -85,13 +85,13 @@ export default class VffTemplate extends Template {
 
         let self = this;
         return new Proxy(this, {
-            get(target, prop){
+            get : function(target, prop){
                 if(prop in target){
                     return target[prop];
                 }
                 return self._proxy[prop];
             },
-            set(target, prop, value){
+            set : function(target, prop, value){
                 if(prop in target){
                     return target[prop] = value;
                 } else {
