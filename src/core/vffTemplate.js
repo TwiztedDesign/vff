@@ -97,7 +97,6 @@ export default class VffTemplate extends Template {
                 } else {
                     target._proxy[prop] = value;
                 }
-
                 return true;
             }
         });

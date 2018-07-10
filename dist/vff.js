@@ -952,6 +952,14 @@ var VffTemplate = function (_Template) {
                     return target[prop];
                 }
                 return self._proxy[prop];
+            },
+            set: function set(target, prop, value) {
+                if (prop in target) {
+                    return target[prop] = value;
+                } else {
+                    target._proxy[prop] = value;
+                }
+                return true;
             }
         }), _possibleConstructorReturn(_this, _ret);
     }
