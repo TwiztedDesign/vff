@@ -13,7 +13,7 @@ describe('vff Data', () => {
 
     describe('clear', () => {
         it('Should clear all the data', () => {
-            vffData.addTemplate('test', data);
+            vffData.registerTemplate('test', data);
             expect(vffData.getTemplate('test')).toBeDefined();
             expect(vffData.getTemplates().length).toBe(1);
             vffData.clear();
@@ -73,15 +73,6 @@ describe('vff Data', () => {
         });
     });
 
-    describe('addTemplate', () => {
-        it('should register template', () => {
-            let register = jest.spyOn(vffData, 'registerTemplate');
-            let template = vffData.registerTemplate('test', data);
-            expect(template).toBeDefined();
-            expect(register).toHaveBeenCalledTimes(1);
-            register.mockRestore();
-        })
-    });
     describe('show', () => {
         it('Should set the visibility property value to TRUE in the given template', () => {
             let template = vffData.registerTemplate('test', {visibility : false});

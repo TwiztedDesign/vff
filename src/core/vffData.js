@@ -56,11 +56,6 @@ class VffData {
         return Object.values(this._templates);
     }
 
-
-    addTemplate(name, data){
-        return this.registerTemplate(name, data);
-    }
-
     show(template){
         this.getTemplate(template).show();
     }

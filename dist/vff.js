@@ -505,11 +505,6 @@ var VffData = function () {
             return Object.values(this._templates);
         }
     }, {
-        key: 'addTemplate',
-        value: function addTemplate(name, data) {
-            return this.registerTemplate(name, data);
-        }
-    }, {
         key: 'show',
         value: function show(template) {
             this.getTemplate(template).show();
@@ -747,7 +742,10 @@ var vff = function vff(selector) {
 };
 
 vff.addTemplate = function (name, data) {
-    return _vffData.vffData.addTemplate(name, data);
+    return _vffData.vffData.registerTemplate(name, data);
+};
+vff.registerTemplate = function (name, data) {
+    return _vffData.vffData.registerTemplate(name, data);
 };
 vff.onUpdate = function (cb) {
     return _vffData.vffData.onUpdate(cb);

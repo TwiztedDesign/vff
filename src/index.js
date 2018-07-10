@@ -24,17 +24,18 @@ let vff = (selector) => {
     return new vffElement(selector);
 };
 
-vff.addTemplate    = (name, data) => {return vffData.addTemplate(name, data);};
-vff.onUpdate       = (cb) => {return vffData.onUpdate(cb);};
-vff.getPages       = () => {return vffData.getPages();};
-vff.getQueryParams = () => {return vffData.getQueryParams();};
-vff.send           = (type, payload) => { send(type, payload); };
-vff.request        = (type, payload, cb) => { request(type, payload, cb); };
-vff.isMobile       = isMobile;
-vff.isController   = isController;
-vff.mode           = mode;
-vff.extend         = (name, extension) => { vff[name] = extension; };
-vff.define         = (name, element) => { customElements.define(name, element); };
+vff.addTemplate         = (name, data) => {return vffData.registerTemplate(name, data);};
+vff.registerTemplate    = (name, data) => {return vffData.registerTemplate(name, data);};
+vff.onUpdate            = (cb) => {return vffData.onUpdate(cb);};
+vff.getPages            = () => {return vffData.getPages();};
+vff.getQueryParams      = () => {return vffData.getQueryParams();};
+vff.send                = (type, payload) => { send(type, payload); };
+vff.request             = (type, payload, cb) => { request(type, payload, cb); };
+vff.isMobile            = isMobile;
+vff.isController        = isController;
+vff.mode                = mode;
+vff.extend              = (name, extension) => { vff[name] = extension; };
+vff.define              = (name, element) => { customElements.define(name, element); };
 
 extend(vff, playerApi);
 extend(vff, visibilityApi);
