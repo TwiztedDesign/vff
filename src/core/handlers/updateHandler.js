@@ -13,6 +13,7 @@ function update(data){
         let template = vffData.getTemplate(templateName);
         if(template){
             // template.addData(data[templateName]);
+
             vffData.registerTemplate(templateName, data[templateName]);
             isDataChanged = true;
             for(let key in data[templateName]){
@@ -41,7 +42,7 @@ function update(data){
     }
 }
 
-
+window.update = update;
 function updateDom(template, control, value, timecode){
     let templateSelector = '[vff-template="' + template + '" i]';
     let controlSelector = '[vff-name="' + control.split(EXPOSE_DELIMITER)[0] + '" i]';

@@ -18,6 +18,9 @@ app.controller("Ctrl", ['$scope',function($scope){
         "drag-area yValue" : 0
     };
 
+
+    $scope.a = vff.registerTemplate('a', {a:1});
+
     vff.onUpdate(function(){
         try{
             $scope.$apply();

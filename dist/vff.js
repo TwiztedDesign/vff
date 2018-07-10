@@ -855,9 +855,10 @@ var Template = function () {
     _createClass(Template, [{
         key: 'addData',
         value: function addData(data) {
-            var proxy = (0, _helpers.deepProxy)(data, this._onChangeFunc(this._name));
             (0, _helpers.deepExtend)(this._data, data);
-            (0, _helpers.deepExtend)(this._proxy, proxy);
+            // let proxy = deepProxy(this._data, this._onChangeFunc(this._name));
+            this._proxy = (0, _helpers.deepProxy)(this._data, this._onChangeFunc(this._name));
+            // deepExtend(this._proxy, proxy);
         }
     }, {
         key: 'show',
@@ -1046,6 +1047,7 @@ function update(data) {
         var template = _vffData.vffData.getTemplate(templateName);
         if (template) {
             // template.addData(data[templateName]);
+
             _vffData.vffData.registerTemplate(templateName, data[templateName]);
             isDataChanged = true;
             for (var key in data[templateName]) {
@@ -1072,6 +1074,7 @@ function update(data) {
     }
 }
 
+window.update = update;
 function updateDom(template, control, value, timecode) {
     var templateSelector = '[vff-template="' + template + '" i]';
     var controlSelector = '[vff-name="' + control.split(_consts.EXPOSE_DELIMITER)[0] + '" i]';
