@@ -90,6 +90,15 @@ export default class VffTemplate extends Template {
                     return target[prop];
                 }
                 return self._proxy[prop];
+            },
+            set(target, prop, value){
+                if(prop in target){
+                    return target[prop] = value;
+                } else {
+                    target._proxy[prop] = value;
+                }
+
+                return true;
             }
         });
     }
