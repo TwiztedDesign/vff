@@ -1,24 +1,42 @@
-import {findKey, setByPath} from '../../utils/helpers.js';
-import {vffData} from '../vffdata.js';
+import {setByPath} from '../../utils/helpers.js';
+import {vffData} from '../vffData.js';
 import {EXPOSE_DELIMITER} from '../consts';
 import {VFF_EVENT} from '../../utils/events';
 
 function update(data){
-    let isDataChanged = false;
+    let isDataChanged;
 
     document.dispatchEvent(new CustomEvent(VFF_EVENT, { detail: data }));
-    for(let template in vffData._main) {
-        let key = findKey(data, template);
-        for(let item in data[key]){
-            let controlKey = findKey(vffData._main[template], item);
 
-            vffData._main[template][controlKey || item] = data[key][item];
+
+    for(let templateName in data){
+        let template = vffData.getTemplate(templateName);
+        if(template){
+            // template.addData(data[templateName]);
+            vffData.registerTemplate(templateName, data[templateName]);
             isDataChanged = true;
-
-            updateDom(template, controlKey || item, data[key][item], data[key].__timecode__);
+            for(let key in data[template.name]){
+                updateDom(templateName, key, data[templateName][key], data[templateName].__timecode__);
+            }
 
         }
     }
+
+
+
+    //
+    // for(let template in vffData._main) {
+    //     let key = findKey(data, template);
+    //     for(let item in data[key]){
+    //         let controlKey = findKey(vffData._main[template], item);
+    //
+    //         vffData._main[template][controlKey || item] = data[key][item];
+    //         isDataChanged = true;
+    //
+    //         updateDom(template, controlKey || item, data[key][item], data[key].__timecode__);
+    //
+    //     }
+    // }
     if(isDataChanged) {
         vffData.updateCB();
     }

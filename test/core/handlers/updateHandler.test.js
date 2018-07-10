@@ -1,4 +1,4 @@
-import {vffData} from '../../../src/core/vffdata.js';
+import {vffData} from '../../../src/core/vffData.js';
 const updateHandler  = require('../../../src/core/handlers/updateHandler.js');
 const helpers = require('../../../src/utils/helpers.js');
 
@@ -6,52 +6,32 @@ const helpers = require('../../../src/utils/helpers.js');
 
 const updateCB = jest.spyOn(vffData, 'updateCB');
 const setByPath = jest.spyOn(helpers, 'setByPath');
-
-
+const data = {prop : "value"};
+let template;
+const templateName = 'test';
 /****************************************************************************/
 
 describe('Update Handler', () => {
     beforeEach(() => {
         vffData.clear();
-        vffData.addTemplate('test', {visibility: true});
-    });
-
-    describe('Update incorrect data', () => {
-        it('Should not update a non-existing template data and/or add the incorrect data or template', () => {
-            let initialData = JSON.parse(JSON.stringify(vffData._main));
-
-            updateHandler.update({'test33': {count: 2}});
-            expect(vffData._main['test33']).toBe(undefined);
-            expect(vffData._main['test']['count']).toBe(undefined);
-
-            expect(vffData._main).toEqual(initialData);
-
-
-            expect(updateCB).not.toHaveBeenCalled();
-
-
-        });
-
-        it('Should not update an existing template data if the data passed is empty', () => {
-            let initialData = JSON.parse(JSON.stringify(vffData._main));
-            updateHandler.update({'test': {}});
-            expect(vffData._main).toEqual(initialData);
-
-            expect(updateCB).not.toHaveBeenCalled();
-        });
+        template = vffData.registerTemplate(templateName, data);
     });
 
     describe('Update', () => {
         it('Should update the data in a given template as passed in the data obj', () => {
-            expect(vffData._main['test']['visibility']).toBe(true);
-            updateHandler.update({'test': {visibility: false}});
-            expect(vffData._main['test']['visibility']).toBe(false);
-            expect(updateCB).toHaveBeenCalledTimes(1);
+            updateHandler.update({'test': {prop: 'some other value'}});
+            expect(template.prop).toBe('some other value');
+            updateHandler.update({'TeSt': {prop: 'some third value'}});
+            expect(template.prop).toBe('some third value');
 
-            // updating an existing template with incorrect template name, case insensitive
-            updateHandler.update({'TesT': {visibility: true}});
-            expect(vffData._main['test']['visibility']).toBe(true);
+            expect(updateCB).toHaveBeenCalledTimes(2);
         });
+        it('Should add the passed property with value to the DOM element object', () => {
+
+        });
+    });
+
+    xdescribe('Update', () => {
 
         it('Should add the passed property with value to the DOM element object', () => {
             let headerElement = document.createElement('h1');
@@ -77,6 +57,21 @@ describe('Update Handler', () => {
         //     updateHandler.update({'test': {testControl: "hi"}});
         //     expect(vffData._main['test']['testControl']).toBe('hi');
         // });
+    });
+
+    xdescribe('Update incorrect data', () => {
+        it('Should not update a non-existing template data and/or add the incorrect data or template', () => {
+            updateHandler.update({'some template': {"some prop": "some value"}});
+            expect(vffData.getTemplate('some template')).toBeUndefined();
+            expect(template['some prop']).toBeUndefined();
+            expect(updateCB).not.toHaveBeenCalled();
+
+        });
+        it('Should not update an existing template data if the data passed is empty', () => {
+            updateHandler.update({'test': {}});
+            expect(template.prop).toBe('value');
+            expect(updateCB).not.toHaveBeenCalled();
+        });
     });
 
 });

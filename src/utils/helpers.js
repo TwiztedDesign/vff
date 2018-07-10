@@ -107,6 +107,10 @@ function deepExtend(destination, source) {
 }
 
 function deepProxy(target, handler) {
+
+    if(typeof target !== 'object'){
+        return target;
+    }
     const preproxy = new WeakMap();
 
     function makeHandler(path) {
@@ -178,7 +182,9 @@ function modeCheck(){
     }
     return mode;
 }
-
+function docRef(anchor){
+    return 'https://www.videoflow.io/documentation/vff?id=' + anchor;
+}
 
 function noop(){}
 
@@ -198,5 +204,6 @@ module.exports = {
     isMobile    : mobilecheck(),
     isController: controllerCheck(),
     mode        : modeCheck(),
+    docRef      : docRef,
     noop        : noop
 };

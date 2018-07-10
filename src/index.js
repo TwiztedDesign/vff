@@ -1,6 +1,6 @@
 import {send, request} from './utils/messenger.js';
 import {READY} from './utils/events.js';
-import {vffData} from './core/vffdata.js';
+import {vffData} from './core/vffData.js';
 import {start as startListener} from './utils/listener';
 import {init as initVffDom} from './core/init';
 import vffElement from './core/vffElement';
