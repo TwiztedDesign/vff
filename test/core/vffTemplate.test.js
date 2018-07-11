@@ -25,7 +25,7 @@ describe('VffTemplate', () => {
         });
     });
 
-    describe('addData', () => {
+    xdescribe('addData', () => {
         it('should add data to the template', () => {
             let template = vffData.registerTemplate('test', {visibility : true});
             expect(template.newProp).toBeUndefined();
@@ -38,6 +38,15 @@ describe('VffTemplate', () => {
             let template = vffData.registerTemplate('test', {visibility : true});
             template.addData({prop : true});
             expect(send).not.toHaveBeenCalledWith(USER_UPDATE, expect.anything());
+        });
+        it('should handle nested objects', () => {
+            debugger;
+            let template = vffData.registerTemplate('test', {visibility : true});
+            template.addData({prop: { prop1 : 'some other value'}});
+            template.addData({prop: { prop2 : 'some second value'}});
+            expect(template.prop.prop1).toBe('some other value');
+            expect(template.prop.prop2).toBe('some second value');
+
         });
     });
     describe('show', () => {

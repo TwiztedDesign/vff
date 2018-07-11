@@ -106,6 +106,19 @@ function deepExtend(destination, source) {
     return destination;
 }
 
+function deepProxy2(target, handler){
+    function proxify(obj, path) {
+        Object.keys(obj).forEach(function(key){
+            if(typeof obj[key] === 'object') {
+                obj[key] = proxify.apply(null, [obj[key]].concat(path, key));
+            }
+        });
+        return new Proxy(obj, handler);
+    }
+
+    return proxify(target, []);
+}
+
 function deepProxy(target, handler) {
 
     if(typeof target !== 'object'){
@@ -201,6 +214,7 @@ module.exports = {
     extend      : extend,
     deepExtend  : deepExtend,
     deepProxy   : deepProxy,
+    deepProxy2  : deepProxy2,
     isMobile    : mobilecheck(),
     isController: controllerCheck(),
     mode        : modeCheck(),

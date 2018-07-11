@@ -17,7 +17,7 @@ describe('Update Handler', () => {
         template = vffData.registerTemplate(templateName, data);
     });
 
-    describe('Update', () => {
+    xdescribe('Update', () => {
         it('Should update the data in a given template as passed in the data obj', () => {
             updateHandler.update({'test': {prop: 'some other value'}});
             expect(template.prop).toBe('some other value');
@@ -29,7 +29,14 @@ describe('Update Handler', () => {
         it('Should add the passed property with value to the DOM element object', () => {
 
         });
+        it('should handle nested objects', () => {
+            console.log('!!!!!!!!!!!!!!');
+            updateHandler.update({'test' : {prop: { prop1 : 'some other value'}}});
+            expect(template.prop.prop1).toBe('some other value');
+        });
     });
+
+
 
     xdescribe('Update', () => {
 

@@ -185,6 +185,19 @@ function deepExtend(destination, source) {
     return destination;
 }
 
+function deepProxy2(target, handler) {
+    function proxify(obj, path) {
+        Object.keys(obj).forEach(function (key) {
+            if (_typeof(obj[key]) === 'object') {
+                obj[key] = proxify.apply(null, [obj[key]].concat(path, key));
+            }
+        });
+        return new Proxy(obj, handler);
+    }
+
+    return proxify(target, []);
+}
+
 function deepProxy(target, handler) {
 
     if ((typeof target === "undefined" ? "undefined" : _typeof(target)) !== 'object') {
@@ -319,6 +332,7 @@ module.exports = {
     extend: extend,
     deepExtend: deepExtend,
     deepProxy: deepProxy,
+    deepProxy2: deepProxy2,
     isMobile: mobilecheck(),
     isController: controllerCheck(),
     mode: modeCheck(),
@@ -843,20 +857,42 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+var bypassPrefix = '___';
+
 var Template = function () {
     function Template(name, data) {
         _classCallCheck(this, Template);
 
         this._name = name;
         this._data = data;
-        this._proxy = (0, _helpers.deepProxy)(data, this._onChangeFunc(name));
+
+        // this._proxy = deepProxy(data, this._onChangeFunc(name));
+        this._proxy = new Proxy(data, this._traps(name));
     }
 
     _createClass(Template, [{
+        key: 'updateData',
+        value: function updateData(data) {
+            var toUpdate = this._copy(data, bypassPrefix);
+            (0, _helpers.deepExtend)(this._proxy, toUpdate);
+        }
+    }, {
+        key: '_copy',
+        value: function _copy(o, prefix) {
+            var output, v, key;
+            output = Array.isArray(o) ? [] : {};
+            for (key in o) {
+                v = o[key];
+                output[prefix + key] = (typeof v === 'undefined' ? 'undefined' : _typeof(v)) === "object" ? this._copy(v, prefix) : v;
+            }
+            return output;
+        }
+    }, {
         key: 'addData',
         value: function addData(data) {
-            (0, _helpers.deepExtend)(this._data, data);
-            this._proxy = (0, _helpers.deepProxy)(this._data, this._onChangeFunc(this._name));
+            this.updateData(data);
+            // deepExtend(this._data, data);
+            // this._proxy = deepProxy(this._data, this._onChangeFunc(this._name));
         }
     }, {
         key: 'show',
@@ -877,18 +913,94 @@ var Template = function () {
             }
         }
     }, {
+        key: 'onData',
+        value: function onData(arg1, arg2, arg3) {
+            var template = void 0,
+                callback = void 0,
+                options = void 0;
+            switch (arguments.length) {
+                case 0:
+                    throw new Error("onEvent was called without arguments");
+                case 1:
+                    callback = arg1;
+                    break;
+                default:
+                    if (typeof arg1 === 'string') {
+                        template = arg1;
+                        callback = arg2;
+                        options = arg3 || {};
+                    } else if (typeof arg1 === 'function') {
+                        callback = arg1;
+                        options = arg2 || {};
+                    }
+                    break;
+            }
+
+            var self = this;
+            function listener(event) {
+                var key = (0, _helpers.findKey)(event.detail, self._name);
+                if (key) {
+                    callback(template ? event.detail[key][template] : event.detail[key]);
+                }
+            }
+            document.addEventListener(_events.VFF_EVENT, listener);
+        }
+    }, {
+        key: '_traps',
+        value: function _traps(name) {
+            var self = this;
+            var traps = {
+                set: function set(target, key, value) {
+
+                    var bypass = key.startsWith(bypassPrefix);
+                    if (bypass && !target.__isProxy) {
+                        key = key.substr(bypassPrefix.length);
+                    }
+                    target[key] = value;
+                    if (!bypass && !target.__isProxy && (typeof value === 'undefined' ? 'undefined' : _typeof(value)) !== 'object') {
+                        var payload = {};
+                        payload[name] = self._proxy;
+                        console.log('user update', payload);
+                        (0, _messenger.send)(_events.USER_UPDATE, payload);
+                    }
+                    return true;
+                },
+                get: function get(target, key) {
+                    if (key === '__isProxy') {
+                        return true;
+                    }
+                    if (key.startsWith && key.startsWith(bypassPrefix)) key = key.substr(bypassPrefix.length);
+                    if (_typeof(target[key]) === 'object' && target[key] !== null) {
+                        return new Proxy(target[key], traps);
+                    } else {
+                        return target[key];
+                    }
+                }
+            };
+
+            return traps;
+        }
+    }, {
         key: '_onChangeFunc',
         value: function _onChangeFunc(name) {
             var self = this;
             return {
                 set: function set(target, prop, value) {
-
+                    var bypass = prop[prop.length - 1].startsWith(bypassPrefix);
+                    if (bypass) prop[prop.length - 1] = prop[prop.length - 1].substr(bypass.length);
                     self._setByPath(target, prop, value);
                     var payload = {};
                     payload[name] = {};
                     self._setByPath(payload[name], prop, value);
-                    (0, _messenger.send)(_events.USER_UPDATE, payload);
-
+                    if (!bypass) {
+                        (0, _messenger.send)(_events.USER_UPDATE, payload);
+                    }
+                    return true;
+                },
+                get: function get(target, prop) {
+                    if (prop !== "__isProxy") {
+                        return target[prop];
+                    }
                     return true;
                 }
             };
@@ -946,11 +1058,16 @@ var VffTemplate = function (_Template) {
                 if (prop in target) {
                     return target[prop];
                 }
+                if (typeof prop === 'string' && prop.startsWith("__")) {
+                    return self._data[prop.substr(2)];
+                }
                 return self._proxy[prop];
             },
             set: function set(target, prop, value) {
                 if (prop in target) {
                     return target[prop] = value;
+                } else if (typeof prop === 'string' && prop.startsWith("__")) {
+                    target._data[prop.substr(2)] = value;
                 } else {
                     target._proxy[prop] = value;
                 }
@@ -1050,7 +1167,6 @@ function update(data) {
         var template = _vffData.vffData.getTemplate(templateName);
         if (template) {
             // template.addData(data[templateName]);
-
             _vffData.vffData.registerTemplate(templateName, data[templateName]);
             isDataChanged = true;
             for (var key in data[templateName]) {

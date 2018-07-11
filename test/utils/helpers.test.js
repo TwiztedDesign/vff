@@ -116,4 +116,13 @@ describe('Helpers', () => {
             expect(helpers.setByPath).toThrow(Error, 'Missing Arguments!');
         });
     });
+
+    describe("deepProxy", () => {
+        it('should leave the original object untouched', () => {
+            let data = {a : 1, b : {c :2}};
+            let proxy = helpers.deepProxy(data, {});
+
+            expect(proxy).toBeDefined();
+        })
+    })
 });
