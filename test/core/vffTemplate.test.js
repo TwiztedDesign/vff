@@ -40,7 +40,6 @@ describe('VffTemplate', () => {
             expect(send).not.toHaveBeenCalledWith(USER_UPDATE, expect.anything());
         });
         it('should handle nested objects', () => {
-            debugger;
             let template = vffData.registerTemplate('test', {visibility : true});
             template.update({prop: { prop1 : 'some other value'}});
             template.update({prop: { prop2 : 'some second value'}});

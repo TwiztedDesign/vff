@@ -1,8 +1,8 @@
 import {USER_UPDATE, VFF_EVENT} from "../utils/events";
 import {findKey, deepExtend} from '../utils/helpers.js';
 import {send} from '../utils/messenger';
-const bypassPrefix = '___';
-
+const bypassPrefix = '___bypass___';
+const timeouts = {};
 
 class Template{
     constructor(name, data) {
@@ -43,7 +43,7 @@ class Template{
     }
 
     onData(arg1, arg2, arg3){
-        let template, callback, options;
+        let template, callback, options = options || {};
         switch (arguments.length){
             case 0:
                 throw new Error("onEvent was called without arguments");
@@ -63,10 +63,22 @@ class Template{
         }
 
         let self = this;
+
+        function runCB(data){
+            if(options.consolidate || options.throttle){
+                clearTimeout(timeouts[template || '__global_event__']);
+                timeouts[template || '__global_event__'] = setTimeout(function(){
+                    callback(data);
+                }, (typeof options.throttle === 'number')? options.throttle : 50);
+            } else {
+                callback(data);
+            }
+        }
+
         function listener(event){
             let key = findKey(event.detail, self._name);
             if(key) {
-                callback(template ? event.detail[key][template] : event.detail[key]);
+                runCB(template ? event.detail[key][template] : event.detail[key]);
             }
         }
         document.addEventListener(VFF_EVENT, listener);

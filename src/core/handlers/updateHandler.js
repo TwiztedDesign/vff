@@ -20,21 +20,6 @@ function update(data){
         }
     }
 
-
-
-    //
-    // for(let template in vffData._main) {
-    //     let key = findKey(data, template);
-    //     for(let item in data[key]){
-    //         let controlKey = findKey(vffData._main[template], item);
-    //
-    //         vffData._main[template][controlKey || item] = data[key][item];
-    //         isDataChanged = true;
-    //
-    //         updateDom(template, controlKey || item, data[key][item], data[key].__timecode__);
-    //
-    //     }
-    // }
     if(isDataChanged) {
         vffData.updateCB();
     }

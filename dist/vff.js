@@ -80,10 +80,6 @@ return /******/ (function(modules) { // webpackBootstrap
 "use strict";
 
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
 function findKey(data, keyToFind) {
     var keys = Object.keys(data);
     for (var i = 0; i < keys.length; i++) {
@@ -176,131 +172,13 @@ function extend(a, b) {
 function deepExtend(destination, source) {
     for (var property in source) {
         if (source[property] && source[property].constructor && source[property].constructor === Object && !source[property].__isProxy) {
-            destination[property] = destination[property] || {};
+            destination[property] = destination[property] && destination[property].constructor && destination[property].constructor === Object ? destination[property] : {};
             deepExtend(destination[property], source[property]);
         } else {
             destination[property] = source[property];
         }
     }
     return destination;
-}
-
-function deepProxy2(target, handler) {
-    function proxify(obj, path) {
-        Object.keys(obj).forEach(function (key) {
-            if (_typeof(obj[key]) === 'object') {
-                obj[key] = proxify.apply(null, [obj[key]].concat(path, key));
-            }
-        });
-        return new Proxy(obj, handler);
-    }
-
-    return proxify(target, []);
-}
-
-function deepProxy(target, handler) {
-
-    if ((typeof target === "undefined" ? "undefined" : _typeof(target)) !== 'object') {
-        return target;
-    }
-    var preproxy = new WeakMap();
-
-    function makeHandler(path) {
-        return {
-            set: function set(target, key, value, receiver) {
-                if ((typeof value === "undefined" ? "undefined" : _typeof(value)) === 'object') {
-                    value = proxify(value, [].concat(_toConsumableArray(path), [key]));
-                }
-                target[key] = value;
-
-                if (handler.set) {
-                    handler.set(target, [].concat(_toConsumableArray(path), [key]), value, receiver);
-                }
-                return true;
-            },
-            deleteProperty: function deleteProperty(target, key) {
-                if (Reflect.has(target, key)) {
-                    unproxy(target, key);
-                    var deleted = Reflect.deleteProperty(target, key);
-                    if (deleted && handler.deleteProperty) {
-                        handler.deleteProperty(target, [].concat(_toConsumableArray(path), [key]));
-                    }
-                    return deleted;
-                }
-                return false;
-            }
-        };
-    }
-
-    function unproxy(obj, key) {
-        if (preproxy.has(obj[key])) {
-            // console.log('unproxy',key);
-            obj[key] = preproxy.get(obj[key]);
-            preproxy.delete(obj[key]);
-        }
-
-        var _iteratorNormalCompletion = true;
-        var _didIteratorError = false;
-        var _iteratorError = undefined;
-
-        try {
-            for (var _iterator = Object.keys(obj[key])[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                var k = _step.value;
-
-                if (_typeof(obj[key][k]) === 'object') {
-                    unproxy(obj[key], k);
-                }
-            }
-        } catch (err) {
-            _didIteratorError = true;
-            _iteratorError = err;
-        } finally {
-            try {
-                if (!_iteratorNormalCompletion && _iterator.return) {
-                    _iterator.return();
-                }
-            } finally {
-                if (_didIteratorError) {
-                    throw _iteratorError;
-                }
-            }
-        }
-    }
-
-    function proxify(obj, path) {
-        var _iteratorNormalCompletion2 = true;
-        var _didIteratorError2 = false;
-        var _iteratorError2 = undefined;
-
-        try {
-            for (var _iterator2 = Object.keys(obj)[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-                var key = _step2.value;
-
-                if (_typeof(obj[key]) === 'object') {
-                    obj[key] = proxify(obj[key], [].concat(_toConsumableArray(path), [key]));
-                }
-            }
-        } catch (err) {
-            _didIteratorError2 = true;
-            _iteratorError2 = err;
-        } finally {
-            try {
-                if (!_iteratorNormalCompletion2 && _iterator2.return) {
-                    _iterator2.return();
-                }
-            } finally {
-                if (_didIteratorError2) {
-                    throw _iteratorError2;
-                }
-            }
-        }
-
-        var p = new Proxy(obj, makeHandler(path));
-        preproxy.set(p, obj);
-        return p;
-    }
-
-    return proxify(target, []);
 }
 
 function modeCheck() {
@@ -331,8 +209,6 @@ module.exports = {
     uuid: uuid,
     extend: extend,
     deepExtend: deepExtend,
-    deepProxy: deepProxy,
-    deepProxy2: deepProxy2,
     isMobile: mobilecheck(),
     isController: controllerCheck(),
     mode: modeCheck(),
@@ -496,7 +372,7 @@ var VffData = function () {
             name = name.toLowerCase();
 
             if (this._templates[name]) {
-                this._templates[name].addData(data);
+                this._templates[name].update(data);
             } else {
                 this._templates[name] = new _vffTemplate2.default(name, data);
             }
@@ -857,29 +733,30 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var bypassPrefix = '___';
+var bypassPrefix = '___bypass___';
+var timeouts = {};
 
 var Template = function () {
     function Template(name, data) {
         _classCallCheck(this, Template);
 
         this._name = name;
-        // this._data = data;
-
-        // this._proxy = deepProxy(data, this._onChangeFunc(name));
         this._proxy = new Proxy(data, this._traps(name));
     }
 
     _createClass(Template, [{
-        key: 'updateData',
-        value: function updateData(data) {
+        key: 'update',
+        value: function update(data) {
             var toUpdate = this._copy(data, bypassPrefix);
             (0, _helpers.deepExtend)(this._proxy, toUpdate);
         }
     }, {
         key: '_copy',
         value: function _copy(o, prefix) {
-            var output, v, key;
+            prefix = prefix || '';
+            var output = void 0,
+                v = void 0,
+                key = void 0;
             output = Array.isArray(o) ? [] : {};
             for (key in o) {
                 v = o[key];
@@ -890,13 +767,6 @@ var Template = function () {
                 }
             }
             return output;
-        }
-    }, {
-        key: 'addData',
-        value: function addData(data) {
-            this.updateData(data);
-            // deepExtend(this._data, data);
-            // this._proxy = deepProxy(this._data, this._onChangeFunc(this._name));
         }
     }, {
         key: 'show',
@@ -921,7 +791,7 @@ var Template = function () {
         value: function onData(arg1, arg2, arg3) {
             var template = void 0,
                 callback = void 0,
-                options = void 0;
+                options = options || {};
             switch (arguments.length) {
                 case 0:
                     throw new Error("onEvent was called without arguments");
@@ -941,10 +811,22 @@ var Template = function () {
             }
 
             var self = this;
+
+            function runCB(data) {
+                if (options.consolidate || options.throttle) {
+                    clearTimeout(timeouts[template || '__global_event__']);
+                    timeouts[template || '__global_event__'] = setTimeout(function () {
+                        callback(data);
+                    }, typeof options.throttle === 'number' ? options.throttle : 50);
+                } else {
+                    callback(data);
+                }
+            }
+
             function listener(event) {
                 var key = (0, _helpers.findKey)(event.detail, self._name);
                 if (key) {
-                    callback(template ? event.detail[key][template] : event.detail[key]);
+                    runCB(template ? event.detail[key][template] : event.detail[key]);
                 }
             }
             document.addEventListener(_events.VFF_EVENT, listener);
@@ -984,61 +866,17 @@ var Template = function () {
             return traps;
         }
     }, {
-        key: '_onChangeFunc',
-        value: function _onChangeFunc(name) {
-            var self = this;
-            return {
-                set: function set(target, prop, value) {
-                    var bypass = prop[prop.length - 1].startsWith(bypassPrefix);
-                    if (bypass) prop[prop.length - 1] = prop[prop.length - 1].substr(bypass.length);
-                    self._setByPath(target, prop, value);
-                    var payload = {};
-                    payload[name] = {};
-                    self._setByPath(payload[name], prop, value);
-                    if (!bypass) {
-                        (0, _messenger.send)(_events.USER_UPDATE, payload);
-                    }
-                    return true;
-                },
-                get: function get(target, prop) {
-                    if (prop !== "__isProxy") {
-                        return target[prop];
-                    }
-                    return true;
-                }
-            };
-        }
-    }, {
-        key: '_setByPath',
-        value: function _setByPath(obj, path, value) {
-            for (var i = 0; i < path.length - 1; i++) {
-                var prop = path[i];
-                if (prop in obj) {
-                    obj = obj[prop];
-                } else {
-                    obj[prop] = {};
-                    obj = obj[prop];
-                }
-            }
-            if ((typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object') {
-                value = (0, _helpers.deepProxy)(value, this._onChangeFunc(path[0]));
-            }
-            obj[path[path.length - 1]] = value;
-        }
-    }, {
         key: '_setValue',
         value: function _setValue(key, value) {
-            key = (0, _helpers.findKey)(this._data, key);
-
+            key = (0, _helpers.findKey)(this._proxy, key);
             if (key) {
-                this._data[key] = value;
-                this._proxy[key] = (0, _helpers.deepProxy)(value, this._onChangeFunc(this._name));
+                this._proxy[key] = value;
             }
         }
     }, {
         key: '_getValue',
         value: function _getValue(key) {
-            return this._data[(0, _helpers.findKey)(this._data, key)];
+            return this._proxy[(0, _helpers.findKey)(this._proxy, key)];
         }
     }]);
 
@@ -1061,21 +899,14 @@ var VffTemplate = function (_Template) {
                 if (prop in target) {
                     return target[prop];
                 }
-                // if(typeof prop === 'string' && prop.startsWith(bypassPrefix)){
-                //     return self._data[prop.substr(2)];
-                // }
                 return self._proxy[prop];
             },
             set: function set(target, prop, value) {
                 if (prop in target) {
                     return target[prop] = value;
+                } else {
+                    target._proxy[prop] = value;
                 }
-                // else if (typeof prop === 'string' && prop.startsWith("__")){
-                //     target._data[prop.substr(2)] = value;
-                // }
-                else {
-                        target._proxy[prop] = value;
-                    }
                 return true;
             }
         }), _possibleConstructorReturn(_this, _ret);
@@ -1171,7 +1002,6 @@ function update(data) {
     for (var templateName in data) {
         var template = _vffData.vffData.getTemplate(templateName);
         if (template) {
-            // template.addData(data[templateName]);
             _vffData.vffData.registerTemplate(templateName, data[templateName]);
             isDataChanged = true;
             for (var key in data[templateName]) {
@@ -1180,19 +1010,6 @@ function update(data) {
         }
     }
 
-    //
-    // for(let template in vffData._main) {
-    //     let key = findKey(data, template);
-    //     for(let item in data[key]){
-    //         let controlKey = findKey(vffData._main[template], item);
-    //
-    //         vffData._main[template][controlKey || item] = data[key][item];
-    //         isDataChanged = true;
-    //
-    //         updateDom(template, controlKey || item, data[key][item], data[key].__timecode__);
-    //
-    //     }
-    // }
     if (isDataChanged) {
         _vffData.vffData.updateCB();
     }
