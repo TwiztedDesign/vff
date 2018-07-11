@@ -25,25 +25,25 @@ describe('VffTemplate', () => {
         });
     });
 
-    xdescribe('addData', () => {
+    describe('addData', () => {
         it('should add data to the template', () => {
             let template = vffData.registerTemplate('test', {visibility : true});
             expect(template.newProp).toBeUndefined();
             expect(template.visibility).toBeTruthy();
-            template.addData({newProp : 'some value'});
+            template.update({newProp : 'some value'});
             expect(template.newProp).toBe('some value');
             expect(template.visibility).toBeTruthy();
         });
         it("shouldn't trigger user update", () => {
             let template = vffData.registerTemplate('test', {visibility : true});
-            template.addData({prop : true});
+            template.update({prop : true});
             expect(send).not.toHaveBeenCalledWith(USER_UPDATE, expect.anything());
         });
         it('should handle nested objects', () => {
             debugger;
             let template = vffData.registerTemplate('test', {visibility : true});
-            template.addData({prop: { prop1 : 'some other value'}});
-            template.addData({prop: { prop2 : 'some second value'}});
+            template.update({prop: { prop1 : 'some other value'}});
+            template.update({prop: { prop2 : 'some second value'}});
             expect(template.prop.prop1).toBe('some other value');
             expect(template.prop.prop2).toBe('some second value');
 

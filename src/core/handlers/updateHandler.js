@@ -12,7 +12,6 @@ function update(data){
     for(let templateName in data){
         let template = vffData.getTemplate(templateName);
         if(template){
-            // template.addData(data[templateName]);
             vffData.registerTemplate(templateName, data[templateName]);
             isDataChanged = true;
             for(let key in data[templateName]){

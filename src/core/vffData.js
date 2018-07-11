@@ -36,7 +36,7 @@ class VffData {
         name = name.toLowerCase();
 
         if(this._templates[name]){
-            this._templates[name].addData(data);
+            this._templates[name].update(data);
         } else {
             this._templates[name] = new VffTemplate(name,data);
         }

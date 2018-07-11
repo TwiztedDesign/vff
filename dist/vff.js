@@ -864,7 +864,7 @@ var Template = function () {
         _classCallCheck(this, Template);
 
         this._name = name;
-        this._data = data;
+        // this._data = data;
 
         // this._proxy = deepProxy(data, this._onChangeFunc(name));
         this._proxy = new Proxy(data, this._traps(name));
@@ -883,7 +883,11 @@ var Template = function () {
             output = Array.isArray(o) ? [] : {};
             for (key in o) {
                 v = o[key];
-                output[prefix + key] = (typeof v === 'undefined' ? 'undefined' : _typeof(v)) === "object" ? this._copy(v, prefix) : v;
+                if (Array.isArray(output)) {
+                    output[key] = (typeof v === 'undefined' ? 'undefined' : _typeof(v)) === "object" ? this._copy(v, prefix) : v;
+                } else {
+                    output[prefix + key] = (typeof v === 'undefined' ? 'undefined' : _typeof(v)) === "object" ? this._copy(v, prefix) : v;
+                }
             }
             return output;
         }
@@ -960,7 +964,6 @@ var Template = function () {
                     if (!bypass && !target.__isProxy && (typeof value === 'undefined' ? 'undefined' : _typeof(value)) !== 'object') {
                         var payload = {};
                         payload[name] = self._proxy;
-                        console.log('user update', payload);
                         (0, _messenger.send)(_events.USER_UPDATE, payload);
                     }
                     return true;
@@ -970,7 +973,7 @@ var Template = function () {
                         return true;
                     }
                     if (key.startsWith && key.startsWith(bypassPrefix)) key = key.substr(bypassPrefix.length);
-                    if (_typeof(target[key]) === 'object' && target[key] !== null) {
+                    if (_typeof(target[key]) === 'object' && target[key] !== null && !target[key].__isProxy) {
                         return new Proxy(target[key], traps);
                     } else {
                         return target[key];
@@ -1058,19 +1061,21 @@ var VffTemplate = function (_Template) {
                 if (prop in target) {
                     return target[prop];
                 }
-                if (typeof prop === 'string' && prop.startsWith("__")) {
-                    return self._data[prop.substr(2)];
-                }
+                // if(typeof prop === 'string' && prop.startsWith(bypassPrefix)){
+                //     return self._data[prop.substr(2)];
+                // }
                 return self._proxy[prop];
             },
             set: function set(target, prop, value) {
                 if (prop in target) {
                     return target[prop] = value;
-                } else if (typeof prop === 'string' && prop.startsWith("__")) {
-                    target._data[prop.substr(2)] = value;
-                } else {
-                    target._proxy[prop] = value;
                 }
+                // else if (typeof prop === 'string' && prop.startsWith("__")){
+                //     target._data[prop.substr(2)] = value;
+                // }
+                else {
+                        target._proxy[prop] = value;
+                    }
                 return true;
             }
         }), _possibleConstructorReturn(_this, _ret);
