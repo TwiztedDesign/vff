@@ -834,10 +834,8 @@ var Template = function () {
     }, {
         key: '_traps',
         value: function _traps(name) {
-            var self = this;
             var traps = {
                 set: function set(target, key, value) {
-
                     var bypass = key.startsWith(bypassPrefix);
                     if (bypass && !target.__isProxy) {
                         key = key.substr(bypassPrefix.length);
@@ -845,7 +843,8 @@ var Template = function () {
                     target[key] = value;
                     if (!bypass && !target.__isProxy && (typeof value === 'undefined' ? 'undefined' : _typeof(value)) !== 'object') {
                         var payload = {};
-                        payload[name] = self._proxy;
+                        payload[name] = {};
+                        payload[name][key] = value;
                         (0, _messenger.send)(_events.USER_UPDATE, payload);
                     }
                     return true;

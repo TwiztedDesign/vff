@@ -85,10 +85,8 @@ class Template{
     }
 
     _traps(name){
-        let self = this;
         let traps = {
             set: function (target, key, value) {
-
                 let bypass = key.startsWith(bypassPrefix);
                 if(bypass && !target.__isProxy){
                     key = key.substr(bypassPrefix.length);
@@ -96,7 +94,8 @@ class Template{
                 target[key] = value;
                 if(!bypass && !target.__isProxy && typeof value !== 'object'){
                     let payload = {};
-                    payload[name] = self._proxy;
+                    payload[name] = {};
+                    payload[name][key] = value;
                     send(USER_UPDATE, payload);
                 }
                 return true;
