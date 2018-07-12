@@ -733,7 +733,9 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var bypassPrefix = '___bypass___';
+var bypassPrefix = '___bypass___',
+    parentObject = '__parent_object__',
+    parentKey = '__parent_key__';
 var timeouts = {};
 
 var Template = function () {
@@ -749,24 +751,6 @@ var Template = function () {
         value: function update(data) {
             var toUpdate = this._copy(data, bypassPrefix);
             (0, _helpers.deepExtend)(this._proxy, toUpdate);
-        }
-    }, {
-        key: '_copy',
-        value: function _copy(o, prefix) {
-            prefix = prefix || '';
-            var output = void 0,
-                v = void 0,
-                key = void 0;
-            output = Array.isArray(o) ? [] : {};
-            for (key in o) {
-                v = o[key];
-                if (Array.isArray(output)) {
-                    output[key] = (typeof v === 'undefined' ? 'undefined' : _typeof(v)) === "object" ? this._copy(v, prefix) : v;
-                } else {
-                    output[prefix + key] = (typeof v === 'undefined' ? 'undefined' : _typeof(v)) === "object" ? this._copy(v, prefix) : v;
-                }
-            }
-            return output;
         }
     }, {
         key: 'show',
@@ -832,8 +816,87 @@ var Template = function () {
             document.addEventListener(_events.VFF_EVENT, listener);
         }
     }, {
+        key: '_copy',
+        value: function _copy(o, prefix) {
+            prefix = prefix || '';
+            var output = void 0,
+                v = void 0,
+                key = void 0;
+            output = Array.isArray(o) ? [] : {};
+            for (key in o) {
+                v = o[key];
+                if (Array.isArray(output)) {
+                    output[key] = (typeof v === 'undefined' ? 'undefined' : _typeof(v)) === "object" ? this._copy(v, prefix) : v;
+                } else {
+                    output[prefix + key] = (typeof v === 'undefined' ? 'undefined' : _typeof(v)) === "object" ? this._copy(v, prefix) : v;
+                }
+            }
+            return output;
+        }
+    }, {
+        key: '_sendUserUpdateEvent',
+        value: function _sendUserUpdateEvent(name, target, key, value) {
+            var payload = {},
+                po = void 0,
+                pk = void 0,
+                originalTarget = target;
+            payload[name] = {};
+
+            if (!target[parentObject]) {
+                payload[name][key] = value;
+            } else {
+                var ancestors = [];
+                while (target[parentObject]) {
+                    ancestors.unshift(target[parentKey]);
+                    target = target[parentObject];
+                }
+
+                var ancestor = '',
+                    tmp = payload[name];
+                var _iteratorNormalCompletion = true;
+                var _didIteratorError = false;
+                var _iteratorError = undefined;
+
+                try {
+                    for (var _iterator = ancestors[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                        ancestor = _step.value;
+
+                        tmp[ancestor] = {};
+                        if (ancestors[ancestors.length - 1 !== ancestor]) {
+                            tmp = tmp[ancestor];
+                        }
+                    }
+                } catch (err) {
+                    _didIteratorError = true;
+                    _iteratorError = err;
+                } finally {
+                    try {
+                        if (!_iteratorNormalCompletion && _iterator.return) {
+                            _iterator.return();
+                        }
+                    } finally {
+                        if (_didIteratorError) {
+                            throw _iteratorError;
+                        }
+                    }
+                }
+
+                po = originalTarget[parentObject];
+                pk = originalTarget[parentKey];
+                delete originalTarget[parentObject];
+                delete originalTarget[parentKey];
+                tmp[ancestor] = originalTarget;
+            }
+
+            (0, _messenger.send)(_events.USER_UPDATE, payload);
+
+            if (po) originalTarget[parentObject] = po;
+            if (pk) originalTarget[parentKey] = pk;
+        }
+    }, {
         key: '_traps',
         value: function _traps(name) {
+            var self = this;
             var traps = {
                 set: function set(target, key, value) {
                     var bypass = key.startsWith(bypassPrefix);
@@ -842,10 +905,7 @@ var Template = function () {
                     }
                     target[key] = value;
                     if (!bypass && !target.__isProxy && (typeof value === 'undefined' ? 'undefined' : _typeof(value)) !== 'object') {
-                        var payload = {};
-                        payload[name] = {};
-                        payload[name][key] = value;
-                        (0, _messenger.send)(_events.USER_UPDATE, payload);
+                        self._sendUserUpdateEvent(name, target, key, value);
                     }
                     return true;
                 },
@@ -855,7 +915,10 @@ var Template = function () {
                     }
                     if (key.startsWith && key.startsWith(bypassPrefix)) key = key.substr(bypassPrefix.length);
                     if (_typeof(target[key]) === 'object' && target[key] !== null && !target[key].__isProxy) {
-                        return new Proxy(target[key], traps);
+                        var proxy = new Proxy(target[key], traps);
+                        proxy[bypassPrefix + parentObject] = target;
+                        proxy[bypassPrefix + parentKey] = key;
+                        return proxy;
                     } else {
                         return target[key];
                     }
