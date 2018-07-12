@@ -1,5 +1,5 @@
 import {USER_UPDATE, VFF_EVENT} from "../utils/events";
-import {findKey, deepExtend} from '../utils/helpers.js';
+import {findKey, deepExtend, getByPath} from '../utils/helpers.js';
 import {send} from '../utils/messenger';
 const bypassPrefix = '___bypass___', parentObject = '__parent_object__', parentKey = '__parent_key__';
 const timeouts = {};
@@ -62,7 +62,12 @@ class Template{
         function listener(event){
             let key = findKey(event.detail, self._name);
             if(key) {
-                runCB(template ? event.detail[key][template] : event.detail[key]);
+                if(template && getByPath(event.detail[key], template)){
+                    runCB(getByPath(event.detail[key], template));
+                } else if(!template){
+                    runCB(event.detail[key]);
+                }
+
             }
         }
         document.addEventListener(VFF_EVENT, listener);

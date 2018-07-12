@@ -810,7 +810,11 @@ var Template = function () {
             function listener(event) {
                 var key = (0, _helpers.findKey)(event.detail, self._name);
                 if (key) {
-                    runCB(template ? event.detail[key][template] : event.detail[key]);
+                    if (template && (0, _helpers.getByPath)(event.detail[key], template)) {
+                        runCB((0, _helpers.getByPath)(event.detail[key], template));
+                    } else if (!template) {
+                        runCB(event.detail[key]);
+                    }
                 }
             }
             document.addEventListener(_events.VFF_EVENT, listener);
