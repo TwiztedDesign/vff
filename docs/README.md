@@ -70,10 +70,10 @@ var lowerThird = {
     subTitle    : "This is a subtitle"
 };
 // Register the object as a template
-var lowerThird = vff.addTemplate("Lower Third", lowerThird);
+var lowerThird = vff.registerTemplate("Lower Third", lowerThird);
 ```
 The above code will generate the same result as the code we used in the "Getting Started" example in the HTML file. The name of the template is the object name, and the properties of the template as the object properties.
-The function "addTemplate" will return a template object that will contain functions for events and additional data. Note that when registering the template via js, you can specify any name you want for the template,
+The function "registerTemplate" will return a template object that will contain functions for events and additional data. Note that when registering the template via js, you can specify any name you want for the template,
 the first pram is the name of the template as it would be displayed in the controller (Lower Third) and the second param is the object that will be used to contain the data of the template.
 
 ## Working with Frameworks
@@ -106,7 +106,7 @@ angular.module('tfApp', [])
             subTitle    : "This is a subtitle"
         };
         // Register the object as a template
-        var lowerThird = vff.addTemplate("Lower Third", lowerThird);
+        var lowerThird = vff.registerTemplate("Lower Third", lowerThird);
         }
     ]);
 ```
@@ -135,7 +135,7 @@ var lowerThird = {
     ]
 };
 // Register the object as a template
-var lowerThird = vff.addTemplate("Lower Third", lowerThird);
+var lowerThird = vff.registerTemplate("Lower Third", lowerThird);
 ```
 The controller will still show only the "Title" and the "Sub Title" properties. It will ignore any objects that are not primitives unless they follow a specific structure that describes a UI element such as a dropdown.
 While the property "stockData" will not be shown by the controller, it will still be active and available.
@@ -226,9 +226,9 @@ var lowerThird = {
     subTitle    : "This is a subtitle",
 };
 // Register the object as a template
-var lowerThird = vff.addTemplate("Lower Third", lowerThird);
+var lowerThird = vff.registerTemplate("Lower Third", lowerThird);
 
-vff.onEvent("lowerThird", function(data){
+lowerThird.onData(function(data){
     // Respond to the event
     var d = new Date(data.__timecode__);
     alert("New data received on " + d.toString());
@@ -267,11 +267,6 @@ Name - string - element name should be at least two words, dash separated (i.e v
 vff.emit(payload);
 ```
 Emit gfx event to all open players **no fully working yet
-## onEvent
-```javascript
-vff.onEvent(template, cb, options)
-vff.onEvent(cb, options)
-```
 
 # Player control
 
@@ -290,7 +285,10 @@ Go to page
 
 ## show
 ```javascript
-vff.show(template)
+template.show();
+// OR
+vff.show('templateName');
+
 ```
 Set "visibility" property in the template to true
 
@@ -298,7 +296,9 @@ Set "visibility" property in the template to true
 
 ## hide
 ```javascript
-vff.hide(template)
+template.hide();
+// OR
+vff.hide('templateName');
 ```
 Set "visibility" property in the template to false
 
@@ -306,7 +306,9 @@ Set "visibility" property in the template to false
 
 ## toggle
 ```javascript
-vff.toggle(template)
+template.toggle();
+// OR
+vff.toggle('templateName');
 ```
 Toggle "visibility" property in the template
 
