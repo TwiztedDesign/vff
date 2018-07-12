@@ -62,12 +62,11 @@ class Template{
         function listener(event){
             let key = findKey(event.detail, self._name);
             if(key) {
-                if(template && getByPath(event.detail[key], template)){
+                if(template && getByPath(event.detail[key], template) !== undefined){
                     runCB(getByPath(event.detail[key], template));
                 } else if(!template){
                     runCB(event.detail[key]);
                 }
-
             }
         }
         document.addEventListener(VFF_EVENT, listener);

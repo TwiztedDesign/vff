@@ -810,7 +810,7 @@ var Template = function () {
             function listener(event) {
                 var key = (0, _helpers.findKey)(event.detail, self._name);
                 if (key) {
-                    if (template && (0, _helpers.getByPath)(event.detail[key], template)) {
+                    if (template && (0, _helpers.getByPath)(event.detail[key], template) !== undefined) {
                         runCB((0, _helpers.getByPath)(event.detail[key], template));
                     } else if (!template) {
                         runCB(event.detail[key]);
