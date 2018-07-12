@@ -737,6 +737,9 @@ var bypassPrefix = '___bypass___',
     parentObject = '__parent_object__',
     parentKey = '__parent_key__';
 var timeouts = {};
+var defaults = {
+    changeOnly: true
+};
 
 var Template = function () {
     function Template(name, data) {
@@ -794,6 +797,8 @@ var Template = function () {
                     break;
             }
 
+            options = Object.assign({}, defaults, options);
+
             var self = this;
 
             function runCB(data) {
@@ -810,6 +815,11 @@ var Template = function () {
             function listener(event) {
                 var key = (0, _helpers.findKey)(event.detail, self._name);
                 if (key) {
+
+                    if (options.changeOnly && (0, _helpers.getByPath)(event.detail[key], template) === (0, _helpers.getByPath)(self._proxy, template)) {
+                        return;
+                    }
+
                     if (template && (0, _helpers.getByPath)(event.detail[key], template) !== undefined) {
                         runCB((0, _helpers.getByPath)(event.detail[key], template));
                     } else if (!template) {

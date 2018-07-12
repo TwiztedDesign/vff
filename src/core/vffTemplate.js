@@ -3,6 +3,9 @@ import {findKey, deepExtend, getByPath} from '../utils/helpers.js';
 import {send} from '../utils/messenger';
 const bypassPrefix = '___bypass___', parentObject = '__parent_object__', parentKey = '__parent_key__';
 const timeouts = {};
+const defaults = {
+  changeOnly : true
+};
 
 class Template{
     constructor(name, data) {
@@ -46,6 +49,8 @@ class Template{
                 break;
         }
 
+        options = Object.assign({}, defaults, options);
+
         let self = this;
 
         function runCB(data){
@@ -62,6 +67,11 @@ class Template{
         function listener(event){
             let key = findKey(event.detail, self._name);
             if(key) {
+
+                if(options.changeOnly && getByPath(event.detail[key], template) === getByPath(self._proxy, template)){
+                    return;
+                }
+
                 if(template && getByPath(event.detail[key], template) !== undefined){
                     runCB(getByPath(event.detail[key], template));
                 } else if(!template){
