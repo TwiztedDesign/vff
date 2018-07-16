@@ -27,7 +27,7 @@ class VffData {
         this._updateCB = cb;
     }
 
-    registerTemplate(name, data){
+    registerTemplate(name, data, element){
         if(arguments.length < 2){
             throw new Error('Missing Arguments, please refer to: ' + docRef(REGISTER_TEMPLATE));
         }
@@ -38,7 +38,7 @@ class VffData {
         if(this._templates[name]){
             this._templates[name].update(data);
         } else {
-            this._templates[name] = new VffTemplate(name,data);
+            this._templates[name] = new VffTemplate(name, data, element);
         }
 
         send(ADD,{

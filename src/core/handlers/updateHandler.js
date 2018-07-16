@@ -1,4 +1,4 @@
-import {setByPath} from '../../utils/helpers.js';
+import {setByPath, getByPath} from '../../utils/helpers.js';
 import {vffData} from '../vffData.js';
 import {EXPOSE_DELIMITER} from '../consts';
 import {VFF_EVENT} from '../../utils/events';
@@ -15,7 +15,7 @@ function update(data){
             vffData.registerTemplate(templateName, data[templateName]);
             isDataChanged = true;
             for(let key in data[templateName]){
-                updateDom(templateName, key, data[templateName][key], data[templateName].__timecode__);
+                updateDom(template, key, data[templateName][key], data[templateName].__timecode__);
             }
         }
     }
@@ -25,12 +25,8 @@ function update(data){
     }
 }
 
-window.update = update;
 function updateDom(template, control, value, timecode){
-    let templateSelector = '[vff-template="' + template + '" i]';
-    let controlSelector = '[vff-name="' + control.split(EXPOSE_DELIMITER)[0] + '" i]';
-    let selector = templateSelector + ' ' + controlSelector + ',' + templateSelector + controlSelector;
-    let dom = document.querySelector(selector);
+    var dom = template.getElement();
     if(dom){
         if(timecode !== undefined){
             setByPath(dom, "__timecode__", timecode);

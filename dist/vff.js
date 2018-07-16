@@ -194,7 +194,7 @@ function modeCheck() {
     return mode;
 }
 function docRef(anchor) {
-    return 'https://www.videoflow.io/documentation/vff?id=' + anchor;
+    return 'https://www.videoflow.io/documentation/api/vff?id=' + anchor;
 }
 
 function noop() {}
@@ -247,68 +247,6 @@ module.exports = {
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(global) {
-
-var _helpers = __webpack_require__(0);
-
-var window = window || global.window;
-var REQUEST_TIMEOUT = 20000;
-
-function sendMessage(type, payload) {
-    var message = {
-        type: type,
-        payload: payload
-    };
-    postMessage(message);
-}
-
-function request(type, payload, cb) {
-    var rid = (0, _helpers.uuid)();
-    payload._rid = rid;
-    var message = {
-        type: type,
-        payload: payload
-    };
-    var timeout;
-    var handler = function handler(message) {
-        message = JSON.parse(message.data);
-        if (message.payload && message.payload._rid === rid) {
-            removeHandler();
-            cb(message);
-        }
-    };
-    var removeHandler = function removeHandler() {
-        clearTimeout(timeout);
-        window.removeEventListener('message', handler, false);
-    };
-
-    window.addEventListener('message', handler, false);
-    timeout = setTimeout(function () {
-        //Request Timeout
-        removeHandler();
-    }, REQUEST_TIMEOUT);
-
-    postMessage(message);
-}
-
-function postMessage(message) {
-    var w = window || global.window;
-    if (w && w.parent) {
-        w.parent.postMessage(JSON.stringify(message), '*');
-    }
-}
-
-module.exports = {
-    send: sendMessage,
-    request: request
-};
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(7)))
-
-/***/ }),
-/* 3 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
 
 
 Object.defineProperty(exports, "__esModule", {
@@ -322,7 +260,7 @@ var _events = __webpack_require__(1);
 
 var _helpers = __webpack_require__(0);
 
-var _messenger = __webpack_require__(2);
+var _messenger = __webpack_require__(3);
 
 var _docRefs = __webpack_require__(8);
 
@@ -363,7 +301,7 @@ var VffData = function () {
         }
     }, {
         key: 'registerTemplate',
-        value: function registerTemplate(name, data) {
+        value: function registerTemplate(name, data, element) {
             if (arguments.length < 2) {
                 throw new Error('Missing Arguments, please refer to: ' + (0, _helpers.docRef)(_docRefs.REGISTER_TEMPLATE));
             }
@@ -374,7 +312,7 @@ var VffData = function () {
             if (this._templates[name]) {
                 this._templates[name].update(data);
             } else {
-                this._templates[name] = new _vffTemplate2.default(name, data);
+                this._templates[name] = new _vffTemplate2.default(name, data, element);
             }
 
             (0, _messenger.send)(_events.ADD, {
@@ -447,6 +385,71 @@ var VffData = function () {
 }();
 
 var vffData = exports.vffData = new VffData();
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {
+
+var _helpers = __webpack_require__(0);
+
+var window = window || global.window;
+var REQUEST_TIMEOUT = 20000;
+var targetOrigins = ['http://localhost:3002'];
+
+function sendMessage(type, payload) {
+    var message = {
+        type: type,
+        payload: payload
+    };
+    postMessage(message);
+}
+
+function request(type, payload, cb) {
+    var rid = (0, _helpers.uuid)();
+    payload._rid = rid;
+    var message = {
+        type: type,
+        payload: payload
+    };
+    var timeout;
+    var handler = function handler(message) {
+        message = JSON.parse(message.data);
+        if (message.payload && message.payload._rid === rid) {
+            removeHandler();
+            cb(message);
+        }
+    };
+    var removeHandler = function removeHandler() {
+        clearTimeout(timeout);
+        window.removeEventListener('message', handler, false);
+    };
+
+    window.addEventListener('message', handler, false);
+    timeout = setTimeout(function () {
+        //Request Timeout
+        removeHandler();
+    }, REQUEST_TIMEOUT);
+
+    postMessage(message);
+}
+
+function postMessage(message) {
+    var w = window || global.window;
+    if (w && w.parent) {
+        targetOrigins.forEach(function (target) {
+            w.parent.postMessage(JSON.stringify(message), target);
+        });
+    }
+}
+
+module.exports = {
+    send: sendMessage,
+    request: request
+};
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(7)))
 
 /***/ }),
 /* 4 */
@@ -582,11 +585,11 @@ module.exports = {
 "use strict";
 
 
-var _messenger = __webpack_require__(2);
+var _messenger = __webpack_require__(3);
 
 var _events = __webpack_require__(1);
 
-var _vffData = __webpack_require__(3);
+var _vffData = __webpack_require__(2);
 
 var _listener = __webpack_require__(10);
 
@@ -636,6 +639,12 @@ vff.addTemplate = function (name, data) {
 };
 vff.registerTemplate = function (name, data) {
     return _vffData.vffData.registerTemplate(name, data);
+};
+vff.getTemplate = function (name) {
+    return _vffData.vffData.getTemplate(name);
+};
+vff.getTemplates = function () {
+    return _vffData.vffData.getTemplates();
 };
 vff.onUpdate = function (cb) {
     return _vffData.vffData.onUpdate(cb);
@@ -725,7 +734,7 @@ var _events = __webpack_require__(1);
 
 var _helpers = __webpack_require__(0);
 
-var _messenger = __webpack_require__(2);
+var _messenger = __webpack_require__(3);
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
@@ -742,14 +751,20 @@ var defaults = {
 };
 
 var Template = function () {
-    function Template(name, data) {
+    function Template(name, data, element) {
         _classCallCheck(this, Template);
 
         this._name = name;
         this._proxy = new Proxy(data, this._traps(name));
+        this._element = element;
     }
 
     _createClass(Template, [{
+        key: 'getElement',
+        value: function getElement() {
+            return this._element;
+        }
+    }, {
         key: 'update',
         value: function update(data) {
             var toUpdate = this._copy(data, bypassPrefix);
@@ -828,6 +843,14 @@ var Template = function () {
                 }
             }
             document.addEventListener(_events.VFF_EVENT, listener);
+        }
+    }, {
+        key: 'emit',
+        value: function emit(data) {
+            var payload = {};
+            payload.data = data;
+            payload.channel = this._name;
+            (0, _messenger.send)(_events.OUTGOING_EVENT, payload);
         }
     }, {
         key: '_copy',
@@ -962,12 +985,12 @@ var Template = function () {
 var VffTemplate = function (_Template) {
     _inherits(VffTemplate, _Template);
 
-    function VffTemplate(name, data) {
+    function VffTemplate(name, data, element) {
         var _ret;
 
         _classCallCheck(this, VffTemplate);
 
-        var _this = _possibleConstructorReturn(this, (VffTemplate.__proto__ || Object.getPrototypeOf(VffTemplate)).call(this, name, data));
+        var _this = _possibleConstructorReturn(this, (VffTemplate.__proto__ || Object.getPrototypeOf(VffTemplate)).call(this, name, data, element));
 
         var self = _this;
         return _ret = new Proxy(_this, {
@@ -1064,7 +1087,7 @@ module.exports = handlers;
 
 var _helpers = __webpack_require__(0);
 
-var _vffData = __webpack_require__(3);
+var _vffData = __webpack_require__(2);
 
 var _consts = __webpack_require__(5);
 
@@ -1081,7 +1104,7 @@ function update(data) {
             _vffData.vffData.registerTemplate(templateName, data[templateName]);
             isDataChanged = true;
             for (var key in data[templateName]) {
-                updateDom(templateName, key, data[templateName][key], data[templateName].__timecode__);
+                updateDom(template, key, data[templateName][key], data[templateName].__timecode__);
             }
         }
     }
@@ -1091,12 +1114,8 @@ function update(data) {
     }
 }
 
-window.update = update;
 function updateDom(template, control, value, timecode) {
-    var templateSelector = '[vff-template="' + template + '" i]';
-    var controlSelector = '[vff-name="' + control.split(_consts.EXPOSE_DELIMITER)[0] + '" i]';
-    var selector = templateSelector + ' ' + controlSelector + ',' + templateSelector + controlSelector;
-    var dom = document.querySelector(selector);
+    var dom = template.getElement();
     if (dom) {
         if (timecode !== undefined) {
             (0, _helpers.setByPath)(dom, "__timecode__", timecode);
@@ -1124,7 +1143,7 @@ module.exports = {
 "use strict";
 
 
-var _vffData = __webpack_require__(3);
+var _vffData = __webpack_require__(2);
 
 function pages(data) {
     _vffData.vffData.addPages(data);
@@ -1141,7 +1160,7 @@ module.exports = {
 "use strict";
 
 
-var _vffData = __webpack_require__(3);
+var _vffData = __webpack_require__(2);
 
 function queryParams(data) {
     _vffData.vffData.addQueryParams(data);
@@ -1161,6 +1180,8 @@ module.exports = {
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var _helpers = __webpack_require__(0);
+
+var _vffData = __webpack_require__(2);
 
 var _consts = __webpack_require__(5);
 
@@ -1200,14 +1221,14 @@ function _init() {
             }
 
             if (!templates[templateName]) {
-                templates[templateName] = data;
+                templates[templateName] = { data: data, dom: template };
             } else {
-                (0, _helpers.deepExtend)(templates[templateName], data);
+                (0, _helpers.deepExtend)(templates[templateName], { data: data, dom: template });
             }
         }
     });
     for (var template in templates) {
-        window.vff.addTemplate(template, templates[template]);
+        _vffData.vffData.registerTemplate(template, templates[template].data, templates[template].dom);
     }
 }
 
@@ -3225,7 +3246,9 @@ var _events = __webpack_require__(1);
 
 var _helpers = __webpack_require__(0);
 
-var _messenger = __webpack_require__(2);
+var _messenger = __webpack_require__(3);
+
+var _vffData = __webpack_require__(2);
 
 var timeouts = {};
 
@@ -3279,7 +3302,10 @@ module.exports = {
         document.addEventListener(_events.VFF_EVENT, listener);
     },
 
-    emit: function emit(payload) {
+    emit: function emit(data) {
+        var payload = {};
+        payload.data = data;
+        payload.query = _vffData.vffData.getQueryParams();
         (0, _messenger.send)(_events.OUTGOING_EVENT, payload);
     }
 
@@ -3292,7 +3318,7 @@ module.exports = {
 "use strict";
 
 
-var _messenger = __webpack_require__(2);
+var _messenger = __webpack_require__(3);
 
 var _events = __webpack_require__(1);
 
@@ -3319,7 +3345,7 @@ module.exports = {
 "use strict";
 
 
-var _vffData = __webpack_require__(3);
+var _vffData = __webpack_require__(2);
 
 module.exports = {
     show: function show(template) {
@@ -3340,7 +3366,7 @@ module.exports = {
 "use strict";
 
 
-var _messenger = __webpack_require__(2);
+var _messenger = __webpack_require__(3);
 
 var _events = __webpack_require__(1);
 

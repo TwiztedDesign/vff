@@ -1,4 +1,4 @@
-import {USER_UPDATE, VFF_EVENT} from "../utils/events";
+import {USER_UPDATE, VFF_EVENT, OUTGOING_EVENT} from "../utils/events";
 import {findKey, deepExtend, getByPath} from '../utils/helpers.js';
 import {send} from '../utils/messenger';
 const bypassPrefix = '___bypass___', parentObject = '__parent_object__', parentKey = '__parent_key__';
@@ -8,9 +8,13 @@ const defaults = {
 };
 
 class Template{
-    constructor(name, data) {
+    constructor(name, data, element) {
         this._name = name;
         this._proxy = new Proxy(data, this._traps(name));
+        this._element = element;
+    }
+    getElement(){
+        return this._element;
     }
     update(data){
         let toUpdate = this._copy(data, bypassPrefix);
@@ -80,6 +84,14 @@ class Template{
             }
         }
         document.addEventListener(VFF_EVENT, listener);
+    }
+
+
+    emit(data){
+        let payload = {};
+        payload.data = data;
+        payload.channel = this._name;
+        send(OUTGOING_EVENT, payload);
     }
 
     _copy(o, prefix) {
@@ -179,8 +191,8 @@ class Template{
 }
 
 export default class VffTemplate extends Template {
-    constructor(name, data){
-        super(name, data);
+    constructor(name, data, element){
+        super(name, data, element);
 
         let self = this;
         return new Proxy(this, {

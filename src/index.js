@@ -26,6 +26,8 @@ let vff = (selector) => {
 
 vff.addTemplate         = (name, data) => {return vffData.registerTemplate(name, data);};
 vff.registerTemplate    = (name, data) => {return vffData.registerTemplate(name, data);};
+vff.getTemplate         = (name) => {return vffData.getTemplate(name);};
+vff.getTemplates        = () => {return vffData.getTemplates();};
 vff.onUpdate            = (cb) => {return vffData.onUpdate(cb);};
 vff.getPages            = () => {return vffData.getPages();};
 vff.getQueryParams      = () => {return vffData.getQueryParams();};

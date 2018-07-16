@@ -121,7 +121,7 @@ function modeCheck(){
     return mode;
 }
 function docRef(anchor){
-    return 'https://www.videoflow.io/documentation/vff?id=' + anchor;
+    return 'https://www.videoflow.io/documentation/api/vff?id=' + anchor;
 }
 
 function noop(){}
