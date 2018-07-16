@@ -51,15 +51,15 @@ module.exports = {
         }
 
         document.addEventListener(VFF_EVENT, listener);
-    },
-
-
-    emit : (data) => {
-        let payload = {};
-        payload.data = data;
-        payload.query = vffData.getQueryParams();
-        send(OUTGOING_EVENT, payload);
     }
+
+
+    // emit : (data) => {
+    //     let payload = {};
+    //     payload.data = data;
+    //     payload.query = vffData.getQueryParams();
+    //     send(OUTGOING_EVENT, payload);
+    // }
 
 };
 
