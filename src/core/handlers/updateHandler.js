@@ -1,4 +1,4 @@
-import {setByPath, getByPath} from '../../utils/helpers.js';
+import {setByPath} from '../../utils/helpers.js';
 import {vffData} from '../vffData.js';
 import {EXPOSE_DELIMITER} from '../consts';
 import {VFF_EVENT} from '../../utils/events';

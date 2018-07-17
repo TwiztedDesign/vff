@@ -1,7 +1,5 @@
-import {VFF_EVENT, OUTGOING_EVENT} from '../../utils/events.js';
+import {VFF_EVENT} from '../../utils/events.js';
 import {findKey} from '../../utils/helpers';
-import {send} from '../../utils/messenger';
-import {vffData} from '../../core/vffData';
 let timeouts = {};
 
 

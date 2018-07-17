@@ -1,6 +1,7 @@
 import {USER_UPDATE, VFF_EVENT, OUTGOING_EVENT} from "../utils/events";
 import {findKey, deepExtend, getByPath} from '../utils/helpers.js';
 import {send} from '../utils/messenger';
+import {vffData} from './vffData';
 const bypassPrefix = '___bypass___', parentObject = '__parent_object__', parentKey = '__parent_key__';
 const timeouts = {};
 const defaults = {
@@ -90,6 +91,7 @@ class Template{
     emit(data){
         let payload = {};
         payload.data = data;
+        payload.query = vffData.getQueryParams();
         payload.channel = this._name;
         send(OUTGOING_EVENT, payload);
     }

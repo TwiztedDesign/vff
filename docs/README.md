@@ -144,6 +144,55 @@ You can still access it via the Videoflow API. This is useful when you have to d
 You will not see it in the controller and will not be able to edit the data, since it arrives for an external source via the API, but you will still be able to use the data in your overlay app.
 Your entire template can be viewed as an object at any time in the data dashboard of the controller.
 
+## Template object
+
+When you register template with "vff.registerTemplate" or with "vff-template" html attribute you get a template object back.
+You can access the template object either by the return value of "vff.registerTemplate" or by "vff.getTemplate(template name)"
+
+### onData
+
+A template can listen for data that is sent to it.
+```javascript
+var template = vff.getTemplate("lowerThird");
+template.onData(function(data){
+    //Received data for the "lowerThird" template
+});
+template.onData('title', function(title){
+   //Received data for the "title" property in the "lowerThird" template 
+});
+```
+
+### emit
+
+A template can emit a message which will be received by all opened Videoflow players.
+
+```javascript
+var template = vff.getTemplate("lowerThird");
+template.emit({"title" : "Breaking News"});
+```
+
+The code above will emit a message from the "lowerThird" template with a new title.
+It will be received in all of the open Videoflow players and the title will be changed.
+Any appropriate "onData" listeners will be triggered;
+
+The received message
+```json
+{
+  "overlay": "the overlay url",
+  "template": "template name",
+  "data": {
+    "title": "Breaking News"
+  },
+  "query": {//query params from the emitting project
+    "param1" : "value1"
+  },
+  "origin": "origin url",
+  "channel": "lowerThird"
+}
+```
+
+
+
 ## Custom UI Elements
 So far we have been adding only primitive objects to our template. In the previous example have added two strings. Additional primitives you can add are numbers and booleans. In addition to the primitive types
 you can also create custom objects that will be used to extend the UI elements that can be used in the template. Normally objects are not shown in the UI of the controller, unless you follow the UI element object structure.

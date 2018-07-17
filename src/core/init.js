@@ -5,6 +5,14 @@ import {EXPOSE_DELIMITER} from './consts';
 function init(){
     let untitledTemplateCount = 0;
     let templates = {};
+
+
+    document.querySelectorAll('[vff-template]').forEach(function(template){
+        if(!template.hasAttribute('vff-name') && !template.querySelector('[vff-template]')){
+            template.setAttribute('vff-name', '');
+        }
+    });
+
     let controls = document.querySelectorAll('[vff-name]');
 
     controls.forEach((control) => {

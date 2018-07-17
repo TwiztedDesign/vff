@@ -397,7 +397,6 @@ var _helpers = __webpack_require__(0);
 
 var window = window || global.window;
 var REQUEST_TIMEOUT = 20000;
-var targetOrigins = ['http://localhost:3002'];
 
 function sendMessage(type, payload) {
     var message = {
@@ -439,9 +438,7 @@ function request(type, payload, cb) {
 function postMessage(message) {
     var w = window || global.window;
     if (w && w.parent) {
-        targetOrigins.forEach(function (target) {
-            w.parent.postMessage(JSON.stringify(message), target);
-        });
+        w.parent.postMessage(JSON.stringify(message), '*');
     }
 }
 
@@ -736,6 +733,8 @@ var _helpers = __webpack_require__(0);
 
 var _messenger = __webpack_require__(3);
 
+var _vffData = __webpack_require__(2);
+
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
@@ -849,6 +848,7 @@ var Template = function () {
         value: function emit(data) {
             var payload = {};
             payload.data = data;
+            payload.query = _vffData.vffData.getQueryParams();
             payload.channel = this._name;
             (0, _messenger.send)(_events.OUTGOING_EVENT, payload);
         }
@@ -1188,47 +1188,62 @@ var _consts = __webpack_require__(5);
 function _init() {
     var untitledTemplateCount = 0;
     var templates = {};
+
+    document.querySelectorAll('[vff-template]').forEach(function (template) {
+        if (!template.hasAttribute('vff-name') && !template.querySelector('[vff-template]')) {
+            template.setAttribute('vff-name', '');
+        }
+    });
+
     var controls = document.querySelectorAll('[vff-name]');
+
     controls.forEach(function (control) {
-        if (control.expose) {
-            var template = control.closest('[vff-template]');
-            if (!template) {
-                control.setAttribute('vff-template', 'Untitled Template ' + ++untitledTemplateCount);
+        var template = closest(control, '[vff-template]');
+        if (!template) {
+            control.setAttribute('vff-template', 'Untitled Template ' + ++untitledTemplateCount);
+        }
+        var templateName = (template || control).getAttribute('vff-template');
+        var controlName = control.getAttribute('vff-name');
+        var exposed = control.expose ? control.expose() : {};
+
+        var data = {};
+        for (var prop in exposed) {
+            if (exposed.hasOwnProperty(prop)) {
+                (function () {
+                    var path = _typeof(exposed[prop]) === 'object' ? exposed[prop].path : exposed[prop];
+                    data[controlName + _consts.EXPOSE_DELIMITER + prop] = (0, _helpers.getByPath)(control, path);
+
+                    Object.defineProperty(control, prop, {
+                        get: function get() {
+                            return (0, _helpers.getByPath)(this, path);
+                        },
+                        set: function set(newVal) {
+                            (0, _helpers.setByPath)(this, path, newVal);
+                        },
+
+                        configurable: true
+                    });
+                })();
             }
-            var templateName = (template || control).getAttribute('vff-template');
-            var controlName = control.getAttribute('vff-name');
-            var exposed = control.expose();
-
-            var data = {};
-            for (var prop in exposed) {
-                if (exposed.hasOwnProperty(prop)) {
-                    (function () {
-                        var path = _typeof(exposed[prop]) === 'object' ? exposed[prop].path : exposed[prop];
-                        data[controlName + _consts.EXPOSE_DELIMITER + prop] = (0, _helpers.getByPath)(control, path);
-
-                        Object.defineProperty(control, prop, {
-                            get: function get() {
-                                return (0, _helpers.getByPath)(this, path);
-                            },
-                            set: function set(newVal) {
-                                (0, _helpers.setByPath)(this, path, newVal);
-                            },
-
-                            configurable: true
-                        });
-                    })();
-                }
-            }
-
-            if (!templates[templateName]) {
-                templates[templateName] = { data: data, dom: template };
-            } else {
-                (0, _helpers.deepExtend)(templates[templateName], { data: data, dom: template });
-            }
+        }
+        if (!templates[templateName]) {
+            templates[templateName] = { data: data, dom: template };
+        } else {
+            (0, _helpers.deepExtend)(templates[templateName], { data: data, dom: template });
         }
     });
     for (var template in templates) {
         _vffData.vffData.registerTemplate(template, templates[template].data, templates[template].dom);
+    }
+}
+
+function closest(element, selector) {
+
+    while (element) {
+        if (element.matches(selector)) {
+            return element;
+        }
+        element = element.parentElement;
     }
 }
 
@@ -1237,7 +1252,8 @@ module.exports = {
         window.addEventListener('load', function () {
             _init();
         });
-    }
+    },
+    _init: _init
 };
 
 /***/ }),
@@ -3246,10 +3262,6 @@ var _events = __webpack_require__(1);
 
 var _helpers = __webpack_require__(0);
 
-var _messenger = __webpack_require__(3);
-
-var _vffData = __webpack_require__(2);
-
 var timeouts = {};
 
 module.exports = {
@@ -3300,14 +3312,14 @@ module.exports = {
         }
 
         document.addEventListener(_events.VFF_EVENT, listener);
-    },
-
-    emit: function emit(data) {
-        var payload = {};
-        payload.data = data;
-        payload.query = _vffData.vffData.getQueryParams();
-        (0, _messenger.send)(_events.OUTGOING_EVENT, payload);
     }
+
+    // emit : (data) => {
+    //     let payload = {};
+    //     payload.data = data;
+    //     payload.query = vffData.getQueryParams();
+    //     send(OUTGOING_EVENT, payload);
+    // }
 
 };
 
