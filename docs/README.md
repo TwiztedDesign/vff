@@ -291,11 +291,6 @@ vff.define(name, element)
 Define a vff custom element  
 Name - string - element name should be at least two words, dash separated (i.e vff-telestrator) **should consider auto ?vff-? prefix
 -->
-## emit
-```javascript
-vff.emit(payload);
-```
-Emit gfx event to all open players **no fully working yet
 
 # Player control
 
