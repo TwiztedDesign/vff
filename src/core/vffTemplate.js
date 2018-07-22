@@ -1,5 +1,5 @@
 import {USER_UPDATE, VFF_EVENT, OUTGOING_EVENT} from "../utils/events";
-import {findKey, deepExtend, getByPath} from '../utils/helpers.js';
+import {findKey, deepExtend, getByPath, uuid} from '../utils/helpers.js';
 import {send} from '../utils/messenger';
 import {vffData} from './vffData';
 const bypassPrefix = '___bypass___', parentObject = '__parent_object__', parentKey = '__parent_key__';
@@ -13,6 +13,7 @@ class Template{
         this._name = name;
         this._proxy = new Proxy(data, this._traps(name));
         this._element = element;
+        this._proxies = {};
     }
     getElement(){
         return this._element;
@@ -110,6 +111,9 @@ class Template{
         }
         return output;
     }
+    _set(target, key, value){
+        target[bypassPrefix + key] = value;
+    }
 
     _sendUserUpdateEvent(name, target, key, value){
         let payload = {}, po, pk, originalTarget = target;
@@ -165,11 +169,19 @@ class Template{
             get: function (target, key) {
                 if(key === '__isProxy'){return true;}
                 if(key.startsWith && key.startsWith(bypassPrefix))  key = key.substr(bypassPrefix.length);
+
                 if (typeof target[key] === 'object' && target[key] !== null && !target[key].__isProxy) {
-                    let proxy = new Proxy(target[key], traps);
-                    proxy[bypassPrefix + parentObject] = target;
-                    proxy[bypassPrefix + parentKey] = key;
-                    return proxy;
+                    if(target[key]._proxy){
+                        return self._proxies[target[key]._proxy];
+                    } else {
+                        let proxy = new Proxy(target[key], traps);
+                        self._set(proxy, parentObject, target);
+                        self._set(proxy, parentKey, key);
+                        let proxyID = uuid();
+                        self._proxies[proxyID] = proxy;
+                        target[key]._proxy = proxyID;
+                        return proxy;
+                    }
                 }
                 else {
                     return target[key];

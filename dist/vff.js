@@ -756,6 +756,7 @@ var Template = function () {
         this._name = name;
         this._proxy = new Proxy(data, this._traps(name));
         this._element = element;
+        this._proxies = {};
     }
 
     _createClass(Template, [{
@@ -871,6 +872,11 @@ var Template = function () {
             return output;
         }
     }, {
+        key: '_set',
+        value: function _set(target, key, value) {
+            target[bypassPrefix + key] = value;
+        }
+    }, {
         key: '_sendUserUpdateEvent',
         value: function _sendUserUpdateEvent(name, target, key, value) {
             var payload = {},
@@ -951,11 +957,19 @@ var Template = function () {
                         return true;
                     }
                     if (key.startsWith && key.startsWith(bypassPrefix)) key = key.substr(bypassPrefix.length);
+
                     if (_typeof(target[key]) === 'object' && target[key] !== null && !target[key].__isProxy) {
-                        var proxy = new Proxy(target[key], traps);
-                        proxy[bypassPrefix + parentObject] = target;
-                        proxy[bypassPrefix + parentKey] = key;
-                        return proxy;
+                        if (target[key]._proxy) {
+                            return self._proxies[target[key]._proxy];
+                        } else {
+                            var proxy = new Proxy(target[key], traps);
+                            self._set(proxy, parentObject, target);
+                            self._set(proxy, parentKey, key);
+                            var proxyID = (0, _helpers.uuid)();
+                            self._proxies[proxyID] = proxy;
+                            target[key]._proxy = proxyID;
+                            return proxy;
+                        }
                     } else {
                         return target[key];
                     }
