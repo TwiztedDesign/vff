@@ -59,7 +59,7 @@ function camelize(str) {
     // }).replace(/\s+/g, '');
 }
 function decamelize(str) {
-    return str.replace(/([A-Z])/g, ' $1');
+    return str.replace(/([A-Z])/g, ' $1').trim();
 }
 
 function uuid() {

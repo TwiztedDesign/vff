@@ -30,19 +30,19 @@ describe('VffTemplate', () => {
             let template = vffData.registerTemplate('test', {visibility : true});
             expect(template.newProp).toBeUndefined();
             expect(template.visibility).toBeTruthy();
-            template.update({newProp : 'some value'});
+            template._update({newProp : 'some value'});
             expect(template.newProp).toBe('some value');
             expect(template.visibility).toBeTruthy();
         });
         it("shouldn't trigger user update", () => {
             let template = vffData.registerTemplate('test', {visibility : true});
-            template.update({prop : true});
+            template._update({prop : true});
             expect(send).not.toHaveBeenCalledWith(USER_UPDATE, expect.anything());
         });
         it('should handle nested objects', () => {
             let template = vffData.registerTemplate('test', {visibility : true});
-            template.update({prop: { prop1 : 'some other value'}});
-            template.update({prop: { prop2 : 'some second value'}});
+            template._update({prop: { prop1 : 'some other value'}});
+            template._update({prop: { prop2 : 'some second value'}});
             expect(template.prop.prop1).toBe('some other value');
             expect(template.prop.prop2).toBe('some second value');
 
@@ -92,6 +92,16 @@ describe('VffTemplate', () => {
             expect(template.visibility).toBeUndefined();
             template.toggle();
             expect(template.visibility).toBeUndefined();
+        });
+    });
+
+    describe('Internal properties', () => {
+        it("can't override internal properties", () => {
+            let template = vffData.registerTemplate('test', {"some prop" : "some value"});
+            function override(){
+                template._update = 'some data';
+            }
+            expect(override).toThrowError(/Override Error/);
         });
     });
 

@@ -9,7 +9,6 @@ the project. For example, you might want to display more data if the project is 
 VFF is extensible, the extensions are designed to add extra functionality that otherwise would not be available in traditional HTML workflows. For example a drawing surface that would allow users to draw on top of the overlay.
 
 
-
 # Getting Started
 
 ## Create your overlay app
@@ -58,9 +57,41 @@ project to the "Overlay" filed of you project. Here is the full basic core:
 </html>
 ```
 
+# VFF Global
+
+After including the vff script in your html file, a "vff" object is set on the window object.
+
+## Methods
+|       Method     | Details                                                                                             |
+|------------------|-----------------------------------------------------------------------------------------------------|
+| registerTemplate(**name**, **data**)| Registers a template in the VFF and returns a template object<br>**name** - _string_ - name of the template<br>**data** - _object_ - data of the template|
+| getTemplate(**name**)               | Returns a registered template by name<br>**name** - _string_ - name of the template to return|
+| getTemplates()                      | Returns an array of all the registered templates|
+
+
 # Templates
 Once the VFF lib is registered, it generates a global object that you can access from anywhere in your code. The global object "vff" contains all the functions and the properties you need to generate templates and control your overlay.
 The "vff" object also contains events that will be fired based on various conditions, such as a change in a data that arrives from an external source like a controller or an API call.
+
+
+## Methods
+|        Method      | Details                                                                                               |
+|--------------------|-------------------------------------------------------------------------------------------------------|
+| $element()         | Returns the DOM element of the template if exists                                                     |
+| $show()            | Set "visibility" property in the template to true                                                     |
+| $hide()            | Set "visibility" property in the template to false                                                    |
+| $toggle()          | Toggle "visibility" property in the template                                                          |
+| $on(**callback**, **options**)  | triggers callback when data for the template arrives<br>**callback** - _function(**data**)_ - data handler<br>**options** - _string(optional)_ - options object (described [here](#options))|
+| $on(**path**, **callback**, **options**)| trigger callback when data for the **path** in the template arrives<br>**path** - _string_ - dot delimited string that describes a path in the template<br>**callback** - _function(**data**)_ - data handler<br>**options** - _string(optional)_ - options object (described [here](#options))|
+| $emit(**payload**) | Emits a message to every player with the same project<br>**payload** - _object_ - data to be sent     |
+
+
+## options
+|        Property    | Type      |  Default   | Details                                                                                         |
+|--------------------|-----------|------------|-------------------------------------------------------------------------------------------------|
+| changeOnly         | _Boolean_ | *true*     | trigger callback only if dat is changed |
+
+
 
 ## Adding templates (JavaScript)
 ```javascript

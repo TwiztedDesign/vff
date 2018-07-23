@@ -7,7 +7,7 @@ const timeouts = {};
 const defaults = {
   changeOnly : true
 };
-
+//getElement, update, show, hide, toggle, onData, emit
 class Template{
     constructor(name, data, element) {
         this._name = name;
@@ -15,27 +15,29 @@ class Template{
         this._element = element;
         this._proxies = {};
     }
-    getElement(){
+    $element(){
         return this._element;
     }
-    update(data){
-        let toUpdate = this._copy(data, bypassPrefix);
-        deepExtend(this._proxy, toUpdate);
-    }
-    show(){
+    $show(){
         this._setValue("visibility", true);
     }
-    hide(){
+    $hide(){
         this._setValue("visibility", false);
     }
-    toggle(){
+    $toggle(){
         let visibility = this._getValue('visibility');
         if(visibility !== undefined){
             this._setValue('visibility', !visibility);
         }
     }
-
-    onData(arg1, arg2, arg3){
+    $emit(data){
+        let payload = {};
+        payload.data = data;
+        payload.query = vffData.getQueryParams();
+        payload.channel = this._name;
+        send(OUTGOING_EVENT, payload);
+    }
+    $on(arg1, arg2, arg3){
         let template, callback, options = options || {};
         switch (arguments.length){
             case 0:
@@ -89,14 +91,17 @@ class Template{
     }
 
 
-    emit(data){
-        let payload = {};
-        payload.data = data;
-        payload.query = vffData.getQueryParams();
-        payload.channel = this._name;
-        send(OUTGOING_EVENT, payload);
-    }
+    getElement(){ return this.$element(); }
+    show(){ return this.$show(); }
+    hide(){ return this.$hide(); }
+    toggle(){ return this.$toggle(); }
+    onData(arg1, arg2, arg3){ return this.$on(arg1, arg2, arg3) }
+    emit(data){ return this.$emit(data); }
 
+    _update(data){
+        let toUpdate = this._copy(data, bypassPrefix);
+        deepExtend(this._proxy, toUpdate);
+    }
     _copy(o, prefix) {
         prefix = prefix || '';
         let output, v, key;
@@ -197,7 +202,6 @@ class Template{
             this._proxy[key] = value;
         }
     }
-
     _getValue(key){
         return this._proxy[findKey(this._proxy, key)];
     }
@@ -218,7 +222,8 @@ export default class VffTemplate extends Template {
             },
             set : function(target, prop, value){
                 if(prop in target){
-                    return target[prop] = value;
+                    throw  new Error("Override Error: " + prop + " is an internal vff property and can't be overridden");
+                    // return target[prop] = value;
                 }
                 else {
                     target._proxy[prop] = value;

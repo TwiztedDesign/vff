@@ -748,6 +748,7 @@ var timeouts = {};
 var defaults = {
     changeOnly: true
 };
+//getElement, update, show, hide, toggle, onData, emit
 
 var Template = function () {
     function Template(name, data, element) {
@@ -760,6 +761,47 @@ var Template = function () {
     }
 
     _createClass(Template, [{
+        key: '$element',
+        value: function $element() {
+            return this._element;
+        }
+    }, {
+        key: '$update',
+        value: function $update(data) {
+            var toUpdate = this._copy(data, bypassPrefix);
+            (0, _helpers.deepExtend)(this._proxy, toUpdate);
+        }
+    }, {
+        key: '$show',
+        value: function $show() {
+            this._setValue("visibility", true);
+        }
+    }, {
+        key: '$hide',
+        value: function $hide() {
+            this._setValue("visibility", false);
+        }
+    }, {
+        key: '$toggle',
+        value: function $toggle() {
+            var visibility = this._getValue('visibility');
+            if (visibility !== undefined) {
+                this._setValue('visibility', !visibility);
+            }
+        }
+    }, {
+        key: '$emit',
+        value: function $emit(data) {
+            var payload = {};
+            payload.data = data;
+            payload.query = _vffData.vffData.getQueryParams();
+            payload.channel = this._name;
+            (0, _messenger.send)(_events.OUTGOING_EVENT, payload);
+        }
+    }, {
+        key: '$on',
+        value: function $on() {}
+    }, {
         key: 'getElement',
         value: function getElement() {
             return this._element;
@@ -1016,7 +1058,8 @@ var VffTemplate = function (_Template) {
             },
             set: function set(target, prop, value) {
                 if (prop in target) {
-                    return target[prop] = value;
+                    throw new Error("Override Error: " + prop + " is an internal vff property and can't be overridden");
+                    // return target[prop] = value;
                 } else {
                     target._proxy[prop] = value;
                 }

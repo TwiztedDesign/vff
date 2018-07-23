@@ -19,6 +19,7 @@ app.controller("Ctrl", ['$scope',function($scope){
     };
 
 
+
     $scope.a = vff.registerTemplate('a', {a:1});
 
     vff.onUpdate(function(){

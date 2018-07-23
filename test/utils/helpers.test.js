@@ -117,4 +117,75 @@ describe('Helpers', () => {
         });
     });
 
+
+    describe('Camelize', () => {
+        it("should not affect empty strings", () => {
+           expect(helpers.camelize('')).toBe('');
+        });
+        it("should trim spaces", () => {
+            expect(helpers.camelize('   a b   c')).toBe('aBC');
+        });
+        it("should lowercase first char", () => {
+            expect(helpers.camelize('Test')).toBe('test');
+        });
+        it("should uppercase every first letter after space", () => {
+            expect(helpers.camelize('ab cd ef')).toBe('abCdEf');
+        });
+    });
+    describe('Decamelize', () => {
+        it("should not affect empty strings", () => {
+            expect(helpers.camelize('')).toBe('');
+        });
+        it("should insert a space before evey capital letter ecxept the first one", () => {
+            expect(helpers.decamelize('ABC')).toBe('A B C');
+        });
+    });
+    describe('uuid', () => {
+        it("should return an alphanumeric string", () => {
+            let id = helpers.uuid();
+            expect(id.match("[A-Za-z0-9]+")).toBeTruthy();
+        });
+        it("should a random string", () => {
+            let id1 = helpers.uuid();
+            let id2 = helpers.uuid();
+            expect(id1).not.toBe(id2);
+        });
+        it("should return string of length 32", () => {
+            let id = helpers.uuid();
+            expect(id.length).toBe(32);
+        });
+    });
+    describe('extend', () => {
+        it('extend lhs object with rhs object', () => {
+            var lhs = {a : 1};
+            var rhs = {b : 2};
+            helpers.extend(lhs, rhs);
+            expect(lhs.a).toBe(1);
+            expect(lhs.b).toBe(2);
+        });
+        it('return the extended object', () => {
+            var lhs = {a : 1};
+            var rhs = {b : 2};
+            var result = helpers.extend(lhs, rhs);
+            expect(result).toBe(lhs);
+        });
+        it('override existing properties', () => {
+            var lhs = {a : 1};
+            var rhs = {a : 2};
+            helpers.extend(lhs, rhs);
+            expect(lhs.a).toBe(2);
+        });
+    });
+    describe('docRef', () => {
+        it('should return a link with an appropriate anchor', () => {
+           expect(helpers.docRef('anchor')).toBe('https://www.videoflow.io/documentation/api/vff?id=anchor');
+        });
+    });
+    describe('noop', () => {
+        it('should noop', () => {
+            expect(helpers.noop()).toBeUndefined();
+        })
+    });
+
+
 });
