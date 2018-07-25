@@ -120,15 +120,43 @@ describe('vff Data', () => {
         });
     });
     describe('addPages', () => {
-
+        it('Should replace the passed pages in vff _pages', () => {
+            let spy = jest.spyOn(vffData, 'updateCB');
+            let pages = [{name: 'page1'}, {name: 'page2'}];
+            vffData.addPages(pages);
+            expect(vffData._pages).toEqual(pages);
+            pages = [{name: 'page3'}, {name: 'page4'}];
+            vffData.addPages(pages);
+            expect(vffData._pages).toEqual(pages);
+            expect(spy).toHaveBeenCalledTimes(2);
+        });
     });
     describe('getPages', () => {
-
+        it('Should return the vff _pages', () => {
+            expect(vffData.getPages()).toHaveLength(0);
+            let pages = [{name: 'page1'}, {name: 'page2'}];
+            vffData.addPages(pages);
+            expect(vffData.getPages()).toEqual(pages);
+        });
     });
     describe('addQueryParams', () => {
-
+        it('Should replace the passed params in vff _queryParams', () => {
+            let spy = jest.spyOn(vffData, 'updateCB');
+            let params = [{name: 'param1', value:'val1'}, {name: 'param2', value:'val2'}];
+            vffData.addQueryParams(params);
+            expect(vffData._queryParams).toEqual(params);
+            params = [{name: 'param3', value:'val3'}, {name: 'param4', value:'val4'}];
+            vffData.addQueryParams(params);
+            expect(vffData._queryParams).toEqual(params);
+            expect(spy).toHaveBeenCalledTimes(2);
+        });
     });
     describe('getQueryParams', () => {
-
+        it('Should return the vff _queryParams', () => {
+            expect(vffData.getQueryParams()).toBeUndefined();
+            let params = [{name: 'param1', value:'val1'}, {name: 'param2', value:'val2'}];
+            vffData.addQueryParams(params);
+            expect(vffData.getQueryParams()).toEqual(params);
+        });
     });
 });
