@@ -23,7 +23,6 @@ function initDOM(){
         let templateName = (template || control).getAttribute('vff-template');
         let controlName = control.getAttribute('vff-name');
         let exposed = control.expose? control.expose() : {};
-
         let data = {};
         for (let prop in exposed) {
             if (exposed.hasOwnProperty(prop)) {
