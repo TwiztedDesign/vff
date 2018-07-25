@@ -15,21 +15,19 @@ describe("Visibility", () =>{
    });
    describe("Hide", () => {
         it("Should hide the graphics of the passed template, set visibility to false", () => {
-            let template = vffData.registerTemplate('test', data);
-            expect(template.visibility).toBeFalsy();
-            visibility.show('test');
+            let template = vffData.registerTemplate('test2', data);
+            visibility.show('test2');
             expect(template.visibility).toBeTruthy();
-            visibility.hide('test');
+            visibility.hide('test2');
             expect(template.visibility).toBeFalsy();
         });
     });
     describe("Toggle", () => {
         it("Should hide or show the graphics of the passed template based on current visibility state", () => {
-            let template = vffData.registerTemplate('test', data);
-            expect(template.visibility).toBeFalsy();
-            visibility.toggle('test');
+            let template = vffData.registerTemplate('test3', data);
+            visibility.toggle('test3');
             expect(template.visibility).toBeTruthy();
-            visibility.toggle('test');
+            visibility.toggle('test3');
             expect(template.visibility).toBeFalsy();
         });
     });
