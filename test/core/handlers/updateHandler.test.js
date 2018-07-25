@@ -15,6 +15,7 @@ const templateName = 'test';
 
 describe('Update Handler', () => {
     beforeEach(() => {
+        document.body.innerHTML = '';
         vffData.clear();
         template = vffData.registerTemplate(templateName, data);
     });
