@@ -2,7 +2,7 @@ import {getByPath, setByPath, deepExtend} from '../utils/helpers';
 import {vffData} from './vffData';
 import {EXPOSE_DELIMITER} from './consts';
 
-function init(){
+function initDOM(){
     let untitledTemplateCount = 0;
     let templates = {};
 
@@ -67,9 +67,9 @@ function closest(element, selector){
 module.exports = {
     init : () => {
         window.addEventListener('load', function(){
-            init();
+            initDOM();
         });
     },
-    _init : init
+    _init : initDOM
 };
 

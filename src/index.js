@@ -2,7 +2,7 @@ import {send, request} from './utils/messenger.js';
 import {READY} from './utils/events.js';
 import {vffData} from './core/vffData.js';
 import {start as startListener} from './utils/listener';
-import {init as initVffDom} from './core/init';
+import {init as initVffDom} from './core/initDOM';
 import vffElement from './core/vffElement';
 import './core/defaultExpose';
 import "./components/components.js";

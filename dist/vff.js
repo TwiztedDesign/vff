@@ -138,7 +138,7 @@ function camelize(str) {
     // }).replace(/\s+/g, '');
 }
 function decamelize(str) {
-    return str.replace(/([A-Z])/g, ' $1');
+    return str.replace(/([A-Z])/g, ' $1').trim();
 }
 
 function uuid() {
@@ -310,7 +310,7 @@ var VffData = function () {
             name = name.toLowerCase();
 
             if (this._templates[name]) {
-                this._templates[name].update(data);
+                this._templates[name]._update(data);
             } else {
                 this._templates[name] = new _vffTemplate2.default(name, data, element);
             }
@@ -590,7 +590,7 @@ var _vffData = __webpack_require__(2);
 
 var _listener = __webpack_require__(10);
 
-var _init = __webpack_require__(15);
+var _initDOM = __webpack_require__(15);
 
 var _vffElement = __webpack_require__(16);
 
@@ -621,7 +621,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 __webpack_require__(39);
 
 (0, _listener.start)();
-(0, _init.init)();
+(0, _initDOM.init)();
 
 window.addEventListener('load', function () {
     (0, _messenger.send)(_events.READY);
@@ -766,12 +766,6 @@ var Template = function () {
             return this._element;
         }
     }, {
-        key: '$update',
-        value: function $update(data) {
-            var toUpdate = this._copy(data, bypassPrefix);
-            (0, _helpers.deepExtend)(this._proxy, toUpdate);
-        }
-    }, {
         key: '$show',
         value: function $show() {
             this._setValue("visibility", true);
@@ -800,39 +794,7 @@ var Template = function () {
         }
     }, {
         key: '$on',
-        value: function $on() {}
-    }, {
-        key: 'getElement',
-        value: function getElement() {
-            return this._element;
-        }
-    }, {
-        key: 'update',
-        value: function update(data) {
-            var toUpdate = this._copy(data, bypassPrefix);
-            (0, _helpers.deepExtend)(this._proxy, toUpdate);
-        }
-    }, {
-        key: 'show',
-        value: function show() {
-            this._setValue("visibility", true);
-        }
-    }, {
-        key: 'hide',
-        value: function hide() {
-            this._setValue("visibility", false);
-        }
-    }, {
-        key: 'toggle',
-        value: function toggle() {
-            var visibility = this._getValue('visibility');
-            if (visibility !== undefined) {
-                this._setValue('visibility', !visibility);
-            }
-        }
-    }, {
-        key: 'onData',
-        value: function onData(arg1, arg2, arg3) {
+        value: function $on(arg1, arg2, arg3) {
             var template = void 0,
                 callback = void 0,
                 options = options || {};
@@ -887,13 +849,40 @@ var Template = function () {
             document.addEventListener(_events.VFF_EVENT, listener);
         }
     }, {
+        key: 'getElement',
+        value: function getElement() {
+            return this.$element();
+        }
+    }, {
+        key: 'show',
+        value: function show() {
+            return this.$show();
+        }
+    }, {
+        key: 'hide',
+        value: function hide() {
+            return this.$hide();
+        }
+    }, {
+        key: 'toggle',
+        value: function toggle() {
+            return this.$toggle();
+        }
+    }, {
+        key: 'onData',
+        value: function onData(arg1, arg2, arg3) {
+            return this.$on(arg1, arg2, arg3);
+        }
+    }, {
         key: 'emit',
         value: function emit(data) {
-            var payload = {};
-            payload.data = data;
-            payload.query = _vffData.vffData.getQueryParams();
-            payload.channel = this._name;
-            (0, _messenger.send)(_events.OUTGOING_EVENT, payload);
+            return this.$emit(data);
+        }
+    }, {
+        key: '_update',
+        value: function _update(data) {
+            var toUpdate = this._copy(data, bypassPrefix);
+            (0, _helpers.deepExtend)(this._proxy, toUpdate);
         }
     }, {
         key: '_copy',
@@ -1172,7 +1161,7 @@ function update(data) {
 }
 
 function updateDom(template, control, value, timecode) {
-    var dom = template.getElement();
+    var dom = template.$element();
     if (dom) {
         if (timecode !== undefined) {
             (0, _helpers.setByPath)(dom, "__timecode__", timecode);
@@ -1242,7 +1231,7 @@ var _vffData = __webpack_require__(2);
 
 var _consts = __webpack_require__(5);
 
-function _init() {
+function initDOM() {
     var untitledTemplateCount = 0;
     var templates = {};
 
@@ -1307,10 +1296,9 @@ function closest(element, selector) {
 module.exports = {
     init: function init() {
         window.addEventListener('load', function () {
-            _init();
+            initDOM();
         });
-    },
-    _init: _init
+    }
 };
 
 /***/ }),

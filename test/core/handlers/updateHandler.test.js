@@ -1,5 +1,5 @@
 import {vffData} from '../../../src/core/vffData.js';
-import {_init} from '../../../src/core/init';
+import {_init} from '../../../src/core/initDOM';
 const updateHandler  = require('../../../src/core/handlers/updateHandler.js');
 const helpers = require('../../../src/utils/helpers.js');
 

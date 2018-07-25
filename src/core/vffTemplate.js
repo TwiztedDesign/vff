@@ -95,7 +95,7 @@ class Template{
     show(){ return this.$show(); }
     hide(){ return this.$hide(); }
     toggle(){ return this.$toggle(); }
-    onData(arg1, arg2, arg3){ return this.$on(arg1, arg2, arg3) }
+    onData(arg1, arg2, arg3){ return this.$on(arg1, arg2, arg3); }
     emit(data){ return this.$emit(data); }
 
     _update(data){
