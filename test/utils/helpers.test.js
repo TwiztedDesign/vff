@@ -186,6 +186,21 @@ describe('Helpers', () => {
            expect(helpers.docRef('anchor')).toBe('https://www.videoflow.io/documentation/api/vff?id=anchor');
         });
     });
+    describe('deepCompare', () => {
+        it('should work', () => {
+            expect(helpers.deepCompare({},{})).toBeTruthy();
+            expect(helpers.deepCompare({a:1}, {a:1})).toBeTruthy();
+            expect(helpers.deepCompare({a:[1,2]}, {a:[1,2]})).toBeTruthy();
+            expect(helpers.deepCompare({a:1}, new Proxy({a:1},{}))).toBeTruthy();
+            expect(helpers.deepCompare({a:{b:{c:1}}},{a:{b:{c:1}}})).toBeTruthy();
+            expect(helpers.deepCompare({a:1},{a:2})).toBeFalsy();
+            expect(helpers.deepCompare({a:1},{b:1})).toBeFalsy();
+            expect(helpers.deepCompare({a:1},{a:1, b:1})).toBeFalsy();
+            expect(helpers.deepCompare({a:1},{a:"1"})).toBeFalsy();
+            expect(helpers.deepCompare({a:[1,2]},{a:[1,3]})).toBeFalsy();
+            expect(helpers.deepCompare({a:{b:[1,2]}},{a:{b:[1,2]}})).toBeTruthy();
+        });
+    });
     describe('noop', () => {
         it('should noop', () => {
             expect(helpers.noop()).toBeUndefined();
