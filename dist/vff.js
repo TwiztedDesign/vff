@@ -80,6 +80,8 @@ return /******/ (function(modules) { // webpackBootstrap
 "use strict";
 
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 function findKey(data, keyToFind) {
     var keys = Object.keys(data);
     for (var i = 0; i < keys.length; i++) {
@@ -197,6 +199,114 @@ function docRef(anchor) {
     return 'https://www.videoflow.io/documentation/api/vff?id=' + anchor;
 }
 
+function deepCompare() {
+    var i, l, leftChain, rightChain;
+
+    function compare2Objects(x, y) {
+        var p;
+
+        // remember that NaN === NaN returns false
+        // and isNaN(undefined) returns true
+        if (isNaN(x) && isNaN(y) && typeof x === 'number' && typeof y === 'number') {
+            return true;
+        }
+
+        // Compare primitives and functions.
+        // Check if both arguments link to the same object.
+        // Especially useful on the step where we compare prototypes
+        if (x === y) {
+            return true;
+        }
+
+        // Works in case when functions are created in constructor.
+        // Comparing dates is a common scenario. Another built-ins?
+        // We can even handle functions passed across iframes
+        if (typeof x === 'function' && typeof y === 'function' || x instanceof Date && y instanceof Date || x instanceof RegExp && y instanceof RegExp || x instanceof String && y instanceof String || x instanceof Number && y instanceof Number) {
+            return x.toString() === y.toString();
+        }
+
+        // At last checking prototypes as good as we can
+        if (!(x instanceof Object && y instanceof Object)) {
+            return false;
+        }
+
+        if (x.isPrototypeOf(y) || y.isPrototypeOf(x)) {
+            return false;
+        }
+
+        if (x.constructor !== y.constructor) {
+            return false;
+        }
+
+        if (x.prototype !== y.prototype) {
+            return false;
+        }
+
+        // Check for infinitive linking loops
+        if (leftChain.indexOf(x) > -1 || rightChain.indexOf(y) > -1) {
+            return false;
+        }
+
+        // Quick checking of one object being a subset of another.
+        // todo: cache the structure of arguments[0] for performance
+        for (p in y) {
+            if (y.hasOwnProperty(p) !== x.hasOwnProperty(p)) {
+                return false;
+            } else if (_typeof(y[p]) !== _typeof(x[p])) {
+                return false;
+            }
+        }
+
+        for (p in x) {
+            if (y.hasOwnProperty(p) !== x.hasOwnProperty(p)) {
+                return false;
+            } else if (_typeof(y[p]) !== _typeof(x[p])) {
+                return false;
+            }
+
+            switch (_typeof(x[p])) {
+                case 'object':
+                case 'function':
+
+                    leftChain.push(x);
+                    rightChain.push(y);
+
+                    if (!compare2Objects(x[p], y[p])) {
+                        return false;
+                    }
+
+                    leftChain.pop();
+                    rightChain.pop();
+                    break;
+
+                default:
+                    if (x[p] !== y[p]) {
+                        return false;
+                    }
+                    break;
+            }
+        }
+
+        return true;
+    }
+
+    if (arguments.length < 1) {
+        return true;
+    }
+
+    for (i = 1, l = arguments.length; i < l; i++) {
+
+        leftChain = []; //Todo: this can be cached
+        rightChain = [];
+
+        if (!compare2Objects(arguments[0], arguments[i])) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 function noop() {}
 
 module.exports = {
@@ -209,6 +319,7 @@ module.exports = {
     uuid: uuid,
     extend: extend,
     deepExtend: deepExtend,
+    deepCompare: deepCompare,
     isMobile: mobilecheck(),
     isController: controllerCheck(),
     mode: modeCheck(),
@@ -838,7 +949,9 @@ var Template = function () {
                 var key = (0, _helpers.findKey)(event.detail, self._name);
                 if (key) {
 
-                    if (options.changeOnly && (0, _helpers.getByPath)(event.detail[key], template) === (0, _helpers.getByPath)(self._proxy, template)) {
+                    if (template && options.changeOnly && (0, _helpers.getByPath)(event.detail[key], template) === (0, _helpers.getByPath)(self._proxy, template)) {
+                        return;
+                    } else if (!template && options.changeOnly && (0, _helpers.deepCompare)(event.detail[key], self._proxy)) {
                         return;
                     }
 
@@ -1327,13 +1440,13 @@ var VffElement = function () {
 
         this.selector = selector;
         this.element = null;
-        this.init();
-        this.observe();
+        this._init();
+        this._observe();
     }
 
     _createClass(VffElement, [{
-        key: 'init',
-        value: function init() {
+        key: '_init',
+        value: function _init() {
             switch (this.selector[0]) {
                 case '<':
                     {
@@ -1372,8 +1485,8 @@ var VffElement = function () {
             };
         }
     }, {
-        key: 'observe',
-        value: function observe() {
+        key: '_observe',
+        value: function _observe() {
             var self = this;
             (0, _htmlAccessorObserver.observe)(this.element, null, function (event, data) {
                 self.element.dispatchEvent(new CustomEvent(event, data));
