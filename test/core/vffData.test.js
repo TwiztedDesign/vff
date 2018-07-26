@@ -3,7 +3,6 @@ const messenger = require('../../src/utils/messenger.js');
 import {ADD} from "../../src/utils/events";
 import {docRef} from "../../src/utils/helpers";
 import {REGISTER_TEMPLATE} from "../../src/utils/docRefs";
-// import  from '../../src/utils/messenger.js';
 
 let data = {visibility: false};
 let send = jest.spyOn(messenger, 'send');
@@ -127,12 +126,10 @@ describe('vff Data', () => {
         });
     });
     describe('onUpdate', () => {
-        it('Should set the CB function to be triggered on update', () => {
-            let onUpdate = () => {};
-            let spy = jest.spyOn(vffData, 'onUpdate');
-            vffData.onUpdate(onUpdate);
-            expect(spy).toHaveBeenCalledTimes(1);
-            expect(vffData._updateCB).toEqual(onUpdate);
+        it('Should set the CB function', () => {
+            let updateFunc = () => {};
+            vffData.onUpdate(updateFunc);
+            expect(vffData._updateCB).toEqual(updateFunc);
         });
     });
     describe('addPages', () => {
@@ -155,10 +152,16 @@ describe('vff Data', () => {
             expect(vffData.getPages()).toEqual(pages);
         });
     });
+    describe('getQueryParams', () => {
+        it('Should return the vff _queryParams', () => {
+            let params = [{name: 'param1', value:'val1'}, {name: 'param2', value:'val2'}];
+            vffData.addQueryParams(params);
+            expect(vffData.getQueryParams()).toEqual(params);
+        });
+    });
     describe('addQueryParams', () => {
         it('Should replace the passed params in vff _queryParams', () => {
             let spy = jest.spyOn(vffData, 'updateCB');
-            expect(vffData.getQueryParams()).toBeUndefined();
             let params = [{name: 'param1', value:'val1'}, {name: 'param2', value:'val2'}];
             vffData.addQueryParams(params);
             expect(vffData.getQueryParams()).toEqual(params);
@@ -168,11 +171,5 @@ describe('vff Data', () => {
             expect(spy).toHaveBeenCalledTimes(2);
         });
     });
-    describe('getQueryParams', () => {
-        it('Should return the vff _queryParams', () => {
-            let params = [{name: 'param1', value:'val1'}, {name: 'param2', value:'val2'}];
-            vffData.addQueryParams(params);
-            expect(vffData.getQueryParams()).toEqual(params);
-        });
-    });
+
 });
