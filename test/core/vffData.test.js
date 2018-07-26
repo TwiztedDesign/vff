@@ -125,10 +125,10 @@ describe('vff Data', () => {
             let pages = [{name: 'page1'}, {name: 'page2'}];
             expect(vffData.getPages()).toHaveLength(0);
             vffData.addPages(pages);
-            expect(vffData._pages).toEqual(pages);
+            expect(vffData.getPages()).toEqual(pages);
             pages = [{name: 'page3'}, {name: 'page4'}];
             vffData.addPages(pages);
-            expect(vffData._pages).toEqual(pages);
+            expect(vffData.getPages()).toEqual(pages);
             expect(spy).toHaveBeenCalledTimes(2);
         });
     });
@@ -144,10 +144,10 @@ describe('vff Data', () => {
             let spy = jest.spyOn(vffData, 'updateCB');
             let params = [{name: 'param1', value:'val1'}, {name: 'param2', value:'val2'}];
             vffData.addQueryParams(params);
-            expect(vffData._queryParams).toEqual(params);
+            expect(vffData.getQueryParams()).toEqual(params);
             params = [{name: 'param3', value:'val3'}, {name: 'param4', value:'val4'}];
             vffData.addQueryParams(params);
-            expect(vffData._queryParams).toEqual(params);
+            expect(vffData.getQueryParams()).toEqual(params);
             expect(spy).toHaveBeenCalledTimes(2);
         });
     });

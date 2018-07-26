@@ -177,7 +177,7 @@ describe('Helpers', () => {
         });
     });
     describe('mode check', () => {
-        it('should return a the mode in which the vff is displayed', () => {
+        it('should return "normal" as default value', () => {
             expect(helpers.mode).toBe('normal');
         });
     });
