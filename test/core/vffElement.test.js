@@ -14,8 +14,7 @@ describe('VFF Element', () => {
         });
         it('Should initialize and create the vff element', () => {
             let vffElementCreated = new VffElement('<h2>');
-            let headerElement = document.createElement('h2');
-            expect(vffElementCreated.element).toEqual(headerElement);
+            expect(vffElementCreated.element.constructor.name).toBe('HTMLHeadingElement');
         });
         it('Should trigger change', () => {
             vffElementCreated.onChange('title', function(val){
