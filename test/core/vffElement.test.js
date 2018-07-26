@@ -3,9 +3,9 @@ import VffElement from '../../src/core/vffElement';
 // jest.mock('../../src/core/vffElement');
 
 describe('VFF Element', () => {
-    // beforeEach(() =>{
-    //     init.mockClear();
-    // });
+    beforeEach(() =>{
+        document.body.innerHTML = '';
+    });
 
     describe('New Element', () => {
         it('Should initialize the vff element', () => {
@@ -26,6 +26,20 @@ describe('VFF Element', () => {
         it('Should throw error, Invalid Node', () => {
             expect(() =>{new VffElement('<h1');}).toThrow();
         });
+
+        it('on change fires on primitive property change' ,(done) => {
+
+            let element = document.createElement('h1');
+            element.prop = "title";
+            document.body.appendChild(element);
+
+            let vffEl = new VffElement('h1');
+            vffEl.onChange('prop', function(data){
+                expect(data).toBe('test');
+                done();
+            });
+            element.prop = 'test';
+        })
     });
 
 });
