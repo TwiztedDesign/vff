@@ -762,7 +762,10 @@ var Template = function () {
 
     _createClass(Template, [{
         key: '$element',
-        value: function $element() {
+        value: function $element(control) {
+            if (this._element && control) {
+                return this._element.getAttribute('vff-name') === control ? this._element : this._element.querySelector('[vff-name=' + control + ']');
+            }
             return this._element;
         }
     }, {
@@ -1161,7 +1164,7 @@ function update(data) {
 }
 
 function updateDom(template, control, value, timecode) {
-    var dom = template.$element();
+    var dom = template.$element(control.split(_consts.EXPOSE_DELIMITER)[0]);
     if (dom) {
         if (timecode !== undefined) {
             (0, _helpers.setByPath)(dom, "__timecode__", timecode);
@@ -1236,7 +1239,7 @@ function initDOM() {
     var templates = {};
 
     document.querySelectorAll('[vff-template]').forEach(function (template) {
-        if (!template.hasAttribute('vff-name') && !template.querySelector('[vff-template]')) {
+        if (!template.hasAttribute('vff-name') && !template.querySelector('[vff-name]')) {
             template.setAttribute('vff-name', '');
         }
     });
@@ -1251,7 +1254,6 @@ function initDOM() {
         var templateName = (template || control).getAttribute('vff-template');
         var controlName = control.getAttribute('vff-name');
         var exposed = control.expose ? control.expose() : {};
-
         var data = {};
         for (var prop in exposed) {
             if (exposed.hasOwnProperty(prop)) {
@@ -1298,7 +1300,8 @@ module.exports = {
         window.addEventListener('load', function () {
             initDOM();
         });
-    }
+    },
+    _init: initDOM
 };
 
 /***/ }),

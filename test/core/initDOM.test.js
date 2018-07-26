@@ -4,27 +4,67 @@ import '../../src/core/defaultExpose';
 
 
 function htmlToElement(htmlString) {
-    var div = document.createElement('div');
+    let div = document.createElement('div');
     div.innerHTML = htmlString.trim();
     return div.firstChild;
 }
 
 describe('Init DOM', () => {
 
-    beforeAll(() => {
+    beforeEach(() => {
         document.body.innerHTML = '';
         vffData.clear();
+    });
+
+    it('should create a template when vff-template and vff-name are on the same element', () => {
+
         let element = htmlToElement('<h1 vff-template="test-template" vff-name="test-control"></h1>');
         element.innerText = 'Title';
         element.style.color = 'red';
         document.body.appendChild(element);
-    });
-
-    it('span should expose inner text', () => {
         _init();
         expect(vffData.getTemplate('test-template')).toBeDefined();
         expect(vffData.getTemplate('test-template')['test-control text']).toBe('Title');
         expect(vffData.getTemplate('test-template')['test-control color']).toBe('red');
+    });
+
+    it('when vff-name is not defined, create one with space as name', () => {
+
+        let element = htmlToElement('<h1 vff-template="test-template"></h1>');
+        element.innerText = 'Title';
+        element.style.color = 'red';
+        document.body.appendChild(element);
+        _init();
+        expect(vffData.getTemplate('test-template')).toBeDefined();
+        expect(vffData.getTemplate('test-template')[' text']).toBe('Title');
+        expect(vffData.getTemplate('test-template')[' color']).toBe('red');
+    });
+
+    it('the vff-name is defined but vff-template is not, declare one with Untitled Template {number} as a name', () => {
+
+        let element1 = htmlToElement('<h1 vff-name="test-control"></h1>');
+        let element2 = htmlToElement('<h1 vff-name="test-control"></h1>');
+
+        document.body.appendChild(element1);
+        document.body.appendChild(element2);
+        _init();
+        expect(vffData.getTemplate('Untitled Template 1')).toBeDefined();
+        expect(vffData.getTemplate('Untitled Template 2')).toBeDefined();
+    });
+
+    it('should create a template when vff-template and vff-name are on the same element', () => {
+
+        let element = htmlToElement('<div vff-template="test-template"><h1 vff-name="title">Title</h1><h2 vff-name="subtitle">Subtitle</h2></div>');
+        document.body.appendChild(element);
+        _init();
+
+        let template = vffData.getTemplate('test-template');
+
+        expect(template).toBeDefined();
+
+        // expect(template['title text']).toBe('Title'); //innerText is not supported by jsdom
+        // expect(template['subtitle text']).toBe('Subtitle'); //innerText is not supported by jsdom
+
     });
 
 });

@@ -15,7 +15,11 @@ class Template{
         this._element = element;
         this._proxies = {};
     }
-    $element(){
+    $element(control){
+        if(this._element && control){
+            return this._element.getAttribute('vff-name') === control?
+                this._element : this._element.querySelector('[vff-name=' + control +']');
+        }
         return this._element;
     }
     $show(){

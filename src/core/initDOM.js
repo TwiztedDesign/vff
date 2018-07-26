@@ -8,7 +8,7 @@ function initDOM(){
 
 
     document.querySelectorAll('[vff-template]').forEach(function(template){
-        if(!template.hasAttribute('vff-name') && !template.querySelector('[vff-template]')){
+        if(!template.hasAttribute('vff-name') && !template.querySelector('[vff-name]')){
             template.setAttribute('vff-name', '');
         }
     });

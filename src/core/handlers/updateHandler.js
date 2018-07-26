@@ -26,7 +26,7 @@ function update(data){
 }
 
 function updateDom(template, control, value, timecode){
-    var dom = template.$element();
+    let dom = template.$element(control.split(EXPOSE_DELIMITER)[0]);
     if(dom){
         if(timecode !== undefined){
             setByPath(dom, "__timecode__", timecode);
