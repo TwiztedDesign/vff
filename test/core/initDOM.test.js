@@ -1,12 +1,7 @@
 import {_init, init} from'../../src/core/initDOM';
 import {vffData} from '../../src/core/vffData';
 import '../../src/core/defaultExpose';
-
-function htmlToElement(htmlString) {
-    let div = document.createElement('div');
-    div.innerHTML = htmlString.trim();
-    return div.firstChild;
-}
+import {htmlToElement} from '../testHelpers';
 
 describe('Init DOM', () => {
 
@@ -75,7 +70,7 @@ describe('Init DOM', () => {
         expect(element.innerText).toBe('title');
     });
 
-    it('', (done) => {
+    it('should trigger init on window load event', (done) => {
         let element = htmlToElement('<h1 vff-template="test-template" vff-name="test-control"></h1>');
         document.body.appendChild(element);
         window.addEventListener('load', () => {
