@@ -5,10 +5,9 @@ let data = {visibility: false};
 
 describe("Visibility", () =>{
 
-
     beforeEach(() => {
         vffData.clear();
-    })
+    });
 
    describe("Show", () => {
       it("Should show the graphics of the passed template, set visibility to true", () => {
