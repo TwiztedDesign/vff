@@ -1,13 +1,17 @@
 import {vffData} from '../../src/core/vffData.js';
-import {USER_UPDATE} from "../../src/utils/events";
+import {USER_UPDATE, OUTGOING_EVENT} from "../../src/utils/events";
+import {_init} from "../../src/core/initDOM";
 const messenger = require('../../src/utils/messenger.js');
 let send = jest.spyOn(messenger, 'send');
+import {htmlToElement} from '../testHelpers';
+import {update} from '../../src/core/handlers/updateHandler';
 
 
 describe('VffTemplate', () => {
 
     beforeEach(() => {
         vffData.clear();
+        document.body.innerHTML = '';
     });
 
     describe('properties', () => {
@@ -102,6 +106,91 @@ describe('VffTemplate', () => {
                 template._update = 'some data';
             }
             expect(override).toThrowError(/Override Error/);
+        });
+    });
+
+    describe('$element', () => {
+
+        it('should return correct element',() => {
+            let element = htmlToElement('<div vff-template="test-template"><h1 vff-name="title"></h1></div>');
+            element.innerText = 'Title';
+            element.style.color = 'red';
+            document.body.appendChild(element);
+            _init();
+
+            let template = vffData.getTemplate('test-template');
+            let el = template.$element('title');
+            expect(el).toBeDefined();
+            expect(el.getAttribute('vff-name')).toBe('title');
+        });
+        it('should return correct element',() => {
+            let element = htmlToElement('<div vff-template="test-template" vff-name="title"></div>');
+            element.innerText = 'Title';
+            element.style.color = 'red';
+            document.body.appendChild(element);
+            _init();
+
+            let template = vffData.getTemplate('test-template');
+            let el = template.$element('title');
+            expect(el).toBeDefined();
+            expect(el.getAttribute('vff-name')).toBe('title');
+        });
+
+    });
+    describe('$emit', () => {
+
+        it('emit message to parent frame with given payload',() => {
+            let tempalte = vffData.registerTemplate("test", {});
+            let payload = {prop : 'test'};
+            tempalte.$emit(payload);
+            expect(send).toHaveBeenCalledWith(OUTGOING_EVENT, expect.objectContaining({channel: 'test', data: payload}));
+        });
+
+        it('emit message to parent frame with given payload and query params',() => {
+            let query = {
+                q1 : 'param1',
+                q2 : 'param2'
+            };
+            vffData.addQueryParams(query);
+            let tempalte = vffData.registerTemplate("test", {});
+            let payload = {prop : 'test'};
+            tempalte.$emit(payload);
+            expect(send).toHaveBeenCalledWith(OUTGOING_EVENT, expect.objectContaining({channel: 'test', data: payload, query : query}));
+        });
+
+    });
+    describe('$on', () => {
+        it('should fire a callback on data change',(done) => {
+            let template = vffData.registerTemplate("template1", {prop : 1});
+            template.$on('prop', function(data){
+                expect(data).toBe(2);
+                done();
+            });
+            update({template1: {prop : 2}});
+        });
+        it("should not file when data didn't change",(done) => {
+            let template = vffData.registerTemplate("template2", {prop : 1});
+            template.$on('prop', function(data){
+                expect(true).toBeFalsy();
+            });
+            update({template2: {prop : 1}});
+            setTimeout(done, 500);
+        });
+        it('should fire a callback on data change',(done) => {
+            let template = vffData.registerTemplate("template3", {prop : 1});
+            template.$on(function(data){
+                expect(data).toEqual({prop : 2});
+                done();
+            });
+            update({template3: {prop : 2}});
+        });
+        it("should not file when data didn't change",(done) => {
+            let template = vffData.registerTemplate("template4", {prop : 1});
+            template.$on(function(data){
+                expect(true).toBeFalsy();
+            });
+            update({template4: {prop : 1}});
+            setTimeout(done, 500);
         });
     });
 

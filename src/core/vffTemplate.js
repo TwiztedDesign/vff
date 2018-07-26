@@ -1,5 +1,5 @@
 import {USER_UPDATE, VFF_EVENT, OUTGOING_EVENT} from "../utils/events";
-import {findKey, deepExtend, getByPath, uuid} from '../utils/helpers.js';
+import {findKey, deepExtend, getByPath, uuid, deepCompare} from '../utils/helpers.js';
 import {send} from '../utils/messenger';
 import {vffData} from './vffData';
 const bypassPrefix = '___bypass___', parentObject = '__parent_object__', parentKey = '__parent_key__';
@@ -80,7 +80,9 @@ class Template{
             let key = findKey(event.detail, self._name);
             if(key) {
 
-                if(options.changeOnly && getByPath(event.detail[key], template) === getByPath(self._proxy, template)){
+                if(template && options.changeOnly && getByPath(event.detail[key], template) === getByPath(self._proxy, template)){
+                    return;
+                } else if (!template && options.changeOnly && deepCompare(event.detail[key], self._proxy)){
                     return;
                 }
 
