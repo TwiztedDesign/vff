@@ -1,6 +1,5 @@
 import VffElement from '../../src/core/vffElement';
 // import {init} from '../../src/core/vffElement';
-//
 // jest.mock('../../src/core/vffElement');
 
 describe('VFF Element', () => {
