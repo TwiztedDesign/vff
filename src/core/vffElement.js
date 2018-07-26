@@ -5,10 +5,10 @@ class VffElement{
     constructor(selector){
         this.selector = selector;
         this.element = null;
-        this.init();
-        this.observe();
+        this._init();
+        this._observe();
     }
-    init(){
+    _init(){
         switch(this.selector[0]){
             case '<' : {
                 //create element
@@ -42,7 +42,7 @@ class VffElement{
             self.element.removeEventListener(event, listener, false);
         };
     }
-    observe(){
+    _observe(){
         let self = this;
         observe(this.element, null, function(event, data){
             self.element.dispatchEvent(new CustomEvent(event, data));
