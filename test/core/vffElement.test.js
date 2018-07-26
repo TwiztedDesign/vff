@@ -91,7 +91,7 @@ describe('VFF Element', () => {
 
             let vffEl = new VffElement('h1');
             let onPropChange = vffEl.onChange('pos.rot', function(data){
-                expect(data).toBe(10);
+                expect(data).toBe({x:10, y:20, z:10});
                 done();
             });
             element.pos.rot.z = 10;
