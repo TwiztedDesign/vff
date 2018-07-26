@@ -1,7 +1,6 @@
-import {_init} from'../../src/core/initDOM';
+import {_init, init} from'../../src/core/initDOM';
 import {vffData} from '../../src/core/vffData';
 import '../../src/core/defaultExpose';
-
 
 function htmlToElement(htmlString) {
     let div = document.createElement('div');
@@ -65,6 +64,28 @@ describe('Init DOM', () => {
         // expect(template['title text']).toBe('Title'); //innerText is not supported by jsdom
         // expect(template['subtitle text']).toBe('Subtitle'); //innerText is not supported by jsdom
 
+    });
+
+    it('should proxy exposed properties', () => {
+        let element = htmlToElement('<h1 vff-template="test-template" vff-name="test-control"></h1>');
+        document.body.appendChild(element);
+        _init();
+        element.text = 'title';
+        expect(element.text).toBe(element.innerText);
+        expect(element.innerText).toBe('title');
+    });
+
+    it('', (done) => {
+        let element = htmlToElement('<h1 vff-template="test-template" vff-name="test-control"></h1>');
+        document.body.appendChild(element);
+        window.addEventListener('load', () => {
+            setTimeout(function(){
+                expect(vffData.getTemplate('test-template')).toBeDefined();
+                done();
+            },1);
+        });
+        init();
+        window.dispatchEvent(new Event('load'));
     });
 
 });
