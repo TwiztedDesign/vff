@@ -347,6 +347,7 @@ module.exports = {
     "OUTGOING_EVENT": "taco-event-sent",
     "VFF_EVENT": "taco-event-received",
     "ACK": "taco-ack",
+    "TRACK_EVENT": "vff-track-event",
 
     "TOUCH": "taco-touch-element",
     "MOUSE_MOVE": "taco-mouse-move",
@@ -3378,7 +3379,7 @@ var Stopwatch = function (_BasicClock) {
 
         var _this = _possibleConstructorReturn(this, (Stopwatch.__proto__ || Object.getPrototypeOf(Stopwatch)).call(this));
 
-        _this.initialTime = 0;
+        _this._limit = -1;
         return _this;
     }
 
@@ -3395,31 +3396,31 @@ var Stopwatch = function (_BasicClock) {
     }, {
         key: "format",
         value: function format(timecode) {
+
+            if (this._limit >= 0 && this._time >= this._limit) {
+                this.run = false;
+            }
+
             var seconds = parseInt(timecode / 1000 % 60),
                 minutes = parseInt(timecode / (1000 * 60));
 
             return this._pad(minutes) + ":" + this._pad(seconds);
         }
     }, {
-        key: "init",
-        value: function init() {
-            return this.initialTime;
-        }
-    }, {
         key: "expose",
         value: function expose() {
             var exposed = _get(Stopwatch.prototype.__proto__ || Object.getPrototypeOf(Stopwatch.prototype), "expose", this).call(this);
-            exposed.inharit = "inharit";
-            exposed.Initial = "initial";
+            // exposed.inharit = "inharit";
+            exposed.To = "to";
             return exposed;
         }
     }, {
-        key: "initial",
+        key: "to",
         get: function get() {
-            return this.initialTime;
+            return this._limit;
         },
         set: function set(value) {
-            this.initialTime = value;
+            this._limit = value;
         }
     }]);
 
@@ -3440,6 +3441,10 @@ var _arguments = arguments;
 var _events = __webpack_require__(1);
 
 var _helpers = __webpack_require__(0);
+
+var _messenger = __webpack_require__(3);
+
+var _vffData = __webpack_require__(2);
 
 var timeouts = {};
 
@@ -3491,6 +3496,14 @@ module.exports = {
         }
 
         document.addEventListener(_events.VFF_EVENT, listener);
+    },
+
+    track: function track(name, data) {
+        var payload = {};
+        payload.name = name;
+        payload.data = data;
+        payload.query = _vffData.vffData.getQueryParams();
+        (0, _messenger.send)(_events.TRACK_EVENT, payload);
     }
 
     // emit : (data) => {
