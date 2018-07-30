@@ -6,6 +6,7 @@ export default class BasicClock extends HTMLElement {
 
         let self = this;
         this._time = this.init();
+        this.running= false;
         this.interval = new Interval(function(interval){
             self.onInterval(interval);
             self._update();

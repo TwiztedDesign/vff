@@ -45,7 +45,7 @@ class Template{
         let template, callback, options = options || {};
         switch (arguments.length){
             case 0:
-                throw new Error("onEvent was called without arguments");
+                throw new Error("$on was called without arguments");
             case 1:
                 callback = arg1;
                 break;

@@ -184,7 +184,7 @@ describe('VffTemplate', () => {
             });
             update({template3: {prop : 2}});
         });
-        it("should not file when data didn't change",(done) => {
+        it("should not fire when data didn't change",(done) => {
             let template = vffData.registerTemplate("template4", {prop : 1});
             template.$on(function(data){
                 expect(true).toBeFalsy();
@@ -192,6 +192,37 @@ describe('VffTemplate', () => {
             update({template4: {prop : 1}});
             setTimeout(done, 500);
         });
+        it("should throw error if called without arguments",() => {
+            let template = vffData.registerTemplate("template5", {prop : 1});
+            expect(() => {
+                template.$on();
+            }).toThrowError();
+        });
+        it('should fire a callback on same data with changeOnly:false',(done) => {
+            let template = vffData.registerTemplate("template6", {prop : 1});
+            template.$on(function(data){
+                expect(data).toEqual({prop : 1});
+                done();
+            },{changeOnly : false});
+            update({template6: {prop : 1}});
+        });
+        it('should fire only once when throttling',(done) => {
+            let template = vffData.registerTemplate("template7", {prop : 1});
+
+            let mock = jest.fn();
+            template.$on(function(data){
+                mock(data);
+                expect(data).toEqual({prop : 5});
+                done();
+            },{throttle:true});
+
+            update({template7: {prop : 1}});
+            update({template7: {prop : 2}});
+            update({template7: {prop : 3}});
+            update({template7: {prop : 4}});
+            update({template7: {prop : 5}});
+        });
     });
+
 
 });

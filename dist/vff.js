@@ -590,6 +590,7 @@ var BasicClock = function (_HTMLElement) {
 
         var self = _this;
         _this._time = _this.init();
+        _this.running = false;
         _this.interval = new Interval(function (interval) {
             self.onInterval(interval);
             self._update();
@@ -914,7 +915,7 @@ var Template = function () {
                 options = options || {};
             switch (arguments.length) {
                 case 0:
-                    throw new Error("onEvent was called without arguments");
+                    throw new Error("$on was called without arguments");
                 case 1:
                     callback = arg1;
                     break;
@@ -3375,7 +3376,10 @@ var Stopwatch = function (_BasicClock) {
     function Stopwatch() {
         _classCallCheck(this, Stopwatch);
 
-        return _possibleConstructorReturn(this, (Stopwatch.__proto__ || Object.getPrototypeOf(Stopwatch)).call(this));
+        var _this = _possibleConstructorReturn(this, (Stopwatch.__proto__ || Object.getPrototypeOf(Stopwatch)).call(this));
+
+        _this.initialTime = 0;
+        return _this;
     }
 
     _createClass(Stopwatch, [{
@@ -3397,11 +3401,25 @@ var Stopwatch = function (_BasicClock) {
             return this._pad(minutes) + ":" + this._pad(seconds);
         }
     }, {
+        key: "init",
+        value: function init() {
+            return this.initialTime;
+        }
+    }, {
         key: "expose",
         value: function expose() {
             var exposed = _get(Stopwatch.prototype.__proto__ || Object.getPrototypeOf(Stopwatch.prototype), "expose", this).call(this);
             exposed.inharit = "inharit";
+            exposed.Initial = "initial";
             return exposed;
+        }
+    }, {
+        key: "initial",
+        get: function get() {
+            return this.initialTime;
+        },
+        set: function set(value) {
+            this.initialTime = value;
         }
     }]);
 

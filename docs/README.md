@@ -81,8 +81,8 @@ The "vff" object also contains events that will be fired based on various condit
 | $show()            | Set "visibility" property in the template to true                                                     |
 | $hide()            | Set "visibility" property in the template to false                                                    |
 | $toggle()          | Toggle "visibility" property in the template                                                          |
-| $on(**callback**, **options**)  | triggers callback when data for the template arrives<br>**callback** - _function(**data**)_ - data handler<br>**options** - _string(optional)_ - options object (described [here](#options))|
-| $on(**path**, **callback**, **options**)| trigger callback when data for the **path** in the template arrives<br>**path** - _string_ - dot delimited string that describes a path in the template<br>**callback** - _function(**data**)_ - data handler<br>**options** - _string(optional)_ - options object (described [here](#options))|
+| $on(**callback**, **options**)  | triggers callback when data for the template arrives<br>**callback** - _function(**data**)_ - data handler<br>**options** - _object(optional)_ - options object (described [here](#options))|
+| $on(**path**, **callback**, **options**)| trigger callback when data for the **path** in the template arrives<br>**path** - _string_ - dot delimited string that describes a path in the template<br>**callback** - _function(**data**)_ - data handler<br>**options** - _object(optional)_ - options object (described [here](#options))|
 | $emit(**payload**) | Emits a message to every player with the same project<br>**payload** - _object_ - data to be sent     |
 
 
