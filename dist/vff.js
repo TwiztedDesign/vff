@@ -249,41 +249,47 @@ function deepCompare() {
 
         // Quick checking of one object being a subset of another.
         // todo: cache the structure of arguments[0] for performance
-        for (p in y) {
-            if (y.hasOwnProperty(p) !== x.hasOwnProperty(p)) {
-                return false;
-            } else if (_typeof(y[p]) !== _typeof(x[p])) {
-                return false;
-            }
-        }
+        // for (p in y) {
+        //     if(!p.startsWith('_')){
+        //         if (y.hasOwnProperty(p) !== x.hasOwnProperty(p)) {
+        //             return false;
+        //         }
+        //         else if (typeof y[p] !== typeof x[p]) {
+        //             return false;
+        //         }
+        //     }
+        //
+        // }
 
         for (p in x) {
-            if (y.hasOwnProperty(p) !== x.hasOwnProperty(p)) {
-                return false;
-            } else if (_typeof(y[p]) !== _typeof(x[p])) {
-                return false;
-            }
+            if (!p.startsWith('_')) {
+                if (y.hasOwnProperty(p) !== x.hasOwnProperty(p)) {
+                    return false;
+                } else if (_typeof(y[p]) !== _typeof(x[p])) {
+                    return false;
+                }
 
-            switch (_typeof(x[p])) {
-                case 'object':
-                case 'function':
+                switch (_typeof(x[p])) {
+                    case 'object':
+                    case 'function':
 
-                    leftChain.push(x);
-                    rightChain.push(y);
+                        leftChain.push(x);
+                        rightChain.push(y);
 
-                    if (!compare2Objects(x[p], y[p])) {
-                        return false;
-                    }
+                        if (!compare2Objects(x[p], y[p])) {
+                            return false;
+                        }
 
-                    leftChain.pop();
-                    rightChain.pop();
-                    break;
+                        leftChain.pop();
+                        rightChain.pop();
+                        break;
 
-                default:
-                    if (x[p] !== y[p]) {
-                        return false;
-                    }
-                    break;
+                    default:
+                        if (x[p] !== y[p]) {
+                            return false;
+                        }
+                        break;
+                }
             }
         }
 
@@ -869,7 +875,7 @@ var Template = function () {
         _classCallCheck(this, Template);
 
         this._name = name;
-        this._proxy = new Proxy(data, this._traps(name));
+        this._proxy = new Proxy(this._copy(data), this._traps(name));
         this._element = element;
         this._proxies = {};
     }
@@ -952,7 +958,7 @@ var Template = function () {
                 var key = (0, _helpers.findKey)(event.detail, self._name);
                 if (key) {
 
-                    if (template && options.changeOnly && (0, _helpers.getByPath)(event.detail[key], template) === (0, _helpers.getByPath)(self._proxy, template)) {
+                    if (template && options.changeOnly && ((0, _helpers.getByPath)(event.detail[key], template) === (0, _helpers.getByPath)(self._proxy, template) || (0, _helpers.getByPath)(event.detail[key], template) === undefined)) {
                         return;
                     } else if (!template && options.changeOnly && (0, _helpers.deepCompare)(event.detail[key], self._proxy)) {
                         return;
