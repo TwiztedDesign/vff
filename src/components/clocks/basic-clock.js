@@ -54,6 +54,7 @@ export default class BasicClock extends HTMLElement {
     set run(value){
         this.running = value;
         this.running? this.start() : this.stop();
+        this.dispatchEvent(new Event(value? "start" : "stop"));
     }
 
     expose(){

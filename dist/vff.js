@@ -669,6 +669,7 @@ var BasicClock = function (_HTMLElement) {
         set: function set(value) {
             this.running = value;
             this.running ? this.start() : this.stop();
+            this.dispatchEvent(new Event(value ? "start" : "stop"));
         }
     }]);
 
@@ -3394,12 +3395,17 @@ var Stopwatch = function (_BasicClock) {
             return ('0' + num).slice(-2);
         }
     }, {
-        key: "format",
-        value: function format(timecode) {
-
+        key: "_update",
+        value: function _update() {
+            _get(Stopwatch.prototype.__proto__ || Object.getPrototypeOf(Stopwatch.prototype), "_update", this).call(this);
             if (this._limit >= 0 && this._time >= this._limit) {
                 this.run = false;
+                this.dispatchEvent(new Event("limit"));
             }
+        }
+    }, {
+        key: "format",
+        value: function format(timecode) {
 
             var seconds = parseInt(timecode / 1000 % 60),
                 minutes = parseInt(timecode / (1000 * 60));
