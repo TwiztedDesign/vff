@@ -199,6 +199,7 @@ function docRef(anchor) {
     return 'https://www.videoflow.io/documentation/api/vff?id=' + anchor;
 }
 
+//compares only properties from lhs and ignores properties that start with _
 function deepCompare() {
     var i, l, leftChain, rightChain;
 
@@ -1207,14 +1208,18 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function messageHandler(message) {
-    var messageData = JSON.parse(message.data);
-    var type = messageData.type;
-    var handler = handlers[type];
-    if (messageData.cid && message.source && message.source.postMessage) {
-        message.source.postMessage(JSON.stringify({ type: _events2.default, cid: messageData.cid }), '*');
-    }
-    if (handler) {
-        handler(messageData.payload);
+    try {
+        var messageData = JSON.parse(message.data);
+        var type = messageData.type;
+        var handler = handlers[type];
+        if (messageData.cid && message.source && message.source.postMessage) {
+            message.source.postMessage(JSON.stringify({ type: _events2.default, cid: messageData.cid }), '*');
+        }
+        if (handler) {
+            handler(messageData.payload);
+        }
+    } catch (err) {
+        //Malformed JSON
     }
 }
 
