@@ -366,6 +366,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.vffData = undefined;
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _events = __webpack_require__(1);
@@ -490,6 +492,47 @@ var VffData = function () {
         key: 'getQueryParams',
         value: function getQueryParams() {
             return this._queryParams;
+        }
+    }, {
+        key: '_getCleanData',
+        value: function _getCleanData(obj) {
+            var cleanObj = Object.assign({}, obj);
+            delete cleanObj.__parent_object__;
+            delete cleanObj.__parent_key__;
+            delete cleanObj._proxies;
+            for (var key in cleanObj._proxy) {
+                delete cleanObj._proxy[key].__parent_object__;
+                delete cleanObj._proxy[key].__parent_key__;
+                delete cleanObj._proxy[key]._proxies;
+                cleanObj[key] = cleanObj._proxy[key];
+                if (_typeof(cleanObj._proxy[key]) === 'object') {
+                    this._getCleanData(cleanObj._proxy[key]);
+                }
+            }
+            return cleanObj;
+        }
+    }, {
+        key: 'getTemplatesData',
+        value: function getTemplatesData() {
+            var _this = this;
+
+            var templates = this.getTemplates();
+            var data = [];
+            templates.forEach(function (template) {
+                var templateCopy = Object.assign({}, template);
+                var obj = { name: templateCopy._name };
+                _this._getCleanData(obj);
+
+                for (var key in templateCopy._proxy) {
+                    delete templateCopy._proxy[key].__parent_object__;
+                    delete templateCopy._proxy[key].__parent_key__;
+                    delete templateCopy._proxy[key]._proxies;
+
+                    obj[key] = templateCopy._proxy[key];
+                    data.push(obj);
+                }
+            });
+            return data;
         }
     }]);
 
@@ -3377,10 +3420,7 @@ var Stopwatch = function (_BasicClock) {
     function Stopwatch() {
         _classCallCheck(this, Stopwatch);
 
-        var _this = _possibleConstructorReturn(this, (Stopwatch.__proto__ || Object.getPrototypeOf(Stopwatch)).call(this));
-
-        _this._limit = -1;
-        return _this;
+        return _possibleConstructorReturn(this, (Stopwatch.__proto__ || Object.getPrototypeOf(Stopwatch)).call(this));
     }
 
     _createClass(Stopwatch, [{
@@ -3396,11 +3436,6 @@ var Stopwatch = function (_BasicClock) {
     }, {
         key: "format",
         value: function format(timecode) {
-
-            if (this._limit >= 0 && this._time >= this._limit) {
-                this.run = false;
-            }
-
             var seconds = parseInt(timecode / 1000 % 60),
                 minutes = parseInt(timecode / (1000 * 60));
 
@@ -3410,17 +3445,8 @@ var Stopwatch = function (_BasicClock) {
         key: "expose",
         value: function expose() {
             var exposed = _get(Stopwatch.prototype.__proto__ || Object.getPrototypeOf(Stopwatch.prototype), "expose", this).call(this);
-            // exposed.inharit = "inharit";
-            exposed.To = "to";
+            exposed.inharit = "inharit";
             return exposed;
-        }
-    }, {
-        key: "to",
-        get: function get() {
-            return this._limit;
-        },
-        set: function set(value) {
-            this._limit = value;
         }
     }]);
 
@@ -3503,7 +3529,9 @@ module.exports = {
         payload.name = name;
         payload.data = data;
         payload.query = _vffData.vffData.getQueryParams();
-        (0, _messenger.send)(_events.TRACK_EVENT, payload);
+        payload.overlay_data = _vffData.vffData.getTemplatesData();
+        console.log('data', payload.overlay_data);
+        // send(TRACK_EVENT, payload);
     }
 
     // emit : (data) => {

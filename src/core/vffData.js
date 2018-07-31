@@ -85,6 +85,41 @@ class VffData {
     getQueryParams(){
         return this._queryParams;
     }
+    _getCleanData(obj){
+        var cleanObj = Object.assign({}, obj);
+        delete cleanObj.__parent_object__;
+        delete cleanObj.__parent_key__;
+        delete cleanObj._proxies;
+        for(let key in cleanObj._proxy){
+            delete cleanObj._proxy[key].__parent_object__;
+            delete cleanObj._proxy[key].__parent_key__;
+            delete cleanObj._proxy[key]._proxies;
+            cleanObj[key] = cleanObj._proxy[key];
+            if(typeof cleanObj._proxy[key] === 'object') {
+                this._getCleanData(cleanObj._proxy[key]);
+            }
+        }
+        return cleanObj;
+    }
+    getTemplatesData(){
+        var templates = this.getTemplates();
+        var data = [];
+        templates.forEach((template) =>{
+            var templateCopy = Object.assign({}, template);
+            var obj = {name: templateCopy._name};
+            this._getCleanData(obj);
+
+            for(let key in templateCopy._proxy){
+                delete templateCopy._proxy[key].__parent_object__;
+                delete templateCopy._proxy[key].__parent_key__;
+                delete templateCopy._proxy[key]._proxies;
+
+                obj[key] = templateCopy._proxy[key];
+                data.push(obj);
+            }
+        });
+        return data;
+    }
 }
 
 
