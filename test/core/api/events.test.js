@@ -11,7 +11,11 @@ describe("Events Api", () =>{
           let template = vffData.registerTemplate('test', {visibility : true, title:'title'});
           template.title = 'new title';
           events.track('template title', {title: template.title});
-          expect(send).toHaveBeenCalledWith(TRACK_EVENT, {"data": {"title": "new title"}, "name": "template title", "overlay_data": [{"template_name": "test", "title": "new title", "visibility": true}], "query": undefined});
+          expect(send).toHaveBeenCalledWith(TRACK_EVENT, {"data": {"title": "new title"},
+              "name": "template title",
+              "overlay_data": [{"template_name": "test", "title": "new title", "visibility": true}],
+              "query": undefined
+          });
       });
    });
 });
