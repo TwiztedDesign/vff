@@ -3422,7 +3422,10 @@ var Stopwatch = function (_BasicClock) {
     function Stopwatch() {
         _classCallCheck(this, Stopwatch);
 
-        return _possibleConstructorReturn(this, (Stopwatch.__proto__ || Object.getPrototypeOf(Stopwatch)).call(this));
+        var _this = _possibleConstructorReturn(this, (Stopwatch.__proto__ || Object.getPrototypeOf(Stopwatch)).call(this));
+
+        _this._limit = -1;
+        return _this;
     }
 
     _createClass(Stopwatch, [{
@@ -3448,10 +3451,6 @@ var Stopwatch = function (_BasicClock) {
         key: "format",
         value: function format(timecode) {
 
-            if (this._limit >= 0 && this._time >= this._limit) {
-                this.run = false;
-            }
-
             var seconds = parseInt(timecode / 1000 % 60),
                 minutes = parseInt(timecode / (1000 * 60));
 
@@ -3461,8 +3460,17 @@ var Stopwatch = function (_BasicClock) {
         key: "expose",
         value: function expose() {
             var exposed = _get(Stopwatch.prototype.__proto__ || Object.getPrototypeOf(Stopwatch.prototype), "expose", this).call(this);
-            exposed.inharit = "inharit";
+            // exposed.inharit = "inharit";
+            exposed.To = "to";
             return exposed;
+        }
+    }, {
+        key: "to",
+        get: function get() {
+            return this._limit;
+        },
+        set: function set(value) {
+            this._limit = value;
         }
     }]);
 
