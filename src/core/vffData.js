@@ -85,38 +85,28 @@ class VffData {
     getQueryParams(){
         return this._queryParams;
     }
-    _getCleanData(obj){
-        var cleanObj = Object.assign({}, obj);
-        delete cleanObj.__parent_object__;
-        delete cleanObj.__parent_key__;
-        delete cleanObj._proxies;
-        for(let key in cleanObj._proxy){
-            delete cleanObj._proxy[key].__parent_object__;
-            delete cleanObj._proxy[key].__parent_key__;
-            delete cleanObj._proxy[key]._proxies;
-            cleanObj[key] = cleanObj._proxy[key];
-            if(typeof cleanObj._proxy[key] === 'object') {
-                this._getCleanData(cleanObj._proxy[key]);
+    _cleanDataProxies(obj){
+        for(let key in obj){
+            if(key.startsWith("__")){
+                delete obj[key];
+            }
+            if(typeof obj[key] === 'object'){
+                this._cleanDataProxies(obj[key]);
             }
         }
-        return cleanObj;
+        return obj;
     }
     getTemplatesData(){
         var templates = this.getTemplates();
         var data = [];
         templates.forEach((template) =>{
+            var obj = {};
             var templateCopy = Object.assign({}, template);
-            var obj = {name: templateCopy._name};
-            this._getCleanData(obj);
-
+            obj.template_name = templateCopy._name;
             for(let key in templateCopy._proxy){
-                delete templateCopy._proxy[key].__parent_object__;
-                delete templateCopy._proxy[key].__parent_key__;
-                delete templateCopy._proxy[key]._proxies;
-
                 obj[key] = templateCopy._proxy[key];
-                data.push(obj);
             }
+            data.push(this._cleanDataProxies(obj));
         });
         return data;
     }

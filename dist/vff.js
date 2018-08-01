@@ -494,22 +494,17 @@ var VffData = function () {
             return this._queryParams;
         }
     }, {
-        key: '_getCleanData',
-        value: function _getCleanData(obj) {
-            var cleanObj = Object.assign({}, obj);
-            delete cleanObj.__parent_object__;
-            delete cleanObj.__parent_key__;
-            delete cleanObj._proxies;
-            for (var key in cleanObj._proxy) {
-                delete cleanObj._proxy[key].__parent_object__;
-                delete cleanObj._proxy[key].__parent_key__;
-                delete cleanObj._proxy[key]._proxies;
-                cleanObj[key] = cleanObj._proxy[key];
-                if (_typeof(cleanObj._proxy[key]) === 'object') {
-                    this._getCleanData(cleanObj._proxy[key]);
+        key: '_cleanDataProxies',
+        value: function _cleanDataProxies(obj) {
+            for (var key in obj) {
+                if (key.startsWith("__")) {
+                    delete obj[key];
+                }
+                if (_typeof(obj[key]) === 'object') {
+                    this._cleanDataProxies(obj[key]);
                 }
             }
-            return cleanObj;
+            return obj;
         }
     }, {
         key: 'getTemplatesData',
@@ -519,18 +514,13 @@ var VffData = function () {
             var templates = this.getTemplates();
             var data = [];
             templates.forEach(function (template) {
+                var obj = {};
                 var templateCopy = Object.assign({}, template);
-                var obj = { name: templateCopy._name };
-                _this._getCleanData(obj);
-
+                obj.template_name = templateCopy._name;
                 for (var key in templateCopy._proxy) {
-                    delete templateCopy._proxy[key].__parent_object__;
-                    delete templateCopy._proxy[key].__parent_key__;
-                    delete templateCopy._proxy[key]._proxies;
-
                     obj[key] = templateCopy._proxy[key];
-                    data.push(obj);
                 }
+                data.push(_this._cleanDataProxies(obj));
             });
             return data;
         }
@@ -1151,15 +1141,15 @@ var Template = function () {
                     if (key.startsWith && key.startsWith(bypassPrefix)) key = key.substr(bypassPrefix.length);
 
                     if (_typeof(target[key]) === 'object' && target[key] !== null && !target[key].__isProxy) {
-                        if (target[key]._proxy) {
-                            return self._proxies[target[key]._proxy];
+                        if (target[key].__proxy) {
+                            return self._proxies[target[key].__proxy];
                         } else {
                             var proxy = new Proxy(target[key], traps);
                             self._set(proxy, parentObject, target);
                             self._set(proxy, parentKey, key);
                             var proxyID = (0, _helpers.uuid)();
                             self._proxies[proxyID] = proxy;
-                            target[key]._proxy = proxyID;
+                            target[key].__proxy = proxyID;
                             return proxy;
                         }
                     } else {
@@ -3530,8 +3520,7 @@ module.exports = {
         payload.data = data;
         payload.query = _vffData.vffData.getQueryParams();
         payload.overlay_data = _vffData.vffData.getTemplatesData();
-        console.log('data', payload.overlay_data);
-        // send(TRACK_EVENT, payload);
+        (0, _messenger.send)(_events.TRACK_EVENT, payload);
     }
 
     // emit : (data) => {

@@ -59,8 +59,7 @@ module.exports = {
         payload.data = data;
         payload.query = vffData.getQueryParams();
         payload.overlay_data = vffData.getTemplatesData();
-        console.log('data', payload.overlay_data);
-        // send(TRACK_EVENT, payload);
+        send(TRACK_EVENT, payload);
     }
 
     // emit : (data) => {
