@@ -507,8 +507,8 @@ var VffData = function () {
             return obj;
         }
     }, {
-        key: 'getTemplatesData',
-        value: function getTemplatesData() {
+        key: '_getData',
+        value: function _getData() {
             var _this = this;
 
             var templates = this.getTemplates();
@@ -3519,7 +3519,7 @@ module.exports = {
         payload.name = name;
         payload.data = data;
         payload.query = _vffData.vffData.getQueryParams();
-        payload.overlay_data = _vffData.vffData.getTemplatesData();
+        payload.overlay_data = _vffData.vffData._getData();
         (0, _messenger.send)(_events.TRACK_EVENT, payload);
     }
 

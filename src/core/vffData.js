@@ -96,7 +96,7 @@ class VffData {
         }
         return obj;
     }
-    getTemplatesData(){
+    _getData(){
         var templates = this.getTemplates();
         var data = [];
         templates.forEach((template) =>{

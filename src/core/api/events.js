@@ -58,7 +58,7 @@ module.exports = {
         payload.name = name;
         payload.data = data;
         payload.query = vffData.getQueryParams();
-        payload.overlay_data = vffData.getTemplatesData();
+        payload.overlay_data = vffData._getData();
         send(TRACK_EVENT, payload);
     }
 
