@@ -11,7 +11,7 @@ const defaults = {
 class Template{
     constructor(name, data, element) {
         this._name = name;
-        this._proxy = new Proxy(data, this._traps(name));
+        this._proxy = new Proxy(this._copy(data), this._traps(name));
         this._element = element;
         this._proxies = {};
     }
@@ -80,7 +80,7 @@ class Template{
             let key = findKey(event.detail, self._name);
             if(key) {
 
-                if(template && options.changeOnly && getByPath(event.detail[key], template) === getByPath(self._proxy, template)){
+                if(template && options.changeOnly && (getByPath(event.detail[key], template) === getByPath(self._proxy, template) || getByPath(event.detail[key], template) === undefined )){
                     return;
                 } else if (!template && options.changeOnly && deepCompare(event.detail[key], self._proxy)){
                     return;

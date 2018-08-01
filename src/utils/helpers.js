@@ -124,6 +124,8 @@ function docRef(anchor){
     return 'https://www.videoflow.io/documentation/api/vff?id=' + anchor;
 }
 
+
+//compares only properties from lhs and ignores properties that start with _
 function deepCompare () {
     var i, l, leftChain, rightChain;
 
@@ -178,43 +180,49 @@ function deepCompare () {
 
         // Quick checking of one object being a subset of another.
         // todo: cache the structure of arguments[0] for performance
-        for (p in y) {
-            if (y.hasOwnProperty(p) !== x.hasOwnProperty(p)) {
-                return false;
-            }
-            else if (typeof y[p] !== typeof x[p]) {
-                return false;
-            }
-        }
+        // for (p in y) {
+        //     if(!p.startsWith('_')){
+        //         if (y.hasOwnProperty(p) !== x.hasOwnProperty(p)) {
+        //             return false;
+        //         }
+        //         else if (typeof y[p] !== typeof x[p]) {
+        //             return false;
+        //         }
+        //     }
+        //
+        // }
 
         for (p in x) {
-            if (y.hasOwnProperty(p) !== x.hasOwnProperty(p)) {
-                return false;
-            }
-            else if (typeof y[p] !== typeof x[p]) {
-                return false;
-            }
+            if(!p.startsWith('_')) {
+                if (y.hasOwnProperty(p) !== x.hasOwnProperty(p)) {
+                    return false;
+                }
+                else if (typeof y[p] !== typeof x[p]) {
+                    return false;
+                }
 
-            switch (typeof (x[p])) {
-                case 'object':
-                case 'function':
 
-                    leftChain.push(x);
-                    rightChain.push(y);
+                switch (typeof (x[p])) {
+                    case 'object':
+                    case 'function':
 
-                    if (!compare2Objects (x[p], y[p])) {
-                        return false;
-                    }
+                        leftChain.push(x);
+                        rightChain.push(y);
 
-                    leftChain.pop();
-                    rightChain.pop();
-                    break;
+                        if (!compare2Objects(x[p], y[p])) {
+                            return false;
+                        }
 
-                default:
-                    if (x[p] !== y[p]) {
-                        return false;
-                    }
-                    break;
+                        leftChain.pop();
+                        rightChain.pop();
+                        break;
+
+                    default:
+                        if (x[p] !== y[p]) {
+                            return false;
+                        }
+                        break;
+                }
             }
         }
 

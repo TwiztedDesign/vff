@@ -199,6 +199,7 @@ function docRef(anchor) {
     return 'https://www.videoflow.io/documentation/api/vff?id=' + anchor;
 }
 
+//compares only properties from lhs and ignores properties that start with _
 function deepCompare() {
     var i, l, leftChain, rightChain;
 
@@ -249,41 +250,47 @@ function deepCompare() {
 
         // Quick checking of one object being a subset of another.
         // todo: cache the structure of arguments[0] for performance
-        for (p in y) {
-            if (y.hasOwnProperty(p) !== x.hasOwnProperty(p)) {
-                return false;
-            } else if (_typeof(y[p]) !== _typeof(x[p])) {
-                return false;
-            }
-        }
+        // for (p in y) {
+        //     if(!p.startsWith('_')){
+        //         if (y.hasOwnProperty(p) !== x.hasOwnProperty(p)) {
+        //             return false;
+        //         }
+        //         else if (typeof y[p] !== typeof x[p]) {
+        //             return false;
+        //         }
+        //     }
+        //
+        // }
 
         for (p in x) {
-            if (y.hasOwnProperty(p) !== x.hasOwnProperty(p)) {
-                return false;
-            } else if (_typeof(y[p]) !== _typeof(x[p])) {
-                return false;
-            }
+            if (!p.startsWith('_')) {
+                if (y.hasOwnProperty(p) !== x.hasOwnProperty(p)) {
+                    return false;
+                } else if (_typeof(y[p]) !== _typeof(x[p])) {
+                    return false;
+                }
 
-            switch (_typeof(x[p])) {
-                case 'object':
-                case 'function':
+                switch (_typeof(x[p])) {
+                    case 'object':
+                    case 'function':
 
-                    leftChain.push(x);
-                    rightChain.push(y);
+                        leftChain.push(x);
+                        rightChain.push(y);
 
-                    if (!compare2Objects(x[p], y[p])) {
-                        return false;
-                    }
+                        if (!compare2Objects(x[p], y[p])) {
+                            return false;
+                        }
 
-                    leftChain.pop();
-                    rightChain.pop();
-                    break;
+                        leftChain.pop();
+                        rightChain.pop();
+                        break;
 
-                default:
-                    if (x[p] !== y[p]) {
-                        return false;
-                    }
-                    break;
+                    default:
+                        if (x[p] !== y[p]) {
+                            return false;
+                        }
+                        break;
+                }
             }
         }
 
@@ -702,6 +709,7 @@ var BasicClock = function (_HTMLElement) {
         set: function set(value) {
             this.running = value;
             this.running ? this.start() : this.stop();
+            this.dispatchEvent(new Event(value ? "start" : "stop"));
         }
     }]);
 
@@ -901,7 +909,7 @@ var Template = function () {
         _classCallCheck(this, Template);
 
         this._name = name;
-        this._proxy = new Proxy(data, this._traps(name));
+        this._proxy = new Proxy(this._copy(data), this._traps(name));
         this._element = element;
         this._proxies = {};
     }
@@ -984,7 +992,7 @@ var Template = function () {
                 var key = (0, _helpers.findKey)(event.detail, self._name);
                 if (key) {
 
-                    if (template && options.changeOnly && (0, _helpers.getByPath)(event.detail[key], template) === (0, _helpers.getByPath)(self._proxy, template)) {
+                    if (template && options.changeOnly && ((0, _helpers.getByPath)(event.detail[key], template) === (0, _helpers.getByPath)(self._proxy, template) || (0, _helpers.getByPath)(event.detail[key], template) === undefined)) {
                         return;
                     } else if (!template && options.changeOnly && (0, _helpers.deepCompare)(event.detail[key], self._proxy)) {
                         return;
@@ -1233,14 +1241,18 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function messageHandler(message) {
-    var messageData = JSON.parse(message.data);
-    var type = messageData.type;
-    var handler = handlers[type];
-    if (messageData.cid && message.source && message.source.postMessage) {
-        message.source.postMessage(JSON.stringify({ type: _events2.default, cid: messageData.cid }), '*');
-    }
-    if (handler) {
-        handler(messageData.payload);
+    try {
+        var messageData = JSON.parse(message.data);
+        var type = messageData.type;
+        var handler = handlers[type];
+        if (messageData.cid && message.source && message.source.postMessage) {
+            message.source.postMessage(JSON.stringify({ type: _events2.default, cid: messageData.cid }), '*');
+        }
+        if (handler) {
+            handler(messageData.payload);
+        }
+    } catch (err) {
+        //Malformed JSON
     }
 }
 
@@ -3424,8 +3436,22 @@ var Stopwatch = function (_BasicClock) {
             return ('0' + num).slice(-2);
         }
     }, {
+        key: "_update",
+        value: function _update() {
+            _get(Stopwatch.prototype.__proto__ || Object.getPrototypeOf(Stopwatch.prototype), "_update", this).call(this);
+            if (this._limit >= 0 && this._time >= this._limit) {
+                this.run = false;
+                this.dispatchEvent(new Event("limit"));
+            }
+        }
+    }, {
         key: "format",
         value: function format(timecode) {
+
+            if (this._limit >= 0 && this._time >= this._limit) {
+                this.run = false;
+            }
+
             var seconds = parseInt(timecode / 1000 % 60),
                 minutes = parseInt(timecode / (1000 * 60));
 
