@@ -850,6 +850,8 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _events = __webpack_require__(1);
 
+var _consts = __webpack_require__(5);
+
 var _helpers = __webpack_require__(0);
 
 var _messenger = __webpack_require__(3);
@@ -1168,6 +1170,8 @@ var VffTemplate = function (_Template) {
             get: function get(target, prop) {
                 if (prop in target) {
                     return target[prop];
+                } else if (target._element && target._element.expose && findExposed(prop, target._proxy)) {
+                    return target._proxy[findExposed(prop, target._proxy)];
                 }
                 return self._proxy[prop];
             },
@@ -1175,6 +1179,8 @@ var VffTemplate = function (_Template) {
                 if (prop in target) {
                     throw new Error("Override Error: " + prop + " is an internal vff property and can't be overridden");
                     // return target[prop] = value;
+                } else if (target._element && target._element.expose && findExposed(prop, target._proxy)) {
+                    target._proxy[findExposed(prop, target._proxy)] = value;
                 } else {
                     target._proxy[prop] = value;
                 }
@@ -1187,6 +1193,17 @@ var VffTemplate = function (_Template) {
 }(Template);
 
 exports.default = VffTemplate;
+
+
+function findExposed(key, values) {
+    values = Object.keys(values);
+    for (var i = 0; i < values.length; i++) {
+        var prop = values[i].split(_consts.EXPOSE_DELIMITER)[1];
+        if (prop && prop.toLowerCase() === key.toLowerCase()) {
+            return values[i];
+        }
+    }
+}
 
 /***/ }),
 /* 10 */
@@ -3391,31 +3408,32 @@ var Stopwatch = function (_BasicClock) {
 
         var _this = _possibleConstructorReturn(this, (Stopwatch.__proto__ || Object.getPrototypeOf(Stopwatch)).call(this));
 
-        _this._limit = -1;
+        _this._limit = '';
+        _this._initial = '';
         return _this;
     }
 
     _createClass(Stopwatch, [{
-        key: "connectedCallback",
+        key: 'connectedCallback',
         value: function connectedCallback() {
-            _get(Stopwatch.prototype.__proto__ || Object.getPrototypeOf(Stopwatch.prototype), "connectedCallback", this).call(this);
+            _get(Stopwatch.prototype.__proto__ || Object.getPrototypeOf(Stopwatch.prototype), 'connectedCallback', this).call(this);
         }
     }, {
-        key: "_pad",
+        key: '_pad',
         value: function _pad(num) {
             return ('0' + num).slice(-2);
         }
     }, {
-        key: "_update",
+        key: '_update',
         value: function _update() {
-            _get(Stopwatch.prototype.__proto__ || Object.getPrototypeOf(Stopwatch.prototype), "_update", this).call(this);
-            if (this._limit >= 0 && this._time >= this._limit) {
+            _get(Stopwatch.prototype.__proto__ || Object.getPrototypeOf(Stopwatch.prototype), '_update', this).call(this);
+            if (this._limit !== '' && this._limit >= 0 && this._time >= this._limit) {
                 this.run = false;
                 this.dispatchEvent(new Event("limit"));
             }
         }
     }, {
-        key: "format",
+        key: 'format',
         value: function format(timecode) {
 
             var seconds = parseInt(timecode / 1000 % 60),
@@ -3424,20 +3442,42 @@ var Stopwatch = function (_BasicClock) {
             return this._pad(minutes) + ":" + this._pad(seconds);
         }
     }, {
-        key: "expose",
+        key: 'expose',
         value: function expose() {
-            var exposed = _get(Stopwatch.prototype.__proto__ || Object.getPrototypeOf(Stopwatch.prototype), "expose", this).call(this);
-            // exposed.inharit = "inharit";
-            exposed.To = "to";
+            var exposed = _get(Stopwatch.prototype.__proto__ || Object.getPrototypeOf(Stopwatch.prototype), 'expose', this).call(this);
+            exposed.Limit = "limit";
+            exposed.Initial = "initial";
+            exposed.Reset = 'reset';
             return exposed;
         }
     }, {
-        key: "to",
+        key: 'limit',
         get: function get() {
             return this._limit;
         },
         set: function set(value) {
             this._limit = value;
+        }
+    }, {
+        key: 'initial',
+        get: function get() {
+            return this._initial;
+        },
+        set: function set(value) {
+            if (!this.running && value !== undefined && value.constructor.name === 'number') {
+                this._initial = parseInt(value) || 0;
+                this._time = this._initial;
+                this._update();
+            }
+        }
+    }, {
+        key: 'reset',
+        get: function get() {
+            return false;
+        },
+        set: function set(value) {
+            this._time = this._initial || 0;
+            this._update();
         }
     }]);
 

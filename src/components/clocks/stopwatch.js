@@ -3,7 +3,8 @@ import BasicClock from "./basic-clock";
 export default class Stopwatch extends BasicClock {
     constructor() {
         super();
-        this._limit = -1;
+        this._limit = '';
+        this._initial = '';
     }
 
     connectedCallback() {
@@ -16,7 +17,7 @@ export default class Stopwatch extends BasicClock {
 
     _update(){
         super._update();
-        if(this._limit >= 0 && this._time >= this._limit){
+        if(this._limit !== '' && this._limit >= 0 && this._time >= this._limit){
             this.run = false;
             this.dispatchEvent(new Event("limit"));
         }
@@ -34,20 +35,38 @@ export default class Stopwatch extends BasicClock {
     }
 
 
-    get to(){
+    get limit(){
         return this._limit;
     }
 
-    set to(value){
+    set limit(value){
         this._limit = value;
+    }
+    get initial(){
+        return this._initial;
+    }
+
+    set initial(value){
+        if(!this.running && value !== undefined && value.constructor.name === 'number'){
+            this._initial = parseInt(value) || 0;
+            this._time = this._initial;
+            this._update();
+        }
+    }
+    get reset(){
+        return false;
+    }
+    set reset(value){
+        this._time = this._initial || 0;
+        this._update();
     }
 
     expose(){
         var exposed = super.expose();
-        // exposed.inharit = "inharit";
-        exposed.To = "to";
+        exposed.Limit = "limit";
+        exposed.Initial = "initial";
+        exposed.Reset = 'reset';
         return exposed;
     }
-
 
 }

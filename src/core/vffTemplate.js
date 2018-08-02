@@ -1,4 +1,5 @@
 import {USER_UPDATE, VFF_EVENT, OUTGOING_EVENT} from "../utils/events";
+import {EXPOSE_DELIMITER} from './consts';
 import {findKey, deepExtend, getByPath, uuid, deepCompare} from '../utils/helpers.js';
 import {send} from '../utils/messenger';
 import {vffData} from './vffData';
@@ -223,6 +224,8 @@ export default class VffTemplate extends Template {
             get : function(target, prop){
                 if(prop in target){
                     return target[prop];
+                } else if(target._element && target._element.expose && findExposed(prop, target._proxy)){
+                    return target._proxy[findExposed(prop, target._proxy)];
                 }
                 return self._proxy[prop];
             },
@@ -231,11 +234,26 @@ export default class VffTemplate extends Template {
                     throw  new Error("Override Error: " + prop + " is an internal vff property and can't be overridden");
                     // return target[prop] = value;
                 }
+                else if(target._element && target._element.expose && findExposed(prop, target._proxy)){
+                    target._proxy[findExposed(prop, target._proxy)] = value;
+                }
                 else {
                     target._proxy[prop] = value;
                 }
                 return true;
             }
         });
+    }
+}
+
+
+function findExposed(key, values){
+    values = Object.keys(values);
+    for (let i = 0; i < values.length; i++) {
+        const prop = values[i].split(EXPOSE_DELIMITER)[1];
+        if(prop && prop.toLowerCase() === key.toLowerCase()){
+            return values[i];
+        }
+
     }
 }
