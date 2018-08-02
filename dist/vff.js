@@ -869,7 +869,8 @@ var bypassPrefix = '___bypass___',
     parentKey = '__parent_key__';
 var timeouts = {};
 var defaults = {
-    changeOnly: true
+    changeOnly: true,
+    throttle: true
 };
 //getElement, update, show, hide, toggle, onData, emit
 

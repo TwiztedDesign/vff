@@ -6,7 +6,8 @@ import {vffData} from './vffData';
 const bypassPrefix = '___bypass___', parentObject = '__parent_object__', parentKey = '__parent_key__';
 const timeouts = {};
 const defaults = {
-  changeOnly : true
+    changeOnly  : true,
+    throttle    : true
 };
 //getElement, update, show, hide, toggle, onData, emit
 class Template{
