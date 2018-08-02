@@ -4,7 +4,6 @@ import {findKey, deepExtend, getByPath, uuid, deepCompare} from '../utils/helper
 import {send} from '../utils/messenger';
 import {vffData} from './vffData';
 const bypassPrefix = '___bypass___', parentObject = '__parent_object__', parentKey = '__parent_key__';
-const timeouts = {};
 const defaults = {
     changeOnly  : true,
     throttle    : true
@@ -16,6 +15,7 @@ class Template{
         this._proxy = new Proxy(this._copy(data), this._traps(name));
         this._element = element;
         this._proxies = {};
+        this._timeouts = {};
     }
     $element(control){
         if(this._element && control){
@@ -69,8 +69,8 @@ class Template{
 
         function runCB(data){
             if(options.consolidate || options.throttle){
-                clearTimeout(timeouts[template || '__global_event__']);
-                timeouts[template || '__global_event__'] = setTimeout(function(){
+                clearTimeout(self._timeouts[template || '__global_event__']);
+                self._timeouts[template || '__global_event__'] = setTimeout(function(){
                     callback(data);
                 }, (typeof options.throttle === 'number')? options.throttle : 50);
             } else {

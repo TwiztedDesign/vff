@@ -866,7 +866,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var bypassPrefix = '___bypass___',
     parentObject = '__parent_object__',
     parentKey = '__parent_key__';
-var timeouts = {};
 var defaults = {
     changeOnly: true,
     throttle: true
@@ -881,6 +880,7 @@ var Template = function () {
         this._proxy = new Proxy(this._copy(data), this._traps(name));
         this._element = element;
         this._proxies = {};
+        this._timeouts = {};
     }
 
     _createClass(Template, [{
@@ -948,8 +948,8 @@ var Template = function () {
 
             function runCB(data) {
                 if (options.consolidate || options.throttle) {
-                    clearTimeout(timeouts[template || '__global_event__']);
-                    timeouts[template || '__global_event__'] = setTimeout(function () {
+                    clearTimeout(self._timeouts[template || '__global_event__']);
+                    self._timeouts[template || '__global_event__'] = setTimeout(function () {
                         callback(data);
                     }, typeof options.throttle === 'number' ? options.throttle : 50);
                 } else {
