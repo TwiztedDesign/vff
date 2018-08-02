@@ -89,24 +89,17 @@ class VffData {
         for(let key in obj){
             if(key.startsWith("__")){
                 delete obj[key];
-            }
-            if(typeof obj[key] === 'object'){
+            }else if(typeof obj[key] === 'object'){
                 this._cleanDataProxies(obj[key]);
             }
         }
         return obj;
     }
     _getData(){
-        var templates = this.getTemplates();
-        var data = [];
-        templates.forEach((template) =>{
-            var obj = {};
-            var templateCopy = Object.assign({}, template);
-            obj.template_name = templateCopy._name;
-            for(let key in templateCopy._proxy){
-                obj[key] = templateCopy._proxy[key];
-            }
-            data.push(this._cleanDataProxies(obj));
+        let templates = this.getTemplates();
+        let data = {};
+        templates.forEach((template) => {
+            data[template._name] = this._cleanDataProxies(template._data);
         });
         return data;
     }

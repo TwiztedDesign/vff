@@ -11,7 +11,9 @@ const defaults = {
 class Template{
     constructor(name, data, element) {
         this._name = name;
-        this._proxy = new Proxy(this._copy(data), this._traps(name));
+        let dataCopy = this._copy(data);
+        this._data = new Proxy(dataCopy, {});
+        this._proxy = new Proxy(dataCopy, this._traps(name));
         this._element = element;
         this._proxies = {};
     }

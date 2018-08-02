@@ -522,7 +522,7 @@ var VffData = function () {
             var data = [];
             templates.forEach(function (template) {
                 var obj = {};
-                var templateCopy = Object.assign({}, template);
+                var templateCopy = (0, _helpers.deepExtend)({}, template);
                 obj.template_name = templateCopy._name;
                 for (var key in templateCopy._proxy) {
                     obj[key] = templateCopy._proxy[key];
