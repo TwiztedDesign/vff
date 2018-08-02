@@ -13,8 +13,7 @@ class VffData {
     updateCB(){
         if(this._updateCB) {
             this._updateCB();
-        }
-        if(window.angular){
+        } else if(window.angular){
             let $body = window.angular.element(document.body);
             let $injector = $body.injector();
             if($injector){

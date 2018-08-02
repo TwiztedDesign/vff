@@ -404,8 +404,7 @@ var VffData = function () {
         value: function updateCB() {
             if (this._updateCB) {
                 this._updateCB();
-            }
-            if (window.angular) {
+            } else if (window.angular) {
                 var $body = window.angular.element(document.body);
                 var $injector = $body.injector();
                 if ($injector) {
