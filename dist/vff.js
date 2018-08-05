@@ -1117,16 +1117,16 @@ var Template = function () {
                     }
                     if (key.startsWith && key.startsWith(bypassPrefix)) key = key.substr(bypassPrefix.length);
 
-                    if (_typeof(target[key]) === 'object' && target[key] !== null && !target[key].__isProxy) {
-                        if (target[key]._proxy) {
-                            return self._proxies[target[key]._proxy];
+                    if (_typeof(target[key]) === 'object' && target[key] !== null && !target[key].__isProxy && !key.startsWith('__')) {
+                        if (target[key].__proxy) {
+                            return self._proxies[target[key].__proxy];
                         } else {
                             var proxy = new Proxy(target[key], traps);
                             self._set(proxy, parentObject, target);
                             self._set(proxy, parentKey, key);
                             var proxyID = (0, _helpers.uuid)();
                             self._proxies[proxyID] = proxy;
-                            target[key]._proxy = proxyID;
+                            target[key].__proxy = proxyID;
                             return proxy;
                         }
                     } else {

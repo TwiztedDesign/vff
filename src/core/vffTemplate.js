@@ -183,16 +183,16 @@ class Template{
                 if(key === '__isProxy'){return true;}
                 if(key.startsWith && key.startsWith(bypassPrefix))  key = key.substr(bypassPrefix.length);
 
-                if (typeof target[key] === 'object' && target[key] !== null && !target[key].__isProxy) {
-                    if(target[key]._proxy){
-                        return self._proxies[target[key]._proxy];
+                if (typeof target[key] === 'object' && target[key] !== null && !target[key].__isProxy && !key.startsWith('__')) {
+                    if(target[key].__proxy){
+                        return self._proxies[target[key].__proxy];
                     } else {
                         let proxy = new Proxy(target[key], traps);
                         self._set(proxy, parentObject, target);
                         self._set(proxy, parentKey, key);
                         let proxyID = uuid();
                         self._proxies[proxyID] = proxy;
-                        target[key]._proxy = proxyID;
+                        target[key].__proxy = proxyID;
                         return proxy;
                     }
                 }
