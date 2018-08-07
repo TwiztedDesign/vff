@@ -46,9 +46,9 @@ function initDOM(){
             }
         }
         if(!templates[templateName]){
-            templates[templateName] = {data : data, dom : template, options : options};
+            templates[templateName] = {data : data, options : options};
         } else {
-            deepExtend(templates[templateName], {data : data, dom : template, options : options});
+            deepExtend(templates[templateName], {data : data, options : options});
         }
     });
     for (let template in templates) {

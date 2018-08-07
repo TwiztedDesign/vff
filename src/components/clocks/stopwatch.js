@@ -44,10 +44,10 @@ export default class Stopwatch extends BasicClock {
     }
 
     set initial(value){
-        if(!this.running && value !== undefined && value.constructor.name === 'number'){
+        if(value !== undefined){
             this._initial = parseInt(value) || 0;
-            this._time = this._initial;
-            this._update();
+            // this._time = this._initial;
+            // this._update();
         }
     }
     get reset(){
@@ -60,9 +60,9 @@ export default class Stopwatch extends BasicClock {
 
     expose(){
         var exposed = super.expose();
-        // exposed['to time'] = "limit";
-        // exposed['from time'] = "initial";
-        // exposed.Reset = 'reset';
+        exposed['toTime'] = "limit";
+        exposed['fromTime'] = "initial";
+        exposed.Reset = 'reset';
         return exposed;
     }
 

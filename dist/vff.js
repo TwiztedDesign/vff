@@ -435,7 +435,8 @@ var VffData = function () {
 
             (0, _messenger.send)(_events.ADD, {
                 channel: name,
-                data: this._templates[name]._proxy
+                options: this._templates[name]._options,
+                data: data
             });
 
             return this._templates[name];
@@ -876,8 +877,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var bypassPrefix = '___bypass___',
     parentObject = '__parent_object__',
-    parentKey = '__parent_key__',
-    settingsKey = '__settings__';
+    parentKey = '__parent_key__';
 var defaultListenerOptions = {
     changeOnly: true,
     throttle: true
@@ -893,11 +893,7 @@ var Template = function () {
 
         this._name = name;
         this._options = Object.assign({}, defaultTemplateOptions, options);
-        var clone = this._copy(data);
-        clone[settingsKey] = {
-            updateOn: this._options.updateOn
-        };
-        this._proxy = new Proxy(clone, this._traps(name));
+        this._proxy = new Proxy(this._copy(data), this._traps(name));
         this._element = this._options.element;
         this._proxies = {};
         this._timeouts = {};
@@ -1444,9 +1440,9 @@ function initDOM() {
             }
         }
         if (!templates[templateName]) {
-            templates[templateName] = { data: data, dom: template, options: options };
+            templates[templateName] = { data: data, options: options };
         } else {
-            (0, _helpers.deepExtend)(templates[templateName], { data: data, dom: template, options: options });
+            (0, _helpers.deepExtend)(templates[templateName], { data: data, options: options });
         }
     });
     for (var template in templates) {
@@ -3470,9 +3466,9 @@ var Stopwatch = function (_BasicClock) {
         key: 'expose',
         value: function expose() {
             var exposed = _get(Stopwatch.prototype.__proto__ || Object.getPrototypeOf(Stopwatch.prototype), 'expose', this).call(this);
-            // exposed['to time'] = "limit";
-            // exposed['from time'] = "initial";
-            // exposed.Reset = 'reset';
+            exposed['toTime'] = "limit";
+            exposed['fromTime'] = "initial";
+            exposed.Reset = 'reset';
             return exposed;
         }
     }, {
@@ -3489,10 +3485,10 @@ var Stopwatch = function (_BasicClock) {
             return this._initial;
         },
         set: function set(value) {
-            if (!this.running && value !== undefined && value.constructor.name === 'number') {
+            if (value !== undefined) {
                 this._initial = parseInt(value) || 0;
-                this._time = this._initial;
-                this._update();
+                // this._time = this._initial;
+                // this._update();
             }
         }
     }, {
