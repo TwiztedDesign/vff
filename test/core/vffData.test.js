@@ -53,6 +53,25 @@ describe('vff Data', () => {
             expect(send).toHaveBeenCalledTimes(1);
             expect(send).toHaveBeenCalledWith(ADD, {
                 channel : 'test',
+                options : expect.anything(),
+                data    : data
+            });
+        });
+        it('Should emit an event with options', () => {
+            vffData.registerTemplate('test', data, {someOption : 'opt1'});
+            expect(send).toHaveBeenCalledTimes(1);
+            expect(send).toHaveBeenCalledWith(ADD, {
+                channel : 'test',
+                options : expect.objectContaining({someOption: 'opt1'}),
+                data    : data
+            });
+        });
+        it('Should emit an event with overridden options', () => {
+            vffData.registerTemplate('test', data, {updateOn : 'control'});
+            expect(send).toHaveBeenCalledTimes(1);
+            expect(send).toHaveBeenCalledWith(ADD, {
+                channel : 'test',
+                options : expect.objectContaining({updateOn: 'control'}),
                 data    : data
             });
         });
