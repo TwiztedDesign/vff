@@ -20,15 +20,15 @@ function initDOM(){
         if(!template) {
             control.setAttribute('vff-template', 'Untitled Template ' + (++untitledTemplateCount));
         }
+        //Set options object
         let options = (template || control).getAttribute('vff-options') || '{}';
-        if(options){
-            try {
-                options = JSON.parse(options.replace((/'/g), "\""));
-            } catch (err){
-                options = {};
-            }
-            options.element = (template || control);
+        try {
+            options = JSON.parse(options.replace((/'/g), "\""));
+        } catch (err){
+            options = {};
         }
+        options.element = (template || control);
+
         let templateName = (template || control).getAttribute('vff-template');
         let controlName = control.getAttribute('vff-name');
         let exposed = control.expose? control.expose() : {};
