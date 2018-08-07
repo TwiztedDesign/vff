@@ -9,7 +9,7 @@ const defaultListenerOptions = {
     throttle    : true
 };
 const defaultTemplateOptions = {
-    updateOn : 'template' // all, template, control
+    updateOn : 'all' // all, template, control
 };
 //getElement, update, show, hide, toggle, onData, emit
 class Template{
