@@ -883,7 +883,7 @@ var defaultListenerOptions = {
     throttle: true
 };
 var defaultTemplateOptions = {
-    updateOn: 'template' // all, template, control
+    updateOn: 'all' // all, template, control
 };
 //getElement, update, show, hide, toggle, onData, emit
 
@@ -1411,11 +1411,15 @@ function initDOM() {
         if (!template) {
             control.setAttribute('vff-template', 'Untitled Template ' + ++untitledTemplateCount);
         }
+        //Set options object
         var options = (template || control).getAttribute('vff-options') || '{}';
-        if (options) {
+        try {
             options = JSON.parse(options.replace(/'/g, "\""));
-            options.element = template || control;
+        } catch (err) {
+            options = {};
         }
+        options.element = template || control;
+
         var templateName = (template || control).getAttribute('vff-template');
         var controlName = control.getAttribute('vff-name');
         var exposed = control.expose ? control.expose() : {};
