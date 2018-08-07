@@ -25,9 +25,6 @@ export default class Stopwatch extends BasicClock {
 
     format(timecode){
 
-
-
-
         var seconds         = parseInt((timecode / 1000) % 60),
             minutes         = parseInt((timecode / (1000 * 60)));
 
@@ -63,9 +60,9 @@ export default class Stopwatch extends BasicClock {
 
     expose(){
         var exposed = super.expose();
-        exposed.Limit = "limit";
-        exposed.Initial = "initial";
-        exposed.Reset = 'reset';
+        // exposed['to time'] = "limit";
+        // exposed['from time'] = "initial";
+        // exposed.Reset = 'reset';
         return exposed;
     }
 

@@ -42,7 +42,7 @@ class VffData {
 
         send(ADD,{
             channel : name,
-            data    : data
+            data    : this._templates[name]._proxy
         });
 
         return this._templates[name];

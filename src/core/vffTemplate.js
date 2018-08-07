@@ -3,17 +3,25 @@ import {EXPOSE_DELIMITER} from './consts';
 import {findKey, deepExtend, getByPath, uuid, deepCompare} from '../utils/helpers.js';
 import {send} from '../utils/messenger';
 import {vffData} from './vffData';
-const bypassPrefix = '___bypass___', parentObject = '__parent_object__', parentKey = '__parent_key__';
-const defaults = {
+const bypassPrefix = '___bypass___', parentObject = '__parent_object__', parentKey = '__parent_key__', settingsKey = '__settings__';
+const defaultListenerOptions = {
     changeOnly  : true,
     throttle    : true
 };
+const defaultTemplateOptions = {
+    updateOn : 'template' // all, template, control
+};
 //getElement, update, show, hide, toggle, onData, emit
 class Template{
-    constructor(name, data, element) {
+    constructor(name, data, options) {
         this._name = name;
-        this._proxy = new Proxy(this._copy(data), this._traps(name));
-        this._element = element;
+        this._options = Object.assign({}, defaultTemplateOptions, options);
+        let clone = this._copy(data);
+        clone[settingsKey] = {
+            updateOn : this._options.updateOn
+        };
+        this._proxy = new Proxy(clone, this._traps(name));
+        this._element = this._options.element;
         this._proxies = {};
         this._timeouts = {};
     }
@@ -63,7 +71,7 @@ class Template{
                 break;
         }
 
-        options = Object.assign({}, defaults, options);
+        options = Object.assign({}, defaultListenerOptions, options);
 
         let self = this;
 

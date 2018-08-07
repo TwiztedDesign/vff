@@ -435,7 +435,7 @@ var VffData = function () {
 
             (0, _messenger.send)(_events.ADD, {
                 channel: name,
-                data: data
+                data: this._templates[name]._proxy
             });
 
             return this._templates[name];
@@ -598,6 +598,7 @@ var BasicClock = function (_HTMLElement) {
         var self = _this;
         _this._time = _this.init();
         _this.running = false;
+        _this._visibility = true;
         _this.interval = new Interval(function (interval) {
             self.onInterval(interval);
             self._update();
@@ -659,7 +660,8 @@ var BasicClock = function (_HTMLElement) {
         key: 'expose',
         value: function expose() {
             return {
-                Run: 'run'
+                Run: 'run',
+                visibility: 'show'
             };
         }
     }, {
@@ -676,6 +678,15 @@ var BasicClock = function (_HTMLElement) {
             this.running = value;
             this.running ? this.start() : this.stop();
             this.dispatchEvent(new Event(value ? "start" : "stop"));
+        }
+    }, {
+        key: 'show',
+        get: function get() {
+            return this._visibility;
+        },
+        set: function set(value) {
+            this._visibility = value;
+            this.style.display = value ? 'block' : 'none';
         }
     }]);
 
@@ -865,20 +876,29 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var bypassPrefix = '___bypass___',
     parentObject = '__parent_object__',
-    parentKey = '__parent_key__';
-var defaults = {
+    parentKey = '__parent_key__',
+    settingsKey = '__settings__';
+var defaultListenerOptions = {
     changeOnly: true,
     throttle: true
+};
+var defaultTemplateOptions = {
+    updateOn: 'template' // all, template, control
 };
 //getElement, update, show, hide, toggle, onData, emit
 
 var Template = function () {
-    function Template(name, data, element) {
+    function Template(name, data, options) {
         _classCallCheck(this, Template);
 
         this._name = name;
-        this._proxy = new Proxy(this._copy(data), this._traps(name));
-        this._element = element;
+        this._options = Object.assign({}, defaultTemplateOptions, options);
+        var clone = this._copy(data);
+        clone[settingsKey] = {
+            updateOn: this._options.updateOn
+        };
+        this._proxy = new Proxy(clone, this._traps(name));
+        this._element = this._options.element;
         this._proxies = {};
         this._timeouts = {};
     }
@@ -942,7 +962,7 @@ var Template = function () {
                     break;
             }
 
-            options = Object.assign({}, defaults, options);
+            options = Object.assign({}, defaultListenerOptions, options);
 
             var self = this;
 
@@ -1395,6 +1415,11 @@ function initDOM() {
         if (!template) {
             control.setAttribute('vff-template', 'Untitled Template ' + ++untitledTemplateCount);
         }
+        var options = (template || control).getAttribute('vff-options') || '{}';
+        if (options) {
+            options = JSON.parse(options.replace(/'/g, "\""));
+            options.element = template || control;
+        }
         var templateName = (template || control).getAttribute('vff-template');
         var controlName = control.getAttribute('vff-name');
         var exposed = control.expose ? control.expose() : {};
@@ -1419,13 +1444,13 @@ function initDOM() {
             }
         }
         if (!templates[templateName]) {
-            templates[templateName] = { data: data, dom: template };
+            templates[templateName] = { data: data, dom: template, options: options };
         } else {
-            (0, _helpers.deepExtend)(templates[templateName], { data: data, dom: template });
+            (0, _helpers.deepExtend)(templates[templateName], { data: data, dom: template, options: options });
         }
     });
     for (var template in templates) {
-        _vffData.vffData.registerTemplate(template, templates[template].data, templates[template].dom);
+        _vffData.vffData.registerTemplate(template, templates[template].data, templates[template].options);
     }
 }
 
@@ -3445,9 +3470,9 @@ var Stopwatch = function (_BasicClock) {
         key: 'expose',
         value: function expose() {
             var exposed = _get(Stopwatch.prototype.__proto__ || Object.getPrototypeOf(Stopwatch.prototype), 'expose', this).call(this);
-            exposed.Limit = "limit";
-            exposed.Initial = "initial";
-            exposed.Reset = 'reset';
+            // exposed['to time'] = "limit";
+            // exposed['from time'] = "initial";
+            // exposed.Reset = 'reset';
             return exposed;
         }
     }, {
