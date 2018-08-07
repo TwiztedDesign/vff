@@ -22,7 +22,11 @@ function initDOM(){
         }
         let options = (template || control).getAttribute('vff-options') || '{}';
         if(options){
-            options = JSON.parse(options.replace((/'/g), "\""));
+            try {
+                options = JSON.parse(options.replace((/'/g), "\""));
+            } catch (err){
+                options = {};
+            }
             options.element = (template || control);
         }
         let templateName = (template || control).getAttribute('vff-template');
