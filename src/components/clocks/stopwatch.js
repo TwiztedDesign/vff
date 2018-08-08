@@ -67,8 +67,8 @@ export default class Stopwatch extends BasicClock {
 
     expose(){
         var exposed = super.expose();
-        exposed['toTime'] = "limit";
         exposed['fromTime'] = "initial";
+        exposed['toTime'] = "limit";
         exposed.Reset = 'reset';
         return exposed;
     }

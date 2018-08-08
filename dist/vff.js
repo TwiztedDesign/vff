@@ -3475,8 +3475,8 @@ var Stopwatch = function (_BasicClock) {
         key: 'expose',
         value: function expose() {
             var exposed = _get(Stopwatch.prototype.__proto__ || Object.getPrototypeOf(Stopwatch.prototype), 'expose', this).call(this);
-            exposed['toTime'] = "limit";
             exposed['fromTime'] = "initial";
+            exposed['toTime'] = "limit";
             exposed.Reset = 'reset';
             return exposed;
         }
