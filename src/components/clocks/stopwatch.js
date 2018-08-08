@@ -17,7 +17,7 @@ export default class Stopwatch extends BasicClock {
 
     _update(){
         super._update();
-        if(this._limit !== '' && this._limit >= 0 && this._time >= this._limit){
+        if(this._limit !== '' && this._limit > 0 && this._time >= this._limit * 1000){
             this.run = false;
             this.dispatchEvent(new Event("limit"));
         }
@@ -45,7 +45,7 @@ export default class Stopwatch extends BasicClock {
 
     set initial(value){
         if(value !== undefined){
-            this._initial = parseInt(value) || 0;
+            this._initial = parseInt(value)|| 0;
             // this._time = this._initial;
             // this._update();
         }
@@ -54,7 +54,7 @@ export default class Stopwatch extends BasicClock {
         return false;
     }
     set reset(value){
-        this._time = this._initial || 0;
+        this._time = this._initial * 1000 || 0;
         this._update();
     }
 

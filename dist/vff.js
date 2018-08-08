@@ -3452,7 +3452,7 @@ var Stopwatch = function (_BasicClock) {
         key: '_update',
         value: function _update() {
             _get(Stopwatch.prototype.__proto__ || Object.getPrototypeOf(Stopwatch.prototype), '_update', this).call(this);
-            if (this._limit !== '' && this._limit >= 0 && this._time >= this._limit) {
+            if (this._limit !== '' && this._limit > 0 && this._time >= this._limit * 1000) {
                 this.run = false;
                 this.dispatchEvent(new Event("limit"));
             }
@@ -3501,7 +3501,7 @@ var Stopwatch = function (_BasicClock) {
             return false;
         },
         set: function set(value) {
-            this._time = this._initial || 0;
+            this._time = this._initial * 1000 || 0;
             this._update();
         }
     }]);
