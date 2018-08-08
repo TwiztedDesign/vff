@@ -43,7 +43,7 @@ describe("Super Proxy",() => {
         expect(sp.level1Object.level2Object.level3Boolean).toBeTruthy();
 
         sp.level1Object.level2Object.level3Boolean = false;
-        let data1 = sp.__self__;
+        let data1 = sp.level1Object.__self__;
 
         expect(sp.level1Object.level2Object.level3Boolean).toBeFalsy();
 

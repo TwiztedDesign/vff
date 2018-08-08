@@ -25,6 +25,7 @@ export default class SuperProxy {
     constructor(data, traps) {
         this._proxies = {};
         traps = traps || {};
+        this._data = data;
         this._proxy = new Proxy(data, this._traps(traps));
 
         let self = this;
