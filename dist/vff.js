@@ -3435,6 +3435,11 @@ var Stopwatch = function (_BasicClock) {
 
         _this._limit = '';
         _this._initial = '';
+        _this._reset = {
+            ui: 'pulse',
+            value: true,
+            label: 'Click to reset'
+        };
         return _this;
     }
 
@@ -3498,7 +3503,7 @@ var Stopwatch = function (_BasicClock) {
     }, {
         key: 'reset',
         get: function get() {
-            return false;
+            return this._reset;
         },
         set: function set(value) {
             this._time = this._initial * 1000 || 0;

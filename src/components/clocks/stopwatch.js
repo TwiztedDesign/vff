@@ -5,6 +5,11 @@ export default class Stopwatch extends BasicClock {
         super();
         this._limit = '';
         this._initial = '';
+        this._reset = {
+            ui      : 'pulse',
+            value   : true,
+            label   : 'Click to reset'
+        };
     }
 
     connectedCallback() {
@@ -51,12 +56,14 @@ export default class Stopwatch extends BasicClock {
         }
     }
     get reset(){
-        return false;
+        return this._reset;
     }
     set reset(value){
         this._time = this._initial * 1000 || 0;
         this._update();
     }
+
+
 
     expose(){
         var exposed = super.expose();
