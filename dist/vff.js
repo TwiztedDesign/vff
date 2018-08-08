@@ -763,11 +763,11 @@ var vff = function vff(selector) {
     return new _vffElement2.default(selector);
 };
 
-vff.addTemplate = function (name, data) {
-    return _vffData.vffData.registerTemplate(name, data);
+vff.addTemplate = function (name, data, options) {
+    return _vffData.vffData.registerTemplate(name, data, options);
 };
-vff.registerTemplate = function (name, data) {
-    return _vffData.vffData.registerTemplate(name, data);
+vff.registerTemplate = function (name, data, options) {
+    return _vffData.vffData.registerTemplate(name, data, options);
 };
 vff.getTemplate = function (name) {
     return _vffData.vffData.getTemplate(name);

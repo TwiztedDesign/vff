@@ -24,8 +24,8 @@ let vff = (selector) => {
     return new vffElement(selector);
 };
 
-vff.addTemplate         = (name, data) => {return vffData.registerTemplate(name, data);};
-vff.registerTemplate    = (name, data) => {return vffData.registerTemplate(name, data);};
+vff.addTemplate         = (name, data, options) => {return vffData.registerTemplate(name, data, options);};
+vff.registerTemplate    = (name, data, options) => {return vffData.registerTemplate(name, data, options);};
 vff.getTemplate         = (name) => {return vffData.getTemplate(name);};
 vff.getTemplates        = () => {return vffData.getTemplates();};
 vff.onUpdate            = (cb) => {return vffData.onUpdate(cb);};
