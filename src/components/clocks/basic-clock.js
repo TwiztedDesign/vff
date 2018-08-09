@@ -67,8 +67,8 @@ export default class BasicClock extends HTMLElement {
 
     expose(){
         return {
-            Run : 'run',
-            visibility : 'show'
+            visibility : 'show',
+            Run : 'run'
         };
     }
 

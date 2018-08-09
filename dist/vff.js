@@ -661,8 +661,8 @@ var BasicClock = function (_HTMLElement) {
         key: 'expose',
         value: function expose() {
             return {
-                Run: 'run',
-                visibility: 'show'
+                visibility: 'show',
+                Run: 'run'
             };
         }
     }, {
