@@ -42,6 +42,7 @@ class VffData {
 
         send(ADD,{
             channel : name,
+            options : this._templates[name]._options,
             data    : data
         });
 

@@ -20,6 +20,15 @@ function initDOM(){
         if(!template) {
             control.setAttribute('vff-template', 'Untitled Template ' + (++untitledTemplateCount));
         }
+        //Set options object
+        let options = (template || control).getAttribute('vff-options') || '{}';
+        try {
+            options = JSON.parse(options.replace((/'/g), "\""));
+        } catch (err){
+            options = {};
+        }
+        options.element = (template || control);
+
         let templateName = (template || control).getAttribute('vff-template');
         let controlName = control.getAttribute('vff-name');
         let exposed = control.expose? control.expose() : {};
@@ -41,13 +50,13 @@ function initDOM(){
             }
         }
         if(!templates[templateName]){
-            templates[templateName] = {data : data, dom : template};
+            templates[templateName] = {data : data, options : options};
         } else {
-            deepExtend(templates[templateName], {data : data, dom : template});
+            deepExtend(templates[templateName], {data : data, options : options});
         }
     });
     for (let template in templates) {
-        vffData.registerTemplate(template, templates[template].data, templates[template].dom);
+        vffData.registerTemplate(template, templates[template].data, templates[template].options);
     }
 }
 

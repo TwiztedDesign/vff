@@ -435,6 +435,7 @@ var VffData = function () {
 
             (0, _messenger.send)(_events.ADD, {
                 channel: name,
+                options: this._templates[name]._options,
                 data: data
             });
 
@@ -598,6 +599,7 @@ var BasicClock = function (_HTMLElement) {
         var self = _this;
         _this._time = _this.init();
         _this.running = false;
+        _this._visibility = true;
         _this.interval = new Interval(function (interval) {
             self.onInterval(interval);
             self._update();
@@ -659,7 +661,8 @@ var BasicClock = function (_HTMLElement) {
         key: 'expose',
         value: function expose() {
             return {
-                Run: 'run'
+                Run: 'run',
+                visibility: 'show'
             };
         }
     }, {
@@ -676,6 +679,15 @@ var BasicClock = function (_HTMLElement) {
             this.running = value;
             this.running ? this.start() : this.stop();
             this.dispatchEvent(new Event(value ? "start" : "stop"));
+        }
+    }, {
+        key: 'show',
+        get: function get() {
+            return this._visibility;
+        },
+        set: function set(value) {
+            this._visibility = value;
+            this.style.display = value ? 'block' : 'none';
         }
     }]);
 
@@ -751,11 +763,11 @@ var vff = function vff(selector) {
     return new _vffElement2.default(selector);
 };
 
-vff.addTemplate = function (name, data) {
-    return _vffData.vffData.registerTemplate(name, data);
+vff.addTemplate = function (name, data, options) {
+    return _vffData.vffData.registerTemplate(name, data, options);
 };
-vff.registerTemplate = function (name, data) {
-    return _vffData.vffData.registerTemplate(name, data);
+vff.registerTemplate = function (name, data, options) {
+    return _vffData.vffData.registerTemplate(name, data, options);
 };
 vff.getTemplate = function (name) {
     return _vffData.vffData.getTemplate(name);
@@ -866,19 +878,23 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var bypassPrefix = '___bypass___',
     parentObject = '__parent_object__',
     parentKey = '__parent_key__';
-var defaults = {
+var defaultListenerOptions = {
     changeOnly: true,
     throttle: true
+};
+var defaultTemplateOptions = {
+    updateOn: 'all' // all, template, control
 };
 //getElement, update, show, hide, toggle, onData, emit
 
 var Template = function () {
-    function Template(name, data, element) {
+    function Template(name, data, options) {
         _classCallCheck(this, Template);
 
         this._name = name;
+        this._options = Object.assign({}, defaultTemplateOptions, options);
         this._proxy = new Proxy(this._copy(data), this._traps(name));
-        this._element = element;
+        this._element = this._options.element;
         this._proxies = {};
         this._timeouts = {};
     }
@@ -942,7 +958,7 @@ var Template = function () {
                     break;
             }
 
-            options = Object.assign({}, defaults, options);
+            options = Object.assign({}, defaultListenerOptions, options);
 
             var self = this;
 
@@ -1395,6 +1411,15 @@ function initDOM() {
         if (!template) {
             control.setAttribute('vff-template', 'Untitled Template ' + ++untitledTemplateCount);
         }
+        //Set options object
+        var options = (template || control).getAttribute('vff-options') || '{}';
+        try {
+            options = JSON.parse(options.replace(/'/g, "\""));
+        } catch (err) {
+            options = {};
+        }
+        options.element = template || control;
+
         var templateName = (template || control).getAttribute('vff-template');
         var controlName = control.getAttribute('vff-name');
         var exposed = control.expose ? control.expose() : {};
@@ -1419,13 +1444,13 @@ function initDOM() {
             }
         }
         if (!templates[templateName]) {
-            templates[templateName] = { data: data, dom: template };
+            templates[templateName] = { data: data, options: options };
         } else {
-            (0, _helpers.deepExtend)(templates[templateName], { data: data, dom: template });
+            (0, _helpers.deepExtend)(templates[templateName], { data: data, options: options });
         }
     });
     for (var template in templates) {
-        _vffData.vffData.registerTemplate(template, templates[template].data, templates[template].dom);
+        _vffData.vffData.registerTemplate(template, templates[template].data, templates[template].options);
     }
 }
 
@@ -3410,6 +3435,11 @@ var Stopwatch = function (_BasicClock) {
 
         _this._limit = '';
         _this._initial = '';
+        _this._reset = {
+            ui: 'pulse',
+            value: true,
+            label: 'Click to reset'
+        };
         return _this;
     }
 
@@ -3427,7 +3457,7 @@ var Stopwatch = function (_BasicClock) {
         key: '_update',
         value: function _update() {
             _get(Stopwatch.prototype.__proto__ || Object.getPrototypeOf(Stopwatch.prototype), '_update', this).call(this);
-            if (this._limit !== '' && this._limit >= 0 && this._time >= this._limit) {
+            if (this._limit !== '' && this._limit > 0 && this._time >= this._limit * 1000) {
                 this.run = false;
                 this.dispatchEvent(new Event("limit"));
             }
@@ -3445,8 +3475,8 @@ var Stopwatch = function (_BasicClock) {
         key: 'expose',
         value: function expose() {
             var exposed = _get(Stopwatch.prototype.__proto__ || Object.getPrototypeOf(Stopwatch.prototype), 'expose', this).call(this);
-            exposed.Limit = "limit";
-            exposed.Initial = "initial";
+            exposed['fromTime'] = "initial";
+            exposed['toTime'] = "limit";
             exposed.Reset = 'reset';
             return exposed;
         }
@@ -3464,19 +3494,19 @@ var Stopwatch = function (_BasicClock) {
             return this._initial;
         },
         set: function set(value) {
-            if (!this.running && value !== undefined && value.constructor.name === 'number') {
+            if (value !== undefined) {
                 this._initial = parseInt(value) || 0;
-                this._time = this._initial;
-                this._update();
+                // this._time = this._initial;
+                // this._update();
             }
         }
     }, {
         key: 'reset',
         get: function get() {
-            return false;
+            return this._reset;
         },
         set: function set(value) {
-            this._time = this._initial || 0;
+            this._time = this._initial * 1000 || 0;
             this._update();
         }
     }]);

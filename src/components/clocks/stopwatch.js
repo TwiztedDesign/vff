@@ -5,6 +5,11 @@ export default class Stopwatch extends BasicClock {
         super();
         this._limit = '';
         this._initial = '';
+        this._reset = {
+            ui      : 'pulse',
+            value   : true,
+            label   : 'Click to reset'
+        };
     }
 
     connectedCallback() {
@@ -17,16 +22,13 @@ export default class Stopwatch extends BasicClock {
 
     _update(){
         super._update();
-        if(this._limit !== '' && this._limit >= 0 && this._time >= this._limit){
+        if(this._limit !== '' && this._limit > 0 && this._time >= this._limit * 1000){
             this.run = false;
             this.dispatchEvent(new Event("limit"));
         }
     }
 
     format(timecode){
-
-
-
 
         var seconds         = parseInt((timecode / 1000) % 60),
             minutes         = parseInt((timecode / (1000 * 60)));
@@ -47,24 +49,26 @@ export default class Stopwatch extends BasicClock {
     }
 
     set initial(value){
-        if(!this.running && value !== undefined && value.constructor.name === 'number'){
-            this._initial = parseInt(value) || 0;
-            this._time = this._initial;
-            this._update();
+        if(value !== undefined){
+            this._initial = parseInt(value)|| 0;
+            // this._time = this._initial;
+            // this._update();
         }
     }
     get reset(){
-        return false;
+        return this._reset;
     }
     set reset(value){
-        this._time = this._initial || 0;
+        this._time = this._initial * 1000 || 0;
         this._update();
     }
 
+
+
     expose(){
         var exposed = super.expose();
-        exposed.Limit = "limit";
-        exposed.Initial = "initial";
+        exposed['fromTime'] = "initial";
+        exposed['toTime'] = "limit";
         exposed.Reset = 'reset';
         return exposed;
     }

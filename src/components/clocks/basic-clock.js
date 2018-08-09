@@ -6,7 +6,8 @@ export default class BasicClock extends HTMLElement {
 
         let self = this;
         this._time = this.init();
-        this.running= false;
+        this.running = false;
+        this._visibility = true;
         this.interval = new Interval(function(interval){
             self.onInterval(interval);
             self._update();
@@ -56,10 +57,18 @@ export default class BasicClock extends HTMLElement {
         this.running? this.start() : this.stop();
         this.dispatchEvent(new Event(value? "start" : "stop"));
     }
+    get show(){
+        return this._visibility;
+    }
+    set show(value){
+        this._visibility = value;
+        this.style.display = value? 'block' : 'none';
+    }
 
     expose(){
         return {
             Run : 'run',
+            visibility : 'show'
         };
     }
 

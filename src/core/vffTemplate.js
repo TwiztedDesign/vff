@@ -4,16 +4,20 @@ import {findKey, deepExtend, getByPath, uuid, deepCompare} from '../utils/helper
 import {send} from '../utils/messenger';
 import {vffData} from './vffData';
 const bypassPrefix = '___bypass___', parentObject = '__parent_object__', parentKey = '__parent_key__';
-const defaults = {
+const defaultListenerOptions = {
     changeOnly  : true,
     throttle    : true
 };
+const defaultTemplateOptions = {
+    updateOn : 'all' // all, template, control
+};
 //getElement, update, show, hide, toggle, onData, emit
 class Template{
-    constructor(name, data, element) {
+    constructor(name, data, options) {
         this._name = name;
+        this._options = Object.assign({}, defaultTemplateOptions, options);
         this._proxy = new Proxy(this._copy(data), this._traps(name));
-        this._element = element;
+        this._element = this._options.element;
         this._proxies = {};
         this._timeouts = {};
     }
@@ -63,7 +67,7 @@ class Template{
                 break;
         }
 
-        options = Object.assign({}, defaults, options);
+        options = Object.assign({}, defaultListenerOptions, options);
 
         let self = this;
 
