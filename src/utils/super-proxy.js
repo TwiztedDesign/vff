@@ -1,4 +1,4 @@
-import {findKey, deepExtend, getByPath, uuid, deepCompare} from '../utils/helpers.js';
+import {uuid, findKey} from '../utils/helpers.js';
 const internal = {
     bypassPrefix    : '__bypass__',
     parentObject    : '__parent_object__',
@@ -9,7 +9,7 @@ const internal = {
 
 };
 const isInternalProperty = function(prop){
-    return prop.startsWith('__') && prop.endsWith('__');
+    return prop.startsWith('__') && prop.endsWith('__') && prop !== '__proxy__';
 };
 const cleanInternal = function(object){
     Object.keys(object).forEach((key) => {
@@ -20,21 +20,34 @@ const cleanInternal = function(object){
         }
     })
 };
+const getPath = (obj, key) => {
+    let path = key? [key] : [];
+    while(obj[internal.parentObject]){
+        path.unshift(obj[internal.parentKey]);
+        obj = obj[internal.parentObject];
+    }
+    return path;
+};
+const noBypass = (key) => {
+    return typeof key === 'string'? key.replace(internal.bypassPrefix ,'') : '';
+};
 
 export default class SuperProxy {
     constructor(data, traps) {
         this._proxies = {};
         traps = traps || {};
-        this._data = data;
         this._proxy = new Proxy(data, this._traps(traps));
 
         let self = this;
 
         return new Proxy(this, {
             get : function(target, prop){
+
                 if(prop in target){
                     return target[prop];
                 }
+                let key = findKey(self._proxy, noBypass(prop));
+                prop = key || prop;
                 return self._proxy[prop];
             },
             set : function(target, prop, value){
@@ -48,6 +61,10 @@ export default class SuperProxy {
             }
         });
 
+    }
+
+    findKey(key){
+        return findKey(this._proxy, key);
     }
 
     _copy(o, prefix) {
@@ -82,21 +99,12 @@ export default class SuperProxy {
                 if (!bypass && !target[internal.isProxy] && typeof value !== 'object') {
                     if (trapFuncs.set) {
                         //set with parent object, path array, value
-                        let path = [key];
-                        while(target[internal.parentObject]){
-                            path.unshift(target[internal.parentKey]);
-                            let parent = target[internal.parentObject];
-                            // delete target[internal.parentObject];
-                            // delete target[internal.key];
-                            target = parent;
-
-                        }
+                        let path = getPath(target, key);
                         cleanInternal(target);
                         trapFuncs.set(target, path, value);
                     }
                 }
                 return true;
-
             },
             get: (target, key) => {
                 if (key === internal.isProxy) {
@@ -130,246 +138,5 @@ export default class SuperProxy {
             }
         };
         return traps;
-    }
-}
-
-
-
-
-
-class Template{
-    constructor(name, data, element) {
-        this._name = name;
-        this._proxy = new Proxy(this._copy(data), this._traps(name));
-        this._element = element;
-        this._proxies = {};
-        this._timeouts = {};
-    }
-    $element(control){
-        if(this._element && control){
-            return this._element.getAttribute('vff-name') === control?
-                this._element : this._element.querySelector('[vff-name=' + control +']');
-        }
-        return this._element;
-    }
-    $show(){
-        this._setValue("visibility", true);
-    }
-    $hide(){
-        this._setValue("visibility", false);
-    }
-    $toggle(){
-        let visibility = this._getValue('visibility');
-        if(visibility !== undefined){
-            this._setValue('visibility', !visibility);
-        }
-    }
-    $emit(data){
-        let payload = {};
-        payload.data = data;
-        payload.query = vffData.getQueryParams();
-        payload.channel = this._name;
-        send(OUTGOING_EVENT, payload);
-    }
-    $on(arg1, arg2, arg3){
-        let template, callback, options = options || {};
-        switch (arguments.length){
-            case 0:
-                throw new Error("$on was called without arguments");
-            case 1:
-                callback = arg1;
-                break;
-            default:
-                if(typeof arg1 === 'string'){
-                    template = arg1;
-                    callback = arg2;
-                    options = arg3 || {};
-                } else if(typeof arg1 === 'function'){
-                    callback = arg1;
-                    options = arg2 || {};
-                }
-                break;
-        }
-
-        options = Object.assign({}, defaults, options);
-
-        let self = this;
-
-        function runCB(data){
-            if(options.consolidate || options.throttle){
-                clearTimeout(self._timeouts[template || '__global_event__']);
-                self._timeouts[template || '__global_event__'] = setTimeout(function(){
-                    callback(data);
-                }, (typeof options.throttle === 'number')? options.throttle : 50);
-            } else {
-                callback(data);
-            }
-        }
-
-        function listener(event){
-            let key = findKey(event.detail, self._name);
-            if(key) {
-
-                if(template && options.changeOnly && (getByPath(event.detail[key], template) === getByPath(self._proxy, template) || getByPath(event.detail[key], template) === undefined )){
-                    return;
-                } else if (!template && options.changeOnly && deepCompare(event.detail[key], self._proxy)){
-                    return;
-                }
-
-                if(template && getByPath(event.detail[key], template) !== undefined){
-                    runCB(getByPath(event.detail[key], template));
-                } else if(!template){
-                    runCB(event.detail[key]);
-                }
-            }
-        }
-        document.addEventListener(VFF_EVENT, listener);
-    }
-
-
-    getElement(){ return this.$element(); }
-    show(){ return this.$show(); }
-    hide(){ return this.$hide(); }
-    toggle(){ return this.$toggle(); }
-    onData(arg1, arg2, arg3){ return this.$on(arg1, arg2, arg3); }
-    emit(data){ return this.$emit(data); }
-
-    _update(data){
-        let toUpdate = this._copy(data, bypassPrefix);
-        deepExtend(this._proxy, toUpdate);
-    }
-    _copy(o, prefix) {
-        prefix = prefix || '';
-        let output, v, key;
-        output = Array.isArray(o) ? [] : {};
-        for (key in o) {
-            v = o[key];
-            if(Array.isArray(output)){
-                output[key] = (typeof v === "object") ? this._copy(v, prefix) : v;
-            } else {
-                output[prefix + key] = (typeof v === "object") ? this._copy(v, prefix) : v;
-            }
-        }
-        return output;
-    }
-    _set(target, key, value){
-        target[bypassPrefix + key] = value;
-    }
-
-    _sendUserUpdateEvent(name, target, key, value){
-        let payload = {}, po, pk, originalTarget = target;
-        payload[name] = {};
-
-
-        if(!target[parentObject]){
-            payload[name][key] = value;
-        } else {
-            let ancestors = [];
-            while(target[parentObject]){
-                ancestors.unshift(target[parentKey]);
-                target = target[parentObject];
-            }
-
-            let ancestor = '',
-                tmp = payload[name];
-            for(ancestor of ancestors) {
-                tmp[ancestor] = {};
-                if(ancestors[ancestors.length -1 !== ancestor]){
-                    tmp = tmp[ancestor];
-                }
-
-            }
-
-            po = originalTarget[parentObject];
-            pk = originalTarget[parentKey];
-            delete originalTarget[parentObject];
-            delete originalTarget[parentKey];
-            tmp[ancestor] = originalTarget;
-        }
-
-        send(USER_UPDATE, payload);
-
-        if(po) originalTarget[parentObject] = po;
-        if(pk) originalTarget[parentKey] = pk;
-    }
-
-    _traps(name){
-        let self = this;
-        let traps = {
-            set: function (target, key, value) {
-                let bypass = key.startsWith(bypassPrefix);
-                if(bypass && !target.__isProxy){
-                    key = key.substr(bypassPrefix.length);
-                }
-                target[key] = value;
-                if(!bypass && !target.__isProxy && typeof value !== 'object'){
-                    self._sendUserUpdateEvent(name, target, key, value);
-                }
-                return true;
-            },
-            get: function (target, key) {
-                if(key === '__isProxy'){return true;}
-                if(key.startsWith && key.startsWith(bypassPrefix))  key = key.substr(bypassPrefix.length);
-
-                if (typeof target[key] === 'object' && target[key] !== null && !target[key].__isProxy && !key.startsWith('__')) {
-                    if(target[key].__proxy){
-                        return self._proxies[target[key].__proxy];
-                    } else {
-                        let proxy = new Proxy(target[key], traps);
-                        self._set(proxy, parentObject, target);
-                        self._set(proxy, parentKey, key);
-                        let proxyID = uuid();
-                        self._proxies[proxyID] = proxy;
-                        target[key].__proxy = proxyID;
-                        return proxy;
-                    }
-                }
-                else {
-                    return target[key];
-                }
-            }
-        };
-
-        return traps;
-    }
-    _setValue(key, value){
-        key = findKey(this._proxy, key);
-        if(key){
-            this._proxy[key] = value;
-        }
-    }
-    _getValue(key){
-        return this._proxy[findKey(this._proxy, key)];
-    }
-
-}
-class VffTemplate extends Template {
-    constructor(name, data, element){
-        super(name, data, element);
-
-        let self = this;
-        return new Proxy(this, {
-            get : function(target, prop){
-                if(prop in target){
-                    return target[prop];
-                } else if(target._element && target._element.expose && findExposed(prop, target._proxy)){
-                    return target._proxy[findExposed(prop, target._proxy)];
-                }
-                return self._proxy[prop];
-            },
-            set : function(target, prop, value){
-                if(prop in target){
-                    throw  new Error("Override Error: " + prop + " is an internal vff property and can't be overridden");
-                    // return target[prop] = value;
-                }
-                else if(target._element && target._element.expose && findExposed(prop, target._proxy)){
-                    target._proxy[findExposed(prop, target._proxy)] = value;
-                }
-                else {
-                    target._proxy[prop] = value;
-                }
-                return true;
-            }
-        });
     }
 }

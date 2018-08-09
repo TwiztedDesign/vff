@@ -86,7 +86,8 @@ describe('vff Data', () => {
         it('should return all templates', () => {
             let template1 = vffData.registerTemplate('test1', data);
             let template2 = vffData.registerTemplate('test2', data);
-            expect(vffData.getTemplates()).toEqual(expect.arrayContaining([template1, template2]));
+            let templates = vffData.getTemplates();
+            expect(templates).toEqual(expect.arrayContaining([template1, template2]));
             expect(vffData.getTemplates().length).toBe(2);
         })
     });

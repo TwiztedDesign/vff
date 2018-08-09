@@ -97,8 +97,11 @@ function deepExtend(destination, source) {
     for (let property in source) {
         if (source[property] && source[property].constructor &&
             source[property].constructor === Object && !source[property].__isProxy) {
-            destination[property] = (destination[property] && destination[property].constructor && destination[property].constructor === Object)?
-                destination[property] : {};
+
+            let valueToSet = (destination[property] && destination[property].constructor && destination[property].constructor === Object)?
+                destination[property] : {}
+
+            destination[property] = valueToSet ;
             deepExtend(destination[property], source[property]);
         } else {
             destination[property] = source[property];

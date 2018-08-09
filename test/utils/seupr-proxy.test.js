@@ -34,7 +34,7 @@ describe("Super Proxy",() => {
     it('', () => {
         let sp = new SuperProxy(data, {
             set : function (target, path, value) {
-                console.log(target, path, value);
+                // console.log(target, path, value);
             }
         });
 
@@ -43,7 +43,7 @@ describe("Super Proxy",() => {
         expect(sp.level1Object.level2Object.level3Boolean).toBeTruthy();
 
         sp.level1Object.level2Object.level3Boolean = false;
-        let data1 = sp.level1Object.__self__;
+        let data1 = sp.__self__.level1Object;
 
         expect(sp.level1Object.level2Object.level3Boolean).toBeFalsy();
 

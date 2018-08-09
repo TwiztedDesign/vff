@@ -3,7 +3,8 @@ import {EXPOSE_DELIMITER} from './consts';
 import {findKey, deepExtend, getByPath, uuid, deepCompare} from '../utils/helpers.js';
 import {send} from '../utils/messenger';
 import {vffData} from './vffData';
-const bypassPrefix = '___bypass___', parentObject = '__parent_object__', parentKey = '__parent_key__';
+import SuperProxy from "../utils/super-proxy";
+const bypassPrefix = '__bypass__', parentObject = '__parent_object__', parentKey = '__parent_key__';
 const defaultListenerOptions = {
     changeOnly  : true,
     throttle    : true
@@ -16,7 +17,7 @@ class Template{
     constructor(name, data, options) {
         this._name = name;
         this._options = Object.assign({}, defaultTemplateOptions, options);
-        this._proxy = new Proxy(this._copy(data), this._traps(name));
+        this._proxy = new SuperProxy(this._copy(data), this._traps(name));
         this._element = this._options.element;
         this._proxies = {};
         this._timeouts = {};
@@ -88,7 +89,7 @@ class Template{
 
                 if(template && options.changeOnly && (getByPath(event.detail[key], template) === getByPath(self._proxy, template) || getByPath(event.detail[key], template) === undefined )){
                     return;
-                } else if (!template && options.changeOnly && deepCompare(event.detail[key], self._proxy)){
+                } else if (!template && options.changeOnly && deepCompare(event.detail[key], self._proxy._proxy)){
                     return;
                 }
 
@@ -132,6 +133,10 @@ class Template{
         target[bypassPrefix + key] = value;
     }
 
+    __sendUserUpdateEvent(){
+
+    }
+
     _sendUserUpdateEvent(name, target, key, value){
         let payload = {}, po, pk, originalTarget = target;
         payload[name] = {};
@@ -169,53 +174,25 @@ class Template{
         if(pk) originalTarget[parentKey] = pk;
     }
 
-    _traps(name){
+
+    _traps(name) {
         let self = this;
         let traps = {
-            set: function (target, key, value) {
-                let bypass = key.startsWith(bypassPrefix);
-                if(bypass && !target.__isProxy){
-                    key = key.substr(bypassPrefix.length);
-                }
-                target[key] = value;
-                if(!bypass && !target.__isProxy && typeof value !== 'object'){
-                    self._sendUserUpdateEvent(name, target, key, value);
-                }
-                return true;
-            },
-            get: function (target, key) {
-                if(key === '__isProxy'){return true;}
-                if(key.startsWith && key.startsWith(bypassPrefix))  key = key.substr(bypassPrefix.length);
-
-                if (typeof target[key] === 'object' && target[key] !== null && !target[key].__isProxy && !key.startsWith('__')) {
-                    if(target[key].__proxy){
-                        return self._proxies[target[key].__proxy];
-                    } else {
-                        let proxy = new Proxy(target[key], traps);
-                        self._set(proxy, parentObject, target);
-                        self._set(proxy, parentKey, key);
-                        let proxyID = uuid();
-                        self._proxies[proxyID] = proxy;
-                        target[key].__proxy = proxyID;
-                        return proxy;
-                    }
-                }
-                else {
-                    return target[key];
-                }
+            set: (target, key, value) => {
+                self._sendUserUpdateEvent(name, target, key, value);
             }
         };
-
         return traps;
     }
     _setValue(key, value){
-        key = findKey(this._proxy, key);
+        key = this._proxy.findKey(key);
         if(key){
             this._proxy[key] = value;
         }
     }
     _getValue(key){
-        return this._proxy[findKey(this._proxy, key)];
+        // return this._proxy[findKey(this._proxy, key)];
+        return this._proxy[key];
     }
 
 }

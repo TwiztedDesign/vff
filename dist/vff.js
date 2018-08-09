@@ -869,13 +869,19 @@ var _messenger = __webpack_require__(3);
 
 var _vffData = __webpack_require__(2);
 
+var _superProxy = __webpack_require__(40);
+
+var _superProxy2 = _interopRequireDefault(_superProxy);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var bypassPrefix = '___bypass___',
+var bypassPrefix = '__bypass__',
     parentObject = '__parent_object__',
     parentKey = '__parent_key__';
 var defaultListenerOptions = {
@@ -893,7 +899,7 @@ var Template = function () {
 
         this._name = name;
         this._options = Object.assign({}, defaultTemplateOptions, options);
-        this._proxy = new Proxy(this._copy(data), this._traps(name));
+        this._proxy = new _superProxy2.default(this._copy(data), this._traps(name));
         this._element = this._options.element;
         this._proxies = {};
         this._timeouts = {};
@@ -1114,6 +1120,17 @@ var Template = function () {
     }, {
         key: '_traps',
         value: function _traps(name) {
+            var self = this;
+            var traps = {
+                set: function set(target, key, value) {
+                    self._sendUserUpdateEvent(name, target, key, value);
+                }
+            };
+            return traps;
+        }
+    }, {
+        key: '__traps',
+        value: function __traps(name) {
             var self = this;
             var traps = {
                 set: function set(target, key, value) {
@@ -3727,6 +3744,168 @@ window.addEventListener('load', function () {
     document.body.addEventListener("mousedown", bubbleUpMouseEvent);
     document.body.addEventListener("mouseup", bubbleUpMouseEvent);
 });
+
+/***/ }),
+/* 40 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+var _helpers = __webpack_require__(0);
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var internal = {
+    bypassPrefix: '__bypass__',
+    parentObject: '__parent_object__',
+    parentKey: '__parent_key__',
+    proxy: '__proxy__',
+    isProxy: '__isProxy__',
+    self: '__self__'
+
+};
+var isInternalProperty = function isInternalProperty(prop) {
+    return prop.startsWith('__') && prop.endsWith('__') && prop !== '__proxy__';
+};
+var cleanInternal = function cleanInternal(object) {
+    Object.keys(object).forEach(function (key) {
+        if (isInternalProperty(key)) {
+            delete object[key];
+        }if (_typeof(object[key]) === 'object') {
+            cleanInternal(object[key]);
+        }
+    });
+};
+var getPath = function getPath(obj, key) {
+    var path = key ? [key] : [];
+    while (obj[internal.parentObject]) {
+        path.unshift(obj[internal.parentKey]);
+        obj = obj[internal.parentObject];
+    }
+    return path;
+};
+
+var SuperProxy = function () {
+    function SuperProxy(data, traps) {
+        _classCallCheck(this, SuperProxy);
+
+        this._proxies = {};
+        traps = traps || {};
+        this._data = data;
+        this._proxy = new Proxy(data, this._traps(traps));
+
+        var self = this;
+
+        return new Proxy(this, {
+            get: function get(target, prop) {
+                if (prop in target) {
+                    return target[prop];
+                }
+                return self._proxy[prop];
+            },
+            set: function set(target, prop, value) {
+                if (prop in target) {
+                    throw new Error("Override Error: " + prop + " is an internal vff property and can't be overridden");
+                    // return target[prop] = value;
+                } else {
+                    target._proxy[prop] = value;
+                }
+                return true;
+            }
+        });
+    }
+
+    _createClass(SuperProxy, [{
+        key: '_copy',
+        value: function _copy(o, prefix) {
+            prefix = prefix || '';
+            var output = void 0,
+                v = void 0,
+                key = void 0;
+            output = Array.isArray(o) ? [] : {};
+            for (key in o) {
+                v = o[key];
+                if (Array.isArray(output)) {
+                    output[key] = (typeof v === 'undefined' ? 'undefined' : _typeof(v)) === "object" ? this._copy(v, prefix) : v;
+                } else {
+                    output[prefix + key] = (typeof v === 'undefined' ? 'undefined' : _typeof(v)) === "object" ? this._copy(v, prefix) : v;
+                }
+            }
+            return output;
+        }
+    }, {
+        key: '_set',
+        value: function _set(target, key, value) {
+            target[internal.bypassPrefix + key] = value;
+        }
+    }, {
+        key: '_traps',
+        value: function _traps(trapFuncs) {
+            var self = this;
+
+            var traps = {
+                set: function set(target, key, value) {
+                    var bypass = key.startsWith(internal.bypassPrefix);
+                    if (bypass && !target[internal.isProxy]) {
+                        key = key.substr(internal.bypassPrefix.length);
+                    }
+                    target[key] = value;
+                    if (!bypass && !target[internal.isProxy] && (typeof value === 'undefined' ? 'undefined' : _typeof(value)) !== 'object') {
+                        if (trapFuncs.set) {
+                            //set with parent object, path array, value
+                            var path = getPath(target, key);
+                            cleanInternal(target);
+                            trapFuncs.set(target, path, value);
+                        }
+                    }
+                    return true;
+                },
+                get: function get(target, key) {
+                    if (key === internal.isProxy) {
+                        return true;
+                    }
+                    if (key === internal.self) {
+                        cleanInternal(target);
+                        return target;
+                    }
+                    if (key.startsWith && key.startsWith(internal.bypassPrefix)) {
+                        key = key.substr(internal.bypassPrefix.length);
+                    }
+
+                    if (_typeof(target[key]) === 'object' && target[key] !== null && !target[key][internal.isProxy] && !isInternalProperty(key)) {
+                        if (target[key][internal.proxy]) {
+                            return self._proxies[target[key][internal.proxy]];
+                        } else {
+                            var proxy = new Proxy(target[key], traps);
+                            self._set(proxy, internal.parentObject, target);
+                            self._set(proxy, internal.parentKey, key);
+                            var proxyID = (0, _helpers.uuid)();
+                            self._proxies[proxyID] = proxy;
+                            target[key][internal.proxy] = proxyID;
+                            return proxy;
+                        }
+                    } else {
+                        return target[key];
+                    }
+                }
+            };
+            return traps;
+        }
+    }]);
+
+    return SuperProxy;
+}();
+
+exports.default = SuperProxy;
 
 /***/ })
 /******/ ]);
