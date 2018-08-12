@@ -1,10 +1,9 @@
 import {USER_UPDATE, VFF_EVENT, OUTGOING_EVENT} from "../utils/events";
 import {EXPOSE_DELIMITER} from './consts';
-import {findKey, deepExtend, getByPath, uuid, deepCompare} from '../utils/helpers.js';
+import {findKey, getByPath} from '../utils/helpers.js';
 import {send} from '../utils/messenger';
 import {vffData} from './vffData';
 import SuperProxy from "../utils/super-proxy";
-const bypassPrefix = '__bypass__', parentObject = '__parent_object__', parentKey = '__parent_key__';
 const defaultListenerOptions = {
     changeOnly  : true,
     throttle    : true
@@ -17,7 +16,7 @@ class Template{
     constructor(name, data, options) {
         this._name = name;
         this._options = Object.assign({}, defaultTemplateOptions, options);
-        this._proxy = new SuperProxy(this._copy(data), this._traps(name));
+        this._proxy = new SuperProxy(data, this._traps(name));
         this._element = this._options.element;
         this._proxies = {};
         this._timeouts = {};
@@ -89,7 +88,7 @@ class Template{
 
                 if(template && options.changeOnly && (getByPath(event.detail[key], template) === getByPath(self._proxy, template) || getByPath(event.detail[key], template) === undefined )){
                     return;
-                } else if (!template && options.changeOnly && deepCompare(event.detail[key], self._proxy._proxy)){
+                } else if (!template && options.changeOnly && self._proxy.equals(event.detail[key])){
                     return;
                 }
 
@@ -112,68 +111,30 @@ class Template{
     emit(data){ return this.$emit(data); }
 
     _update(data){
-        let toUpdate = this._copy(data, bypassPrefix);
-        deepExtend(this._proxy, toUpdate);
-    }
-    _copy(o, prefix) {
-        prefix = prefix || '';
-        let output, v, key;
-        output = Array.isArray(o) ? [] : {};
-        for (key in o) {
-            v = o[key];
-            if(Array.isArray(output)){
-                output[key] = (typeof v === "object") ? this._copy(v, prefix) : v;
-            } else {
-                output[prefix + key] = (typeof v === "object") ? this._copy(v, prefix) : v;
-            }
-        }
-        return output;
-    }
-    _set(target, key, value){
-        target[bypassPrefix + key] = value;
+        this._proxy.update(data);
     }
 
-    __sendUserUpdateEvent(){
-
-    }
-
-    _sendUserUpdateEvent(name, target, key, value){
-        let payload = {}, po, pk, originalTarget = target;
+    _sendUserUpdateEvent(name, target, path, value){
+        let payload = {};
         payload[name] = {};
-
-
-        if(!target[parentObject]){
-            payload[name][key] = value;
+        if(path.length === 1){
+            payload[name][path[0]] = value;
         } else {
-            let ancestors = [];
-            while(target[parentObject]){
-                ancestors.unshift(target[parentKey]);
-                target = target[parentObject];
-            }
+            let tmp = payload[name];
+            for (let i = 0; i < path.length -1; i++) {
+                const key = path[i];
 
-            let ancestor = '',
-                tmp = payload[name];
-            for(ancestor of ancestors) {
-                tmp[ancestor] = {};
-                if(ancestors[ancestors.length -1 !== ancestor]){
-                    tmp = tmp[ancestor];
+                if(i === path.length - 2){
+                    tmp[key] = target;
+                } else {
+                    tmp[key] = {};
+                    tmp = tmp[key];
                 }
 
             }
-
-            po = originalTarget[parentObject];
-            pk = originalTarget[parentKey];
-            delete originalTarget[parentObject];
-            delete originalTarget[parentKey];
-            tmp[ancestor] = originalTarget;
         }
-
         send(USER_UPDATE, payload);
-
-        if(po) originalTarget[parentObject] = po;
-        if(pk) originalTarget[parentKey] = pk;
     }
-
 
     _traps(name) {
         let self = this;
@@ -191,7 +152,6 @@ class Template{
         }
     }
     _getValue(key){
-        // return this._proxy[findKey(this._proxy, key)];
         return this._proxy[key];
     }
 

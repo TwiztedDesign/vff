@@ -26,10 +26,10 @@ describe('VffTemplate', () => {
                template.visibility = false;
                 expect(send).toHaveBeenCalledWith(USER_UPDATE, {test : {visibility: false}});
             });
-            it('should trigget user update with the correct payload', () => {
+            it('should trigger user update with the correct payload', () => {
                 let nested = vffData.registerTemplate('nested', {level1 : {level2 : {level3 : {level4 : 1}}}});
                 nested.level1.level2.level3.level4 = 2;
-                expect(send).toHaveBeenCalledWith(USER_UPDATE, {nested : {level1 : {level2 : {level3 : {level4 : 2}}}}});
+                expect(send).toHaveBeenCalledWith(USER_UPDATE, {nested : {level1 : {level2 : {level3 : expect.objectContaining({level4 : 2})}}}});
             })
         });
     });

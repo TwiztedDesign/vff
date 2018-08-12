@@ -1,13 +1,14 @@
-import {uuid, findKey} from '../utils/helpers.js';
-const internal = {
-    bypassPrefix    : '__bypass__',
-    parentObject    : '__parent_object__',
-    parentKey       : '__parent_key__',
-    proxy           : '__proxy__',
-    isProxy         : '__isProxy__',
-    self            : '__self__'
+import {uuid, findKey, deepExtend, deepCompare} from '../utils/helpers.js';
 
-};
+const
+    BYPASS_PREFIX   = '__bypass__',
+    PARENT_ID       = '__parent_id__',
+    PARENT_KEY      = '__parent_key__',
+    PROXY_ID        = '__proxy__',
+    IS_PROXY        = '__isProxy__',
+    SELF            = '__self__';
+
+
 const isInternalProperty = function(prop){
     return prop.startsWith('__') && prop.endsWith('__') && prop !== '__proxy__';
 };
@@ -18,25 +19,21 @@ const cleanInternal = function(object){
         } if(typeof object[key] === 'object'){
             cleanInternal(object[key]);
         }
-    })
-};
-const getPath = (obj, key) => {
-    let path = key? [key] : [];
-    while(obj[internal.parentObject]){
-        path.unshift(obj[internal.parentKey]);
-        obj = obj[internal.parentObject];
-    }
-    return path;
+    });
 };
 const noBypass = (key) => {
-    return typeof key === 'string'? key.replace(internal.bypassPrefix ,'') : '';
+    return typeof key === 'string'? key.replace(BYPASS_PREFIX ,'') : '';
 };
 
 export default class SuperProxy {
     constructor(data, traps) {
         this._proxies = {};
+
+        this._parents = new WeakMap();
+        this._parentIDs = {};
+
         traps = traps || {};
-        this._proxy = new Proxy(data, this._traps(traps));
+        this._proxy = new Proxy(this._copy(data), this._traps(traps));
 
         let self = this;
 
@@ -62,10 +59,19 @@ export default class SuperProxy {
         });
 
     }
-
+/************************* PUBLIC *****************************/
     findKey(key){
         return findKey(this._proxy, key);
     }
+    update(data){
+        let toUpdate = this._copy(data, BYPASS_PREFIX);
+        deepExtend(this._proxy, toUpdate);
+    }
+    equals(data){
+        return deepCompare(this._proxy, data);
+    }
+
+/************************* PRIVATE *****************************/
 
     _copy(o, prefix) {
         prefix = prefix || '';
@@ -83,7 +89,17 @@ export default class SuperProxy {
     }
 
     _set(target, key, value){
-        target[internal.bypassPrefix + key] = value;
+        target[BYPASS_PREFIX + key] = value;
+    }
+
+    _getPath(obj, key){
+        let path = key? [key] : [];
+        let tmp = obj;
+        while(tmp[PARENT_ID]){
+            path.unshift(tmp[PARENT_KEY]);
+            tmp = this._parentIDs[tmp[PARENT_ID]];
+        }
+        return path;
     }
 
     _traps(trapFuncs) {
@@ -91,50 +107,61 @@ export default class SuperProxy {
 
         let traps = {
             set: (target, key, value) => {
-                let bypass = key.startsWith(internal.bypassPrefix);
-                if (bypass && !target[internal.isProxy]) {
-                    key = key.substr(internal.bypassPrefix.length);
+                let bypass = key.startsWith(BYPASS_PREFIX);
+                // if (bypass && !target[IS_PROXY]) {
+                if (bypass) {
+                    key = key.substr(BYPASS_PREFIX.length);
                 }
                 target[key] = value;
-                if (!bypass && !target[internal.isProxy] && typeof value !== 'object') {
+                // if (!bypass && !target[IS_PROXY] && typeof value !== 'object') {
+                if (!bypass) {
                     if (trapFuncs.set) {
                         //set with parent object, path array, value
-                        let path = getPath(target, key);
-                        cleanInternal(target);
+                        let path = self._getPath(target, key);
+                        // cleanInternal(target);
                         trapFuncs.set(target, path, value);
                     }
                 }
                 return true;
             },
             get: (target, key) => {
-                if (key === internal.isProxy) {
+                if (key === IS_PROXY) {
                     return true;
                 }
-                if (key === internal.self) {
+                if (key === SELF) {
                     cleanInternal(target);
                     return target;
                 }
-                if (key.startsWith && key.startsWith(internal.bypassPrefix)) {
-                    key = key.substr(internal.bypassPrefix.length);
+                if (key.startsWith && key.startsWith(BYPASS_PREFIX)) {
+                    key = key.substr(BYPASS_PREFIX.length);
                 }
 
-                if (typeof target[key] === 'object' && target[key] !== null && !target[key][internal.isProxy] && !isInternalProperty(key)) {
-                    if (target[key][internal.proxy]) {
-                        return self._proxies[target[key][internal.proxy]];
+                // if (typeof target[key] === 'object' && target[key] !== null && !target[key][IS_PROXY] && !isInternalProperty(key)) {
+                if (typeof target[key] === 'object' && target[key] !== null && !isInternalProperty(key)) {
+                    if (target[key][PROXY_ID]) {
+                        return self._proxies[target[key][PROXY_ID]];
                     } else {
                         let proxy = new Proxy(target[key], traps);
-                        self._set(proxy, internal.parentObject, target);
-                        self._set(proxy, internal.parentKey, key);
+
+                        let parentID;
+                        if(!self._parents.has(target)){
+                            parentID = uuid();
+                            self._parents.set(target, parentID);
+                            self._parentIDs[parentID] = target;
+                        }
+                        parentID = parentID || self._parents.get(target);
+
+                        self._set(proxy, PARENT_KEY, key);
+                        self._set(proxy, PARENT_ID, parentID);
                         let proxyID = uuid();
                         self._proxies[proxyID] = proxy;
-                        target[key][internal.proxy] = proxyID;
+                        target[key][PROXY_ID] = proxyID;
                         return proxy;
                     }
                 }
                 else {
                     return target[key];
                 }
-
             }
         };
         return traps;

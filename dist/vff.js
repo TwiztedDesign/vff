@@ -173,7 +173,7 @@ function extend(a, b) {
 
 function deepExtend(destination, source) {
     for (var property in source) {
-        if (source[property] && source[property].constructor && source[property].constructor === Object && !source[property].__isProxy) {
+        if (source[property] && source[property].constructor && source[property].constructor === Object) {
             destination[property] = destination[property] && destination[property].constructor && destination[property].constructor === Object ? destination[property] : {};
             deepExtend(destination[property], source[property]);
         } else {
@@ -586,7 +586,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Interval = __webpack_require__(33);
+var Interval = __webpack_require__(34);
 
 var BasicClock = function (_HTMLElement) {
     _inherits(BasicClock, _HTMLElement);
@@ -720,29 +720,29 @@ var _events = __webpack_require__(1);
 
 var _vffData = __webpack_require__(2);
 
-var _listener = __webpack_require__(10);
+var _listener = __webpack_require__(11);
 
-var _initDOM = __webpack_require__(15);
+var _initDOM = __webpack_require__(16);
 
-var _vffElement = __webpack_require__(16);
+var _vffElement = __webpack_require__(17);
 
 var _vffElement2 = _interopRequireDefault(_vffElement);
 
-__webpack_require__(18);
-
 __webpack_require__(19);
+
+__webpack_require__(20);
 
 var _helpers = __webpack_require__(0);
 
-var _events2 = __webpack_require__(36);
+var _events2 = __webpack_require__(37);
 
 var eventsApi = _interopRequireWildcard(_events2);
 
-var _player = __webpack_require__(37);
+var _player = __webpack_require__(38);
 
 var playerApi = _interopRequireWildcard(_player);
 
-var _visibility = __webpack_require__(38);
+var _visibility = __webpack_require__(39);
 
 var visibilityApi = _interopRequireWildcard(_visibility);
 
@@ -750,7 +750,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-__webpack_require__(39);
+__webpack_require__(40);
 
 (0, _listener.start)();
 (0, _initDOM.init)();
@@ -855,8 +855,6 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _events = __webpack_require__(1);
@@ -869,7 +867,7 @@ var _messenger = __webpack_require__(3);
 
 var _vffData = __webpack_require__(2);
 
-var _superProxy = __webpack_require__(40);
+var _superProxy = __webpack_require__(10);
 
 var _superProxy2 = _interopRequireDefault(_superProxy);
 
@@ -881,9 +879,6 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var bypassPrefix = '__bypass__',
-    parentObject = '__parent_object__',
-    parentKey = '__parent_key__';
 var defaultListenerOptions = {
     changeOnly: true,
     throttle: true
@@ -899,7 +894,7 @@ var Template = function () {
 
         this._name = name;
         this._options = Object.assign({}, defaultTemplateOptions, options);
-        this._proxy = new _superProxy2.default(this._copy(data), this._traps(name));
+        this._proxy = new _superProxy2.default(data, this._traps(name));
         this._element = this._options.element;
         this._proxies = {};
         this._timeouts = {};
@@ -985,7 +980,7 @@ var Template = function () {
 
                     if (template && options.changeOnly && ((0, _helpers.getByPath)(event.detail[key], template) === (0, _helpers.getByPath)(self._proxy, template) || (0, _helpers.getByPath)(event.detail[key], template) === undefined)) {
                         return;
-                    } else if (!template && options.changeOnly && (0, _helpers.deepCompare)(event.detail[key], self._proxy)) {
+                    } else if (!template && options.changeOnly && self._proxy.equals(event.detail[key])) {
                         return;
                     }
 
@@ -1031,91 +1026,29 @@ var Template = function () {
     }, {
         key: '_update',
         value: function _update(data) {
-            var toUpdate = this._copy(data, bypassPrefix);
-            (0, _helpers.deepExtend)(this._proxy, toUpdate);
-        }
-    }, {
-        key: '_copy',
-        value: function _copy(o, prefix) {
-            prefix = prefix || '';
-            var output = void 0,
-                v = void 0,
-                key = void 0;
-            output = Array.isArray(o) ? [] : {};
-            for (key in o) {
-                v = o[key];
-                if (Array.isArray(output)) {
-                    output[key] = (typeof v === 'undefined' ? 'undefined' : _typeof(v)) === "object" ? this._copy(v, prefix) : v;
-                } else {
-                    output[prefix + key] = (typeof v === 'undefined' ? 'undefined' : _typeof(v)) === "object" ? this._copy(v, prefix) : v;
-                }
-            }
-            return output;
-        }
-    }, {
-        key: '_set',
-        value: function _set(target, key, value) {
-            target[bypassPrefix + key] = value;
+            this._proxy.update(data);
         }
     }, {
         key: '_sendUserUpdateEvent',
-        value: function _sendUserUpdateEvent(name, target, key, value) {
-            var payload = {},
-                po = void 0,
-                pk = void 0,
-                originalTarget = target;
+        value: function _sendUserUpdateEvent(name, target, path, value) {
+            var payload = {};
             payload[name] = {};
-
-            if (!target[parentObject]) {
-                payload[name][key] = value;
+            if (path.length === 1) {
+                payload[name][path[0]] = value;
             } else {
-                var ancestors = [];
-                while (target[parentObject]) {
-                    ancestors.unshift(target[parentKey]);
-                    target = target[parentObject];
-                }
+                var tmp = payload[name];
+                for (var i = 0; i < path.length - 1; i++) {
+                    var key = path[i];
 
-                var ancestor = '',
-                    tmp = payload[name];
-                var _iteratorNormalCompletion = true;
-                var _didIteratorError = false;
-                var _iteratorError = undefined;
-
-                try {
-                    for (var _iterator = ancestors[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                        ancestor = _step.value;
-
-                        tmp[ancestor] = {};
-                        if (ancestors[ancestors.length - 1 !== ancestor]) {
-                            tmp = tmp[ancestor];
-                        }
-                    }
-                } catch (err) {
-                    _didIteratorError = true;
-                    _iteratorError = err;
-                } finally {
-                    try {
-                        if (!_iteratorNormalCompletion && _iterator.return) {
-                            _iterator.return();
-                        }
-                    } finally {
-                        if (_didIteratorError) {
-                            throw _iteratorError;
-                        }
+                    if (i === path.length - 2) {
+                        tmp[key] = target;
+                    } else {
+                        tmp[key] = {};
+                        tmp = tmp[key];
                     }
                 }
-
-                po = originalTarget[parentObject];
-                pk = originalTarget[parentKey];
-                delete originalTarget[parentObject];
-                delete originalTarget[parentKey];
-                tmp[ancestor] = originalTarget;
             }
-
             (0, _messenger.send)(_events.USER_UPDATE, payload);
-
-            if (po) originalTarget[parentObject] = po;
-            if (pk) originalTarget[parentKey] = pk;
         }
     }, {
         key: '_traps',
@@ -1129,51 +1062,9 @@ var Template = function () {
             return traps;
         }
     }, {
-        key: '__traps',
-        value: function __traps(name) {
-            var self = this;
-            var traps = {
-                set: function set(target, key, value) {
-                    var bypass = key.startsWith(bypassPrefix);
-                    if (bypass && !target.__isProxy) {
-                        key = key.substr(bypassPrefix.length);
-                    }
-                    target[key] = value;
-                    if (!bypass && !target.__isProxy && (typeof value === 'undefined' ? 'undefined' : _typeof(value)) !== 'object') {
-                        self._sendUserUpdateEvent(name, target, key, value);
-                    }
-                    return true;
-                },
-                get: function get(target, key) {
-                    if (key === '__isProxy') {
-                        return true;
-                    }
-                    if (key.startsWith && key.startsWith(bypassPrefix)) key = key.substr(bypassPrefix.length);
-
-                    if (_typeof(target[key]) === 'object' && target[key] !== null && !target[key].__isProxy && !key.startsWith('__')) {
-                        if (target[key].__proxy) {
-                            return self._proxies[target[key].__proxy];
-                        } else {
-                            var proxy = new Proxy(target[key], traps);
-                            self._set(proxy, parentObject, target);
-                            self._set(proxy, parentKey, key);
-                            var proxyID = (0, _helpers.uuid)();
-                            self._proxies[proxyID] = proxy;
-                            target[key].__proxy = proxyID;
-                            return proxy;
-                        }
-                    } else {
-                        return target[key];
-                    }
-                }
-            };
-
-            return traps;
-        }
-    }, {
         key: '_setValue',
         value: function _setValue(key, value) {
-            key = (0, _helpers.findKey)(this._proxy, key);
+            key = this._proxy.findKey(key);
             if (key) {
                 this._proxy[key] = value;
             }
@@ -1181,7 +1072,7 @@ var Template = function () {
     }, {
         key: '_getValue',
         value: function _getValue(key) {
-            return this._proxy[(0, _helpers.findKey)(this._proxy, key)];
+            return this._proxy[key];
         }
     }]);
 
@@ -1245,7 +1136,212 @@ function findExposed(key, values) {
 "use strict";
 
 
-var _handlers = __webpack_require__(11);
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+var _helpers = __webpack_require__(0);
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var BYPASS_PREFIX = '__bypass__',
+    PARENT_ID = '__parent_id__',
+    PARENT_KEY = '__parent_key__',
+    PROXY_ID = '__proxy__',
+    IS_PROXY = '__isProxy__',
+    SELF = '__self__';
+
+var isInternalProperty = function isInternalProperty(prop) {
+    return prop.startsWith('__') && prop.endsWith('__') && prop !== '__proxy__';
+};
+var cleanInternal = function cleanInternal(object) {
+    Object.keys(object).forEach(function (key) {
+        if (isInternalProperty(key)) {
+            delete object[key];
+        }if (_typeof(object[key]) === 'object') {
+            cleanInternal(object[key]);
+        }
+    });
+};
+var noBypass = function noBypass(key) {
+    return typeof key === 'string' ? key.replace(BYPASS_PREFIX, '') : '';
+};
+
+var SuperProxy = function () {
+    function SuperProxy(data, traps) {
+        _classCallCheck(this, SuperProxy);
+
+        this._proxies = {};
+
+        this._parents = new WeakMap();
+        this._parentIDs = {};
+
+        traps = traps || {};
+        this._proxy = new Proxy(this._copy(data), this._traps(traps));
+
+        var self = this;
+
+        return new Proxy(this, {
+            get: function get(target, prop) {
+
+                if (prop in target) {
+                    return target[prop];
+                }
+                var key = (0, _helpers.findKey)(self._proxy, noBypass(prop));
+                prop = key || prop;
+                return self._proxy[prop];
+            },
+            set: function set(target, prop, value) {
+                if (prop in target) {
+                    throw new Error("Override Error: " + prop + " is an internal vff property and can't be overridden");
+                    // return target[prop] = value;
+                } else {
+                    target._proxy[prop] = value;
+                }
+                return true;
+            }
+        });
+    }
+    /************************* PUBLIC *****************************/
+
+
+    _createClass(SuperProxy, [{
+        key: 'findKey',
+        value: function findKey(key) {
+            return (0, _helpers.findKey)(this._proxy, key);
+        }
+    }, {
+        key: 'update',
+        value: function update(data) {
+            var toUpdate = this._copy(data, BYPASS_PREFIX);
+            (0, _helpers.deepExtend)(this._proxy, toUpdate);
+        }
+    }, {
+        key: 'equals',
+        value: function equals(data) {
+            return (0, _helpers.deepCompare)(this._proxy, data);
+        }
+
+        /************************* PRIVATE *****************************/
+
+    }, {
+        key: '_copy',
+        value: function _copy(o, prefix) {
+            prefix = prefix || '';
+            var output = void 0,
+                v = void 0,
+                key = void 0;
+            output = Array.isArray(o) ? [] : {};
+            for (key in o) {
+                v = o[key];
+                if (Array.isArray(output)) {
+                    output[key] = (typeof v === 'undefined' ? 'undefined' : _typeof(v)) === "object" ? this._copy(v, prefix) : v;
+                } else {
+                    output[prefix + key] = (typeof v === 'undefined' ? 'undefined' : _typeof(v)) === "object" ? this._copy(v, prefix) : v;
+                }
+            }
+            return output;
+        }
+    }, {
+        key: '_set',
+        value: function _set(target, key, value) {
+            target[BYPASS_PREFIX + key] = value;
+        }
+    }, {
+        key: '_getPath',
+        value: function _getPath(obj, key) {
+            var path = key ? [key] : [];
+            var tmp = obj;
+            while (tmp[PARENT_ID]) {
+                path.unshift(tmp[PARENT_KEY]);
+                tmp = this._parentIDs[tmp[PARENT_ID]];
+            }
+            return path;
+        }
+    }, {
+        key: '_traps',
+        value: function _traps(trapFuncs) {
+            var self = this;
+
+            var traps = {
+                set: function set(target, key, value) {
+                    var bypass = key.startsWith(BYPASS_PREFIX);
+                    // if (bypass && !target[IS_PROXY]) {
+                    if (bypass) {
+                        key = key.substr(BYPASS_PREFIX.length);
+                    }
+                    target[key] = value;
+                    // if (!bypass && !target[IS_PROXY] && typeof value !== 'object') {
+                    if (!bypass) {
+                        if (trapFuncs.set) {
+                            //set with parent object, path array, value
+                            var path = self._getPath(target, key);
+                            // cleanInternal(target);
+                            trapFuncs.set(target, path, value);
+                        }
+                    }
+                    return true;
+                },
+                get: function get(target, key) {
+                    if (key === IS_PROXY) {
+                        return true;
+                    }
+                    if (key === SELF) {
+                        cleanInternal(target);
+                        return target;
+                    }
+                    if (key.startsWith && key.startsWith(BYPASS_PREFIX)) {
+                        key = key.substr(BYPASS_PREFIX.length);
+                    }
+
+                    // if (typeof target[key] === 'object' && target[key] !== null && !target[key][IS_PROXY] && !isInternalProperty(key)) {
+                    if (_typeof(target[key]) === 'object' && target[key] !== null && !isInternalProperty(key)) {
+                        if (target[key][PROXY_ID]) {
+                            return self._proxies[target[key][PROXY_ID]];
+                        } else {
+                            var proxy = new Proxy(target[key], traps);
+
+                            var parentID = void 0;
+                            if (!self._parents.has(target)) {
+                                parentID = (0, _helpers.uuid)();
+                                self._parents.set(target, parentID);
+                                self._parentIDs[parentID] = target;
+                            }
+                            parentID = parentID || self._parents.get(target);
+
+                            self._set(proxy, PARENT_KEY, key);
+                            self._set(proxy, PARENT_ID, parentID);
+                            var proxyID = (0, _helpers.uuid)();
+                            self._proxies[proxyID] = proxy;
+                            target[key][PROXY_ID] = proxyID;
+                            return proxy;
+                        }
+                    } else {
+                        return target[key];
+                    }
+                }
+            };
+            return traps;
+        }
+    }]);
+
+    return SuperProxy;
+}();
+
+exports.default = SuperProxy;
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _handlers = __webpack_require__(12);
 
 var handlers = _interopRequireWildcard(_handlers);
 
@@ -1282,17 +1378,17 @@ module.exports = {
 };
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _updateHandler = __webpack_require__(12);
+var _updateHandler = __webpack_require__(13);
 
-var _pagesHandler = __webpack_require__(13);
+var _pagesHandler = __webpack_require__(14);
 
-var _queryParamsHandler = __webpack_require__(14);
+var _queryParamsHandler = __webpack_require__(15);
 
 var events = __webpack_require__(1);
 
@@ -1305,7 +1401,7 @@ handlers[events.QUERY_PARAMS] = _queryParamsHandler.queryParams;
 module.exports = handlers;
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1363,7 +1459,7 @@ module.exports = {
  ************************/
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1380,7 +1476,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1397,7 +1493,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1491,7 +1587,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1503,7 +1599,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _htmlAccessorObserver = __webpack_require__(17);
+var _htmlAccessorObserver = __webpack_require__(18);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -1574,7 +1670,7 @@ var VffElement = function () {
 exports.default = VffElement;
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1645,7 +1741,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1665,41 +1761,41 @@ HTMLImageElement.prototype.expose = function () {
 };
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-__webpack_require__(20);
-
 __webpack_require__(21);
 
-var _emoji = __webpack_require__(22);
+__webpack_require__(22);
+
+var _emoji = __webpack_require__(23);
 
 var _emoji2 = _interopRequireDefault(_emoji);
 
-var _dragArea = __webpack_require__(23);
+var _dragArea = __webpack_require__(24);
 
 var _dragArea2 = _interopRequireDefault(_dragArea);
 
-var _telestratorElement = __webpack_require__(24);
+var _telestratorElement = __webpack_require__(25);
 
 var _telestratorElement2 = _interopRequireDefault(_telestratorElement);
 
-var _clockSimple = __webpack_require__(30);
+var _clockSimple = __webpack_require__(31);
 
 var _clockSimple2 = _interopRequireDefault(_clockSimple);
 
-var _systemClock = __webpack_require__(32);
+var _systemClock = __webpack_require__(33);
 
 var _systemClock2 = _interopRequireDefault(_systemClock);
 
-var _countdown = __webpack_require__(34);
+var _countdown = __webpack_require__(35);
 
 var _countdown2 = _interopRequireDefault(_countdown);
 
-var _stopwatch = __webpack_require__(35);
+var _stopwatch = __webpack_require__(36);
 
 var _stopwatch2 = _interopRequireDefault(_stopwatch);
 
@@ -1727,7 +1823,7 @@ define('basic-clock', _basicClock2.default);
 // }
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports) {
 
 (function(){
@@ -1770,7 +1866,7 @@ define('basic-clock', _basicClock2.default);
 
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports) {
 
 /* eslint-disable */
@@ -1794,7 +1890,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 /* eslint-enable */
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1888,7 +1984,7 @@ var MyElement = function (_HTMLElement) {
 exports.default = MyElement;
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2069,7 +2165,7 @@ var DragArea = function (_HTMLElement) {
 exports.default = DragArea;
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2081,7 +2177,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-__webpack_require__(25);
+__webpack_require__(26);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -2273,11 +2369,11 @@ var Telestrator = function (_HTMLElement) {
 exports.default = Telestrator;
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
-var content = __webpack_require__(26);
+var content = __webpack_require__(27);
 
 if(typeof content === 'string') content = [[module.i, content, '']];
 
@@ -2291,7 +2387,7 @@ var options = {"hmr":true}
 options.transform = transform
 options.insertInto = undefined;
 
-var update = __webpack_require__(28)(content, options);
+var update = __webpack_require__(29)(content, options);
 
 if(content.locals) module.exports = content.locals;
 
@@ -2323,10 +2419,10 @@ if(false) {
 }
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(27)(false);
+exports = module.exports = __webpack_require__(28)(false);
 // imports
 
 
@@ -2337,7 +2433,7 @@ exports.push([module.i, "telestrator-element #telestrator-canvas {\n  position: 
 
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, exports) {
 
 /*
@@ -2419,7 +2515,7 @@ function toComment(sourceMap) {
 
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -2485,7 +2581,7 @@ var singleton = null;
 var	singletonCounter = 0;
 var	stylesInsertedAtTop = [];
 
-var	fixUrls = __webpack_require__(29);
+var	fixUrls = __webpack_require__(30);
 
 module.exports = function(list, options) {
 	if (typeof DEBUG !== "undefined" && DEBUG) {
@@ -2801,7 +2897,7 @@ function updateLink (link, options, obj) {
 
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ (function(module, exports) {
 
 
@@ -2896,7 +2992,7 @@ module.exports = function (css) {
 
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2914,7 +3010,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var work = __webpack_require__(31);
+var work = __webpack_require__(32);
 
 function createWorker() {
     var blobURL = URL.createObjectURL(new Blob(['(', work.toString(), ')()'], { type: 'application/javascript' }));
@@ -3133,7 +3229,7 @@ var Clock = function (_HTMLElement) {
 exports.default = Clock;
 
 /***/ }),
-/* 31 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3196,7 +3292,7 @@ function worker() {
 module.exports = worker;
 
 /***/ }),
-/* 32 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3269,7 +3365,7 @@ var Countdown = function (_BasicClock) {
 exports.default = Countdown;
 
 /***/ }),
-/* 33 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3353,7 +3449,7 @@ var Interval = function () {
 module.exports = Interval;
 
 /***/ }),
-/* 34 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3416,7 +3512,7 @@ var Countdown = function (_BasicClock) {
 exports.default = Countdown;
 
 /***/ }),
-/* 35 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3534,7 +3630,7 @@ var Stopwatch = function (_BasicClock) {
 exports.default = Stopwatch;
 
 /***/ }),
-/* 36 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3620,7 +3716,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 37 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3647,7 +3743,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 38 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3668,7 +3764,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 39 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3744,168 +3840,6 @@ window.addEventListener('load', function () {
     document.body.addEventListener("mousedown", bubbleUpMouseEvent);
     document.body.addEventListener("mouseup", bubbleUpMouseEvent);
 });
-
-/***/ }),
-/* 40 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-var _helpers = __webpack_require__(0);
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var internal = {
-    bypassPrefix: '__bypass__',
-    parentObject: '__parent_object__',
-    parentKey: '__parent_key__',
-    proxy: '__proxy__',
-    isProxy: '__isProxy__',
-    self: '__self__'
-
-};
-var isInternalProperty = function isInternalProperty(prop) {
-    return prop.startsWith('__') && prop.endsWith('__') && prop !== '__proxy__';
-};
-var cleanInternal = function cleanInternal(object) {
-    Object.keys(object).forEach(function (key) {
-        if (isInternalProperty(key)) {
-            delete object[key];
-        }if (_typeof(object[key]) === 'object') {
-            cleanInternal(object[key]);
-        }
-    });
-};
-var getPath = function getPath(obj, key) {
-    var path = key ? [key] : [];
-    while (obj[internal.parentObject]) {
-        path.unshift(obj[internal.parentKey]);
-        obj = obj[internal.parentObject];
-    }
-    return path;
-};
-
-var SuperProxy = function () {
-    function SuperProxy(data, traps) {
-        _classCallCheck(this, SuperProxy);
-
-        this._proxies = {};
-        traps = traps || {};
-        this._data = data;
-        this._proxy = new Proxy(data, this._traps(traps));
-
-        var self = this;
-
-        return new Proxy(this, {
-            get: function get(target, prop) {
-                if (prop in target) {
-                    return target[prop];
-                }
-                return self._proxy[prop];
-            },
-            set: function set(target, prop, value) {
-                if (prop in target) {
-                    throw new Error("Override Error: " + prop + " is an internal vff property and can't be overridden");
-                    // return target[prop] = value;
-                } else {
-                    target._proxy[prop] = value;
-                }
-                return true;
-            }
-        });
-    }
-
-    _createClass(SuperProxy, [{
-        key: '_copy',
-        value: function _copy(o, prefix) {
-            prefix = prefix || '';
-            var output = void 0,
-                v = void 0,
-                key = void 0;
-            output = Array.isArray(o) ? [] : {};
-            for (key in o) {
-                v = o[key];
-                if (Array.isArray(output)) {
-                    output[key] = (typeof v === 'undefined' ? 'undefined' : _typeof(v)) === "object" ? this._copy(v, prefix) : v;
-                } else {
-                    output[prefix + key] = (typeof v === 'undefined' ? 'undefined' : _typeof(v)) === "object" ? this._copy(v, prefix) : v;
-                }
-            }
-            return output;
-        }
-    }, {
-        key: '_set',
-        value: function _set(target, key, value) {
-            target[internal.bypassPrefix + key] = value;
-        }
-    }, {
-        key: '_traps',
-        value: function _traps(trapFuncs) {
-            var self = this;
-
-            var traps = {
-                set: function set(target, key, value) {
-                    var bypass = key.startsWith(internal.bypassPrefix);
-                    if (bypass && !target[internal.isProxy]) {
-                        key = key.substr(internal.bypassPrefix.length);
-                    }
-                    target[key] = value;
-                    if (!bypass && !target[internal.isProxy] && (typeof value === 'undefined' ? 'undefined' : _typeof(value)) !== 'object') {
-                        if (trapFuncs.set) {
-                            //set with parent object, path array, value
-                            var path = getPath(target, key);
-                            cleanInternal(target);
-                            trapFuncs.set(target, path, value);
-                        }
-                    }
-                    return true;
-                },
-                get: function get(target, key) {
-                    if (key === internal.isProxy) {
-                        return true;
-                    }
-                    if (key === internal.self) {
-                        cleanInternal(target);
-                        return target;
-                    }
-                    if (key.startsWith && key.startsWith(internal.bypassPrefix)) {
-                        key = key.substr(internal.bypassPrefix.length);
-                    }
-
-                    if (_typeof(target[key]) === 'object' && target[key] !== null && !target[key][internal.isProxy] && !isInternalProperty(key)) {
-                        if (target[key][internal.proxy]) {
-                            return self._proxies[target[key][internal.proxy]];
-                        } else {
-                            var proxy = new Proxy(target[key], traps);
-                            self._set(proxy, internal.parentObject, target);
-                            self._set(proxy, internal.parentKey, key);
-                            var proxyID = (0, _helpers.uuid)();
-                            self._proxies[proxyID] = proxy;
-                            target[key][internal.proxy] = proxyID;
-                            return proxy;
-                        }
-                    } else {
-                        return target[key];
-                    }
-                }
-            };
-            return traps;
-        }
-    }]);
-
-    return SuperProxy;
-}();
-
-exports.default = SuperProxy;
 
 /***/ })
 /******/ ]);
