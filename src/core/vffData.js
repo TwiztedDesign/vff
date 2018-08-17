@@ -6,8 +6,18 @@ import VffTemplate from './vffTemplate';
 
 class VffData {
     constructor(){
+        let self = this;
         this._templates = {};
         this._pages = [];
+
+        this._pagesPromise = new Promise(function(resolve, reject){
+            self._pagesResolve = resolve;
+            self._pagesReject = reject;
+        });
+        this._queryParamsPromise = new Promise(function(resolve, reject){
+            self._quaryParamsResolve = resolve;
+            self._quaryParamsReject = reject;
+        });
     }
 
     updateCB(){
@@ -72,18 +82,19 @@ class VffData {
         if(pages && pages.length){
             while (this._pages.length) { this._pages.pop(); }
             this._pages = this._pages.concat(pages);
+            this._pagesResolve(pages);
             this.updateCB();
         }
     }
     getPages(){
-        return this._pages;
+        return this._pagesPromise;
     }
     addQueryParams(params){
-        this._queryParams = params;
+        this._quaryParamsResolve(params);
         this.updateCB();
     }
     getQueryParams(){
-        return this._queryParams;
+        return this._queryParamsPromise;
     }
 }
 

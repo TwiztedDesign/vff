@@ -395,8 +395,18 @@ var VffData = function () {
     function VffData() {
         _classCallCheck(this, VffData);
 
+        var self = this;
         this._templates = {};
         this._pages = [];
+
+        this._pagesPromise = new Promise(function (resolve, reject) {
+            self._pagesResolve = resolve;
+            self._pagesReject = reject;
+        });
+        this._queryParamsPromise = new Promise(function (resolve, reject) {
+            self._quaryParamsResolve = resolve;
+            self._quaryParamsReject = reject;
+        });
     }
 
     _createClass(VffData, [{
@@ -479,24 +489,25 @@ var VffData = function () {
                     this._pages.pop();
                 }
                 this._pages = this._pages.concat(pages);
+                this._pagesResolve(pages);
                 this.updateCB();
             }
         }
     }, {
         key: 'getPages',
         value: function getPages() {
-            return this._pages;
+            return this._pagesPromise;
         }
     }, {
         key: 'addQueryParams',
         value: function addQueryParams(params) {
-            this._queryParams = params;
+            this._quaryParamsResolve(params);
             this.updateCB();
         }
     }, {
         key: 'getQueryParams',
         value: function getQueryParams() {
-            return this._queryParams;
+            return this._queryParamsPromise;
         }
     }]);
 
