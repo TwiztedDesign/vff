@@ -1,23 +1,14 @@
-import {ADD} from "../utils/events";
-import {docRef} from '../utils/helpers.js';
+import {ADD, PAGES_UPDATE} from "../utils/events";
+import {docRef, broadcast, on, defer} from '../utils/helpers.js';
 import {send} from '../utils/messenger';
 import {REGISTER_TEMPLATE} from '../utils/docRefs';
 import VffTemplate from './vffTemplate';
 
 class VffData {
     constructor(){
-        let self = this;
         this._templates = {};
         this._pages = [];
-
-        this._pagesPromise = new Promise(function(resolve, reject){
-            self._pagesResolve = resolve;
-            self._pagesReject = reject;
-        });
-        this._queryParamsPromise = new Promise(function(resolve, reject){
-            self._quaryParamsResolve = resolve;
-            self._quaryParamsReject = reject;
-        });
+        this._pagesDefer = defer();
     }
 
     updateCB(){
@@ -82,19 +73,28 @@ class VffData {
         if(pages && pages.length){
             while (this._pages.length) { this._pages.pop(); }
             this._pages = this._pages.concat(pages);
-            this._pagesResolve(pages);
+            this._pagesDefer.resolve(pages);
+            broadcast(PAGES_UPDATE, this._pages);
             this.updateCB();
         }
     }
     getPages(){
-        return this._pagesPromise;
+        return this._pagesDefer.promise;
+    }
+    onPages(cb){
+        if(this._pages.length){
+            cb(this._pages);
+        }
+        on(PAGES_UPDATE, (event) => {
+            cb(event.detail);
+        });
     }
     addQueryParams(params){
-        this._quaryParamsResolve(params);
+        this._queryParams = params;
         this.updateCB();
     }
     getQueryParams(){
-        return this._queryParamsPromise;
+        return this._queryParams;
     }
 }
 

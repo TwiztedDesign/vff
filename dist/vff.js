@@ -313,6 +313,28 @@ function deepCompare() {
 
     return true;
 }
+function broadcast(event, data) {
+    document.dispatchEvent(new CustomEvent(event, { detail: data }));
+}
+function on(event, listener) {
+    document.addEventListener(event, listener);
+}
+function off(event, listener) {
+    document.removeEventListener(event, listener);
+}
+function defer() {
+    var resolve = noop,
+        reject = noop;
+    var promise = new Promise(function (res, rej) {
+        resolve = res;
+        reject = rej;
+    });
+    return {
+        promise: promise,
+        resolve: resolve,
+        reject: reject
+    };
+}
 
 function noop() {}
 
@@ -331,6 +353,10 @@ module.exports = {
     isController: controllerCheck(),
     mode: modeCheck(),
     docRef: docRef,
+    broadcast: broadcast,
+    on: on,
+    off: off,
+    defer: defer,
     noop: noop
 };
 
@@ -358,7 +384,9 @@ module.exports = {
 
     "TOUCH": "taco-touch-element",
     "MOUSE_MOVE": "taco-mouse-move",
-    "BUBBLE_UP": "taco-bubble-up"
+    "BUBBLE_UP": "taco-bubble-up",
+
+    "PAGES_UPDATE": "vff-pages-update"
 };
 
 /***/ }),
@@ -395,18 +423,11 @@ var VffData = function () {
     function VffData() {
         _classCallCheck(this, VffData);
 
-        var self = this;
         this._templates = {};
         this._pages = [];
 
-        this._pagesPromise = new Promise(function (resolve, reject) {
-            self._pagesResolve = resolve;
-            self._pagesReject = reject;
-        });
-        this._queryParamsPromise = new Promise(function (resolve, reject) {
-            self._quaryParamsResolve = resolve;
-            self._quaryParamsReject = reject;
-        });
+        this._pagesDefer = (0, _helpers.defer)();
+        this._queryParamsDefer = (0, _helpers.defer)();
     }
 
     _createClass(VffData, [{
@@ -489,25 +510,36 @@ var VffData = function () {
                     this._pages.pop();
                 }
                 this._pages = this._pages.concat(pages);
-                this._pagesResolve(pages);
+                this._pagesDefer.resolve(pages);
+                (0, _helpers.broadcast)(_events.PAGES_UPDATE, this._pages);
                 this.updateCB();
             }
         }
     }, {
         key: 'getPages',
         value: function getPages() {
-            return this._pagesPromise;
+            return this._pagesDefer.promise;
+        }
+    }, {
+        key: 'onPages',
+        value: function onPages(cb) {
+            if (this._pages.length) {
+                cb(this._pages);
+            }
+            (0, _helpers.on)(_events.PAGES_UPDATE, function (event) {
+                cb(event.detail);
+            });
         }
     }, {
         key: 'addQueryParams',
         value: function addQueryParams(params) {
-            this._quaryParamsResolve(params);
+            this._queryParamsDefer.resolve(params);
             this.updateCB();
         }
     }, {
         key: 'getQueryParams',
         value: function getQueryParams() {
-            return this._queryParamsPromise;
+            return this._queryParamsDefer.promise;
         }
     }]);
 
@@ -792,6 +824,9 @@ vff.onUpdate = function (cb) {
 vff.getPages = function () {
     return _vffData.vffData.getPages();
 };
+vff.onPages = function (cb) {
+    return _vffData.vffData.onPages(cb);
+};
 vff.getQueryParams = function () {
     return _vffData.vffData.getQueryParams();
 };
@@ -939,11 +974,16 @@ var Template = function () {
     }, {
         key: '$emit',
         value: function $emit(data) {
-            var payload = {};
+            var payload = {},
+                deferred = (0, _helpers.defer)();
             payload.data = data;
-            payload.query = _vffData.vffData.getQueryParams();
             payload.channel = this._name;
-            (0, _messenger.send)(_events.OUTGOING_EVENT, payload);
+            _vffData.vffData.getQueryParams().then(function (params) {
+                payload.query = params;
+                (0, _messenger.send)(_events.OUTGOING_EVENT, payload);
+                _helpers.defer.resolve();
+            }).catch(deferred.reject);
+            return deferred.promise;
         }
     }, {
         key: '$on',

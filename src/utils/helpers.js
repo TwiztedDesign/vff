@@ -1,5 +1,3 @@
-
-
 function findKey(data, keyToFind) {
     let keys = Object.keys(data);
     for(let i = 0 ; i < keys.length ; i++){
@@ -245,25 +243,50 @@ function deepCompare () {
 
     return true;
 }
+function broadcast(event, data){
+    document.dispatchEvent(new CustomEvent(event, { detail: data }));
+}
+function on(event, listener){
+    document.addEventListener(event, listener);
+}
+function off(event, listener){
+    document.removeEventListener(event, listener);
+}
+function defer(){
+    let resolve = noop, reject = noop;
+    let promise =  new Promise(function(res, rej) {
+        resolve = res;
+        reject  = rej;
+    });
+    return {
+        promise : promise,
+        resolve : resolve,
+        reject  : reject
+    };
+}
 
 function noop(){}
 
 
 
 module.exports = {
-    findKey     : findKey,
-    trim        : trim,
-    getByPath   : getByPath,
-    setByPath   : setByPath,
-    camelize    : camelize,
-    decamelize  : decamelize,
-    uuid        : uuid,
-    extend      : extend,
-    deepExtend  : deepExtend,
-    deepCompare : deepCompare,
-    isMobile    : mobilecheck(),
-    isController: controllerCheck(),
-    mode        : modeCheck(),
-    docRef      : docRef,
-    noop        : noop
+    findKey         : findKey,
+    trim            : trim,
+    getByPath       : getByPath,
+    setByPath       : setByPath,
+    camelize        : camelize,
+    decamelize      : decamelize,
+    uuid            : uuid,
+    extend          : extend,
+    deepExtend      : deepExtend,
+    deepCompare     : deepCompare,
+    isMobile        : mobilecheck(),
+    isController    : controllerCheck(),
+    mode            : modeCheck(),
+    docRef          : docRef,
+    broadcast       : broadcast,
+    on              : on,
+    off             : off,
+    defer           : defer,
+    noop            : noop
 };

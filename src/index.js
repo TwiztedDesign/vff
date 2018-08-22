@@ -30,6 +30,7 @@ vff.getTemplate         = (name) => {return vffData.getTemplate(name);};
 vff.getTemplates        = () => {return vffData.getTemplates();};
 vff.onUpdate            = (cb) => {return vffData.onUpdate(cb);};
 vff.getPages            = () => {return vffData.getPages();};
+vff.onPages             = (cb) => {return vffData.onPages(cb);};
 vff.getQueryParams      = () => {return vffData.getQueryParams();};
 vff.send                = (type, payload) => { send(type, payload); };
 vff.request             = (type, payload, cb) => { request(type, payload, cb); };

@@ -207,6 +207,30 @@ describe('Helpers', () => {
             expect(helpers.noop()).toBeUndefined();
         })
     });
+    describe('defer', () => {
+        it('should return a defer object with promise, resolve and reject', function () {
+            let defer = helpers.defer();
+            expect(defer).toHaveProperty('promise');
+            expect(defer).toHaveProperty('resolve');
+            expect(defer).toHaveProperty('reject');
+        });
+        it('should resolve properly', function (done) {
+            let defer = helpers.defer();
+            defer.promise.then((data) => {
+                expect(data).toBeTruthy();
+                done();
+            });
+            defer.resolve(true);
+        });
+        it('should reject properly', function (done) {
+            let defer = helpers.defer();
+            defer.promise.then(() => {}).catch((err) => {
+                expect(err).toBe('error');
+                done();
+            });
+            defer.reject('error');
+        });
+    });
 
 
 });

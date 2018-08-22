@@ -151,24 +151,26 @@ describe('vff Data', () => {
             expect(vffData._updateCB).toEqual(updateFunc);
         });
     });
-    describe('addPages', () => {
-        it('Should replace the passed pages in vff _pages', () => {
+    describe('onPages', () => {
+        it('Should replace the passed pages in vff _pages', (done) => {
             let spy = jest.spyOn(vffData, 'updateCB');
             let pages = [{name: 'page1'}, {name: 'page2'}];
-            expect(vffData.getPages()).toHaveLength(0);
             vffData.addPages(pages);
-            expect(vffData.getPages()).toEqual(pages);
-            pages = [{name: 'page3'}, {name: 'page4'}];
-            vffData.addPages(pages);
-            expect(vffData.getPages()).toEqual(pages);
-            expect(spy).toHaveBeenCalledTimes(2);
+            vffData.onPages((p) => {
+                    expect(p).toEqual(pages);
+                    done();
+            });
+            expect(spy).toHaveBeenCalledTimes(1);
         });
     });
     describe('getPages', () => {
-        it('Should return the vff _pages', () => {
+        it('Should return the vff _pages', (done) => {
             let pages = [{name: 'page1'}, {name: 'page2'}];
             vffData.addPages(pages);
-            expect(vffData.getPages()).toEqual(pages);
+            vffData.getPages().then((p) => {
+                expect(pages).toEqual(p);
+                done();
+            });
         });
     });
     describe('getQueryParams', () => {
