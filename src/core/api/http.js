@@ -9,6 +9,8 @@ function get(url, callback) {
                 callback(xmlHttp.responseText);
             }
             deferred.resolve(xmlHttp.responseText);
+        } else {
+            deferred.reject(xmlHttp.status);
         }
     };
     xmlHttp.open("GET", url, true); // true for asynchronous
