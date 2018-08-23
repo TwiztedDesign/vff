@@ -4,25 +4,21 @@ import {EXPOSE_DELIMITER} from '../consts';
 import {VFF_EVENT} from '../../utils/events';
 
 function update(data){
-    let isDataChanged;
-
-    document.dispatchEvent(new CustomEvent(VFF_EVENT, { detail: data }));
-
 
     for(let templateName in data){
         let template = vffData.getTemplate(templateName);
         if(template){
-            vffData.registerTemplate(templateName, data[templateName]);
-            isDataChanged = true;
-            for(let key in data[templateName]){
-                updateDom(template, key, data[templateName][key], data[templateName].__timecode__);
-            }
+            template._runMiddleware(data[templateName]).then((result) => {
+                vffData.registerTemplate(templateName, result);
+                for(let key in result){
+                    updateDom(template, key, result[key], result.__timecode__);
+                }
+                vffData.updateCB();
+            });
         }
     }
 
-    if(isDataChanged) {
-        vffData.updateCB();
-    }
+    document.dispatchEvent(new CustomEvent(VFF_EVENT, { detail: data }));
 }
 
 function updateDom(template, control, value, timecode){

@@ -425,9 +425,7 @@ var VffData = function () {
 
         this._templates = {};
         this._pages = [];
-
         this._pagesDefer = (0, _helpers.defer)();
-        this._queryParamsDefer = (0, _helpers.defer)();
     }
 
     _createClass(VffData, [{
@@ -533,13 +531,13 @@ var VffData = function () {
     }, {
         key: 'addQueryParams',
         value: function addQueryParams(params) {
-            this._queryParamsDefer.resolve(params);
+            this._queryParams = params;
             this.updateCB();
         }
     }, {
         key: 'getQueryParams',
         value: function getQueryParams() {
-            return this._queryParamsDefer.promise;
+            return this._queryParams;
         }
     }]);
 
@@ -789,11 +787,15 @@ var _visibility = __webpack_require__(38);
 
 var visibilityApi = _interopRequireWildcard(_visibility);
 
+var _http = __webpack_require__(39);
+
+var httpApi = _interopRequireWildcard(_http);
+
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-__webpack_require__(39);
+__webpack_require__(40);
 
 (0, _listener.start)();
 (0, _initDOM.init)();
@@ -839,6 +841,7 @@ vff.request = function (type, payload, cb) {
 vff.isMobile = _helpers.isMobile;
 vff.isController = _helpers.isController;
 vff.mode = _helpers.mode;
+vff.defer = _helpers.defer;
 vff.extend = function (name, extension) {
     vff[name] = extension;
 };
@@ -849,6 +852,7 @@ vff.define = function (name, element) {
 (0, _helpers.extend)(vff, playerApi);
 (0, _helpers.extend)(vff, visibilityApi);
 (0, _helpers.extend)(vff, eventsApi);
+vff.extend('http', httpApi);
 
 module.exports = vff;
 
@@ -943,6 +947,7 @@ var Template = function () {
         this._element = this._options.element;
         this._proxies = {};
         this._timeouts = {};
+        this._middleware = [];
     }
 
     _createClass(Template, [{
@@ -974,69 +979,48 @@ var Template = function () {
     }, {
         key: '$emit',
         value: function $emit(data) {
-            var payload = {},
-                deferred = (0, _helpers.defer)();
+            var payload = {};
             payload.data = data;
+            payload.query = _vffData.vffData.getQueryParams();
             payload.channel = this._name;
-            _vffData.vffData.getQueryParams().then(function (params) {
-                payload.query = params;
-                (0, _messenger.send)(_events.OUTGOING_EVENT, payload);
-                _helpers.defer.resolve();
-            }).catch(deferred.reject);
-            return deferred.promise;
+            (0, _messenger.send)(_events.OUTGOING_EVENT, payload);
+        }
+    }, {
+        key: '$before',
+        value: function $before(arg1, arg2, arg3) {
+            var args = this._arguments(arg1, arg2, arg3);
+            args.options = Object.assign({}, defaultListenerOptions, args.options);
+            this._middleware.push(args);
         }
     }, {
         key: '$on',
         value: function $on(arg1, arg2, arg3) {
-            var template = void 0,
-                callback = void 0,
-                options = options || {};
-            switch (arguments.length) {
-                case 0:
-                    throw new Error("$on was called without arguments");
-                case 1:
-                    callback = arg1;
-                    break;
-                default:
-                    if (typeof arg1 === 'string') {
-                        template = arg1;
-                        callback = arg2;
-                        options = arg3 || {};
-                    } else if (typeof arg1 === 'function') {
-                        callback = arg1;
-                        options = arg2 || {};
-                    }
-                    break;
-            }
+            var args = this._arguments(arg1, arg2, arg3);
+            var path = args.path,
+                callback = args.callback,
+                options = args.options;
 
             options = Object.assign({}, defaultListenerOptions, options);
 
             var self = this;
 
             function runCB(data) {
-                if (options.consolidate || options.throttle) {
-                    clearTimeout(self._timeouts[template || '__global_event__']);
-                    self._timeouts[template || '__global_event__'] = setTimeout(function () {
-                        callback(data);
-                    }, typeof options.throttle === 'number' ? options.throttle : 50);
-                } else {
-                    callback(data);
-                }
+                self._runCallback(callback, path, options, data);
             }
 
             function listener(event) {
                 var key = (0, _helpers.findKey)(event.detail, self._name);
                 if (key) {
 
-                    if (template && options.changeOnly && ((0, _helpers.getByPath)(event.detail[key], template) === (0, _helpers.getByPath)(self._proxy, template) || (0, _helpers.getByPath)(event.detail[key], template) === undefined)) {
+                    if (path && options.changeOnly && ((0, _helpers.getByPath)(event.detail[key], path) === (0, _helpers.getByPath)(self._proxy, path) || (0, _helpers.getByPath)(event.detail[key], path) === undefined)) {
                         return;
-                    } else if (!template && options.changeOnly && (0, _helpers.deepCompare)(event.detail[key], self._proxy)) {
+                    } else if (!path && options.changeOnly && (0, _helpers.deepCompare)(event.detail[key], self._proxy)) {
                         return;
                     }
 
-                    if (template && (0, _helpers.getByPath)(event.detail[key], template) !== undefined) {
-                        runCB((0, _helpers.getByPath)(event.detail[key], template));
-                    } else if (!template) {
+                    if (path && (0, _helpers.getByPath)(event.detail[key], path) !== undefined) {
+                        runCB((0, _helpers.getByPath)(event.detail[key], path));
+                    } else if (!path) {
                         runCB(event.detail[key]);
                     }
                 }
@@ -1217,6 +1201,75 @@ var Template = function () {
         value: function _getValue(key) {
             return this._proxy[(0, _helpers.findKey)(this._proxy, key)];
         }
+    }, {
+        key: '_runMiddleware',
+        value: function _runMiddleware(data) {
+            var self = this;
+            return this._middleware.reduce(function (prev, curr) {
+                return prev.then(function (data) {
+                    var d = (0, _helpers.defer)();
+
+                    if (!curr.path || curr.path && (0, _helpers.getByPath)(data, curr.path) !== undefined) {
+                        self._runCallback(curr.callback, curr.path, curr.options || {}, data, d.resolve);
+                    } else {
+                        d.resolve(data);
+                    }
+
+                    return d.promise;
+                });
+            }, Promise.resolve(data));
+        }
+    }, {
+        key: '_arguments',
+        value: function _arguments(arg1, arg2, arg3) {
+            var path = void 0,
+                callback = void 0,
+                options = void 0;
+            switch (arguments.length) {
+                case 0:
+                    throw new Error("No arguments error");
+                case 1:
+                    callback = arg1;
+                    break;
+                default:
+                    if (typeof arg1 === 'string') {
+                        path = arg1;
+                        callback = arg2;
+                        options = arg3 || {};
+                    } else if (typeof arg1 === 'function') {
+                        callback = arg1;
+                        options = arg2 || {};
+                    }
+                    break;
+            }
+            return {
+                path: path,
+                callback: callback,
+                options: options
+            };
+        }
+    }, {
+        key: '_runCallback',
+        value: function _runCallback(callback, path, options) {
+            for (var _len = arguments.length, data = Array(_len > 3 ? _len - 3 : 0), _key = 3; _key < _len; _key++) {
+                data[_key - 3] = arguments[_key];
+            }
+
+            if (options.consolidate || options.throttle) {
+
+                var callbacks = this._timeouts[path || '__global_event__'];
+                if (!callbacks) {
+                    this._timeouts[path || '__global_event__'] = new WeakMap();
+                }
+
+                clearTimeout(this._timeouts[path || '__global_event__'].get(callback));
+                this._timeouts[path || '__global_event__'].set(callback, setTimeout(function () {
+                    callback.apply(undefined, data);
+                }, typeof options.throttle === 'number' ? options.throttle : 50));
+            } else {
+                callback.apply(undefined, data);
+            }
+        }
     }]);
 
     return Template;
@@ -1354,24 +1407,24 @@ var _consts = __webpack_require__(5);
 var _events = __webpack_require__(1);
 
 function update(data) {
-    var isDataChanged = void 0;
-
-    document.dispatchEvent(new CustomEvent(_events.VFF_EVENT, { detail: data }));
-
-    for (var templateName in data) {
+    var _loop = function _loop(templateName) {
         var template = _vffData.vffData.getTemplate(templateName);
         if (template) {
-            _vffData.vffData.registerTemplate(templateName, data[templateName]);
-            isDataChanged = true;
-            for (var key in data[templateName]) {
-                updateDom(template, key, data[templateName][key], data[templateName].__timecode__);
-            }
+            template._runMiddleware(data[templateName]).then(function (result) {
+                _vffData.vffData.registerTemplate(templateName, result);
+                for (var key in result) {
+                    updateDom(template, key, result[key], result.__timecode__);
+                }
+                _vffData.vffData.updateCB();
+            });
         }
+    };
+
+    for (var templateName in data) {
+        _loop(templateName);
     }
 
-    if (isDataChanged) {
-        _vffData.vffData.updateCB();
-    }
+    document.dispatchEvent(new CustomEvent(_events.VFF_EVENT, { detail: data }));
 }
 
 function updateDom(template, control, value, timecode) {
@@ -3703,6 +3756,36 @@ module.exports = {
 
 /***/ }),
 /* 39 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _helpers = __webpack_require__(0);
+
+function get(url, callback) {
+    var deferred = (0, _helpers.defer)();
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function () {
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+            if (callback) {
+                callback(xmlHttp.responseText);
+            }
+            deferred.resolve(xmlHttp.responseText);
+        }
+    };
+    xmlHttp.open("GET", url, true); // true for asynchronous
+    xmlHttp.send(null);
+    return deferred.promise;
+}
+
+module.exports = {
+    get: get
+
+};
+
+/***/ }),
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
