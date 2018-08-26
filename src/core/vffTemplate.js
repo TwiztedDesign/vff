@@ -48,13 +48,13 @@ class Template{
         payload.channel = this._name;
         send(OUTGOING_EVENT, payload);
     }
-    $before(arg1, arg2, arg3){
-        let args = this._arguments(arg1, arg2, arg3);
+    $before(...args){
+        args = this._arguments(...args);
         args.options = Object.assign({}, defaultListenerOptions, args.options);
         this._middleware.push(args);
     }
-    $on(arg1, arg2, arg3){
-        let args = this._arguments(arg1, arg2, arg3);
+    $on(...args){
+        args = this._arguments(...args);
         let path = args.path, callback = args.callback, options = args.options;
 
         options = Object.assign({}, defaultListenerOptions, options);
@@ -90,7 +90,7 @@ class Template{
     show(){ return this.$show(); }
     hide(){ return this.$hide(); }
     toggle(){ return this.$toggle(); }
-    onData(arg1, arg2, arg3){ return this.$on(arg1, arg2, arg3); }
+    onData(...args){ return this.$on(...args); }
     emit(data){ return this.$emit(data); }
 
     _update(data){
