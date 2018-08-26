@@ -16,5 +16,7 @@ module.exports = {
 
     "TOUCH"         : "taco-touch-element",
     "MOUSE_MOVE"    : "taco-mouse-move",
-    "BUBBLE_UP"     : "taco-bubble-up"
+    "BUBBLE_UP"     : "taco-bubble-up",
+
+    "PAGES_UPDATE"  : "vff-pages-update"
 };

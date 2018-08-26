@@ -1,5 +1,5 @@
-import {ADD} from "../utils/events";
-import {docRef} from '../utils/helpers.js';
+import {ADD, PAGES_UPDATE} from "../utils/events";
+import {docRef, broadcast, on, defer} from '../utils/helpers.js';
 import {send} from '../utils/messenger';
 import {REGISTER_TEMPLATE} from '../utils/docRefs';
 import VffTemplate from './vffTemplate';
@@ -8,6 +8,7 @@ class VffData {
     constructor(){
         this._templates = {};
         this._pages = [];
+        this._pagesDefer = defer();
     }
 
     updateCB(){
@@ -72,11 +73,21 @@ class VffData {
         if(pages && pages.length){
             while (this._pages.length) { this._pages.pop(); }
             this._pages = this._pages.concat(pages);
+            this._pagesDefer.resolve(pages);
+            broadcast(PAGES_UPDATE, this._pages);
             this.updateCB();
         }
     }
     getPages(){
-        return this._pages;
+        return this._pagesDefer.promise;
+    }
+    onPages(cb){
+        if(this._pages.length){
+            cb(this._pages);
+        }
+        on(PAGES_UPDATE, (event) => {
+            cb(event.detail);
+        });
     }
     addQueryParams(params){
         this._queryParams = params;

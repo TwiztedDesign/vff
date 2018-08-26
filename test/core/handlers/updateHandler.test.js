@@ -21,13 +21,15 @@ describe('Update Handler', () => {
     });
 
     describe('Update', () => {
-        it('Should update the data in a given template as passed in the data obj', () => {
-            updateHandler.update({'test': {prop: 'some other value'}});
-            expect(template.prop).toBe('some other value');
-            updateHandler.update({'TeSt': {prop: 'some third value'}});
-            expect(template.prop).toBe('some third value');
-
-            expect(updateCB).toHaveBeenCalledTimes(2);
+        it('Should update the data in a given template as passed in the data obj', (done) => {
+            updateHandler.update({'test': {prop: 'some other value'}}).then(() => {
+                expect(template.prop).toBe('some other value');
+                updateHandler.update({'TeSt': {prop: 'some third value'}}).then(() => {
+                    expect(template.prop).toBe('some third value');
+                    expect(updateCB).toHaveBeenCalledTimes(2);
+                    done();
+                });
+            });
         });
         it('Should add the passed property with value to the DOM element object', () => {
             let headerElement = document.createElement('h1');
@@ -51,9 +53,12 @@ describe('Update Handler', () => {
 
             // expect(setByPath).toHaveBeenCalledWith(testElement, 'title', 'test title');
         });
-        it('should handle nested objects', () => {
-            updateHandler.update({'test' : {prop: { prop1 : 'some other value'}}});
-            expect(template.prop.prop1).toBe('some other value');
+        it('should handle nested objects', (done) => {
+            updateHandler.update({'test' : {prop: { prop1 : 'some other value'}}}).then(() => {
+                expect(template.prop.prop1).toBe('some other value');
+                done();
+            });
+
         });
 
     });

@@ -1,6 +1,6 @@
 import {USER_UPDATE, VFF_EVENT, OUTGOING_EVENT} from "../utils/events";
 import {EXPOSE_DELIMITER} from './consts';
-import {findKey, getByPath} from '../utils/helpers.js';
+import {findKey, deepExtend, getByPath, uuid, deepCompare, defer} from '../utils/helpers.js';
 import {send} from '../utils/messenger';
 import {vffData} from './vffData';
 import SuperProxy from "../utils/super-proxy";
@@ -20,6 +20,7 @@ class Template{
         this._element = this._options.element;
         this._proxies = {};
         this._timeouts = {};
+        this._middleware = [];
     }
     $element(control){
         if(this._element && control){
@@ -47,54 +48,36 @@ class Template{
         payload.channel = this._name;
         send(OUTGOING_EVENT, payload);
     }
-    $on(arg1, arg2, arg3){
-        let template, callback, options = options || {};
-        switch (arguments.length){
-            case 0:
-                throw new Error("$on was called without arguments");
-            case 1:
-                callback = arg1;
-                break;
-            default:
-                if(typeof arg1 === 'string'){
-                    template = arg1;
-                    callback = arg2;
-                    options = arg3 || {};
-                } else if(typeof arg1 === 'function'){
-                    callback = arg1;
-                    options = arg2 || {};
-                }
-                break;
-        }
+    $before(...args){
+        args = this._arguments(...args);
+        args.options = Object.assign({}, defaultListenerOptions, args.options);
+        this._middleware.push(args);
+    }
+    $on(...args){
+        args = this._arguments(...args);
+        let path = args.path, callback = args.callback, options = args.options;
 
         options = Object.assign({}, defaultListenerOptions, options);
 
         let self = this;
 
         function runCB(data){
-            if(options.consolidate || options.throttle){
-                clearTimeout(self._timeouts[template || '__global_event__']);
-                self._timeouts[template || '__global_event__'] = setTimeout(function(){
-                    callback(data);
-                }, (typeof options.throttle === 'number')? options.throttle : 50);
-            } else {
-                callback(data);
-            }
+            self._runCallback(callback, path, options, data);
         }
 
         function listener(event){
             let key = findKey(event.detail, self._name);
             if(key) {
 
-                if(template && options.changeOnly && (getByPath(event.detail[key], template) === getByPath(self._proxy, template) || getByPath(event.detail[key], template) === undefined )){
+                if(path && options.changeOnly && (getByPath(event.detail[key], path) === getByPath(self._proxy, path) || getByPath(event.detail[key], path) === undefined )){
                     return;
-                } else if (!template && options.changeOnly && self._proxy.equals(event.detail[key])){
+                } else if (!path && options.changeOnly && deepCompare(event.detail[key], self._proxy)){
                     return;
                 }
 
-                if(template && getByPath(event.detail[key], template) !== undefined){
-                    runCB(getByPath(event.detail[key], template));
-                } else if(!template){
+                if(path && getByPath(event.detail[key], path) !== undefined){
+                    runCB(getByPath(event.detail[key], path));
+                } else if(!path){
                     runCB(event.detail[key]);
                 }
             }
@@ -107,7 +90,7 @@ class Template{
     show(){ return this.$show(); }
     hide(){ return this.$hide(); }
     toggle(){ return this.$toggle(); }
-    onData(arg1, arg2, arg3){ return this.$on(arg1, arg2, arg3); }
+    onData(...args){ return this.$on(...args); }
     emit(data){ return this.$emit(data); }
 
     _update(data){
@@ -154,7 +137,65 @@ class Template{
     _getValue(key){
         return this._proxy[key];
     }
+    _runMiddleware(data){
+        let self = this;
+        return this._middleware.reduce((prev, curr) => {
+            return prev.then((data) => {
+                let d = defer();
 
+                if(!curr.path || (curr.path && getByPath(data, curr.path) !== undefined)){
+                    self._runCallback(curr.callback, curr.path, curr.options || {}, data, d.resolve);
+                } else {
+                    d.resolve(data);
+                }
+
+                return d.promise;
+            });
+        }, Promise.resolve(data));
+    }
+
+    _arguments(arg1, arg2, arg3){
+        let path, callback, options;
+        switch (arguments.length){
+            case 0:
+                throw new Error("No arguments error");
+            case 1:
+                callback = arg1;
+                break;
+            default:
+                if(typeof arg1 === 'string'){
+                    path = arg1;
+                    callback = arg2;
+                    options = arg3 || {};
+                } else if(typeof arg1 === 'function'){
+                    callback = arg1;
+                    options = arg2 || {};
+                }
+                break;
+        }
+        return {
+            path : path,
+            callback : callback,
+            options : options
+        };
+    }
+
+    _runCallback(callback, path, options, ...data){
+        if(options.consolidate || options.throttle){
+
+            let callbacks = this._timeouts[path || '__global_event__'];
+            if(!callbacks){
+                this._timeouts[path || '__global_event__'] = new WeakMap();
+            }
+
+            clearTimeout(this._timeouts[path || '__global_event__'].get(callback));
+            this._timeouts[path || '__global_event__'].set(callback, setTimeout(function(){
+                callback(...data);
+            }, (typeof options.throttle === 'number')? options.throttle : 50));
+        } else {
+            callback(...data);
+        }
+    }
 }
 
 export default class VffTemplate extends Template {
