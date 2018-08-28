@@ -1,6 +1,6 @@
 import {USER_UPDATE, VFF_EVENT, OUTGOING_EVENT} from "../utils/events";
 import {EXPOSE_DELIMITER} from './consts';
-import {findKey, deepExtend, getByPath, uuid, deepCompare, defer} from '../utils/helpers.js';
+import {findKey, getByPath, defer} from '../utils/helpers.js';
 import {send} from '../utils/messenger';
 import {vffData} from './vffData';
 import SuperProxy from "../utils/super-proxy";
@@ -71,7 +71,7 @@ class Template{
 
                 if(path && options.changeOnly && (getByPath(event.detail[key], path) === getByPath(self._proxy, path) || getByPath(event.detail[key], path) === undefined )){
                     return;
-                } else if (!path && options.changeOnly && deepCompare(event.detail[key], self._proxy)){
+                } else if (!path && options.changeOnly && self._proxy.equals(event.detail[key])){
                     return;
                 }
 
