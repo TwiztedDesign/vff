@@ -80,7 +80,6 @@ the first pram is the name of the template as it would be displayed in the contr
 VFF will update the registered object on any change, you can then bind you template object directly to the DOM using your favorite framework, here are a few examples using different frameworks:
 
 ### AngularJS
-### angular.js
 HTML
 ```html
 <html>
