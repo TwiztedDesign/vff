@@ -1,15 +1,16 @@
 import {send, request} from './utils/messenger.js';
 import {READY} from './utils/events.js';
-import {vffData} from './core/vffdata.js';
+import {vffData} from './core/vffData.js';
 import {start as startListener} from './utils/listener';
-import {init as initVffDom} from './core/init';
+import {init as initVffDom} from './core/initDOM';
 import vffElement from './core/vffElement';
 import './core/defaultExpose';
 import "./components/components.js";
-import {isMobile, isController, extend} from './utils/helpers';
+import {isMobile, isController, mode, extend, defer} from './utils/helpers';
 import * as eventsApi from './core/api/events';
 import * as playerApi from './core/api/player';
 import * as visibilityApi from './core/api/visibility';
+import * as httpApi from './core/api/http';
 require('./core/interactionEvents');
 
 startListener();
@@ -24,20 +25,27 @@ let vff = (selector) => {
     return new vffElement(selector);
 };
 
-vff.addTemplate    = (name, data) => {return vffData.addTemplate(name, data);};
-vff.onUpdate       = (cb) => {return vffData.onUpdate(cb);};
-vff.getPages       = () => {return vffData.getPages();};
-vff.getQueryParams = () => {return vffData.getQueryParams();};
-vff.send           = (type, payload) => { send(type, payload); };
-vff.request        = (type, payload, cb) => { request(type, payload, cb); };
-vff.isMobile       = isMobile;
-vff.isController   = isController;
-vff.extend         = (name, extension) => { vff[name] = extension; };
-vff.define         = (name, element) => { customElements.define(name, element); };
+vff.addTemplate         = (name, data, options) => {return vffData.registerTemplate(name, data, options);};
+vff.registerTemplate    = (name, data, options) => {return vffData.registerTemplate(name, data, options);};
+vff.getTemplate         = (name) => {return vffData.getTemplate(name);};
+vff.getTemplates        = () => {return vffData.getTemplates();};
+vff.onUpdate            = (cb) => {return vffData.onUpdate(cb);};
+vff.getPages            = () => {return vffData.getPages();};
+vff.onPages             = (cb) => {return vffData.onPages(cb);};
+vff.getQueryParams      = () => {return vffData.getQueryParams();};
+vff.send                = (type, payload) => { send(type, payload); };
+vff.request             = (type, payload, cb) => { request(type, payload, cb); };
+vff.isMobile            = isMobile;
+vff.isController        = isController;
+vff.mode                = mode;
+vff.defer               = defer;
+vff.extend              = (name, extension) => { vff[name] = extension; };
+vff.define              = (name, element) => { customElements.define(name, element); };
 
 extend(vff, playerApi);
 extend(vff, visibilityApi);
 extend(vff, eventsApi);
+vff.extend('http', httpApi);
 
 
 module.exports = vff;

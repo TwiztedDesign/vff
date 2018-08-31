@@ -1,5 +1,5 @@
 // let expect = require('chai').expect;
-import {vffData} from '../src/core/vffdata.js';
+import {vffData} from '../src/core/vffData.js';
 
 // describe('VFF', () => {
 //     describe('first test', () => {

@@ -1,4 +1,4 @@
-import {vffData} from '../../core/vffdata.js';
+import {vffData} from '../vffData.js';
 
 
 module.exports = {

@@ -1,5 +1,3 @@
-
-
 function findKey(data, keyToFind) {
     let keys = Object.keys(data);
     for(let i = 0 ; i < keys.length ; i++){
@@ -59,7 +57,7 @@ function camelize(str) {
     // }).replace(/\s+/g, '');
 }
 function decamelize(str) {
-    return str.replace(/([A-Z])/g, ' $1');
+    return str.replace(/([A-Z])/g, ' $1').trim();
 }
 
 function uuid() {
@@ -84,11 +82,10 @@ function controllerCheck(){
     } catch (err){
         return false;
     }
-
 }
 
 function extend(a, b){
-    for(var key in b)
+    for(let key in b)
         if(b.hasOwnProperty(key))
             a[key] = b[key];
     return a;
@@ -98,7 +95,8 @@ function deepExtend(destination, source) {
     for (let property in source) {
         if (source[property] && source[property].constructor &&
             source[property].constructor === Object && !source[property].__isProxy) {
-            destination[property] = destination[property] || {};
+            destination[property] = (destination[property] && destination[property].constructor && destination[property].constructor === Object)?
+                destination[property] : {};
             deepExtend(destination[property], source[property]);
         } else {
             destination[property] = source[property];
@@ -107,21 +105,188 @@ function deepExtend(destination, source) {
     return destination;
 }
 
+
+function modeCheck(){
+    //"controller_preview" "controller_program" "editor" "player_external" "player_internal"
+    let mode = 'normal';
+
+    try{
+        let frame = window.frameElement.ownerDocument.defaultView.frameElement;
+        mode = frame.getAttribute('vff-mode') || mode;
+    } catch (err){
+        // not in iframe
+    }
+    return mode;
+}
+function docRef(anchor){
+    return 'https://www.videoflow.io/documentation/api/vff?id=' + anchor;
+}
+
+
+//compares only properties from lhs and ignores properties that start with _
+function deepCompare () {
+    var i, l, leftChain, rightChain;
+
+    function compare2Objects (x, y) {
+        var p;
+
+        // remember that NaN === NaN returns false
+        // and isNaN(undefined) returns true
+         if (isNaN(x) && isNaN(y) && typeof x === 'number' && typeof y === 'number') {
+            return true;
+        }
+
+        // Compare primitives and functions.
+        // Check if both arguments link to the same object.
+        // Especially useful on the step where we compare prototypes
+        if (x === y) {
+            return true;
+        }
+
+        // Works in case when functions are created in constructor.
+        // Comparing dates is a common scenario. Another built-ins?
+        // We can even handle functions passed across iframes
+        if ((typeof x === 'function' && typeof y === 'function') ||
+            (x instanceof Date && y instanceof Date) ||
+            (x instanceof RegExp && y instanceof RegExp) ||
+            (x instanceof String && y instanceof String) ||
+            (x instanceof Number && y instanceof Number)) {
+            return x.toString() === y.toString();
+        }
+
+        // At last checking prototypes as good as we can
+        if (!(x instanceof Object && y instanceof Object)) {
+            return false;
+        }
+
+        if (x.isPrototypeOf(y) || y.isPrototypeOf(x)) {
+            return false;
+        }
+
+        if (x.constructor !== y.constructor) {
+            return false;
+        }
+
+        if (x.prototype !== y.prototype) {
+            return false;
+        }
+
+        // Check for infinitive linking loops
+        if (leftChain.indexOf(x) > -1 || rightChain.indexOf(y) > -1) {
+            return false;
+        }
+
+        // Quick checking of one object being a subset of another.
+        // todo: cache the structure of arguments[0] for performance
+        // for (p in y) {
+        //     if(!p.startsWith('_')){
+        //         if (y.hasOwnProperty(p) !== x.hasOwnProperty(p)) {
+        //             return false;
+        //         }
+        //         else if (typeof y[p] !== typeof x[p]) {
+        //             return false;
+        //         }
+        //     }
+        //
+        // }
+
+        for (p in x) {
+            if(!p.startsWith('_')) {
+                if (y.hasOwnProperty(p) !== x.hasOwnProperty(p)) {
+                    return false;
+                }
+                else if (typeof y[p] !== typeof x[p]) {
+                    return false;
+                }
+
+
+                switch (typeof (x[p])) {
+                    case 'object':
+                    case 'function':
+
+                        leftChain.push(x);
+                        rightChain.push(y);
+
+                        if (!compare2Objects(x[p], y[p])) {
+                            return false;
+                        }
+
+                        leftChain.pop();
+                        rightChain.pop();
+                        break;
+
+                    default:
+                        if (x[p] !== y[p]) {
+                            return false;
+                        }
+                        break;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    if (arguments.length < 1) {
+        return true;
+    }
+
+    for (i = 1, l = arguments.length; i < l; i++) {
+
+        leftChain = []; //Todo: this can be cached
+        rightChain = [];
+
+        if (!compare2Objects(arguments[0], arguments[i])) {
+            return false;
+        }
+    }
+
+    return true;
+}
+function broadcast(event, data){
+    document.dispatchEvent(new CustomEvent(event, { detail: data }));
+}
+function on(event, listener){
+    document.addEventListener(event, listener);
+}
+function off(event, listener){
+    document.removeEventListener(event, listener);
+}
+function defer(){
+    let resolve = noop, reject = noop;
+    let promise =  new Promise(function(res, rej) {
+        resolve = res;
+        reject  = rej;
+    });
+    return {
+        promise : promise,
+        resolve : resolve,
+        reject  : reject
+    };
+}
+
 function noop(){}
 
 
 
 module.exports = {
-    findKey     : findKey,
-    trim        : trim,
-    getByPath   : getByPath,
-    setByPath   : setByPath,
-    camelize    : camelize,
-    decamelize  : decamelize,
-    uuid        : uuid,
-    extend      : extend,
-    deepExtend  : deepExtend,
-    isMobile    : mobilecheck(),
-    isController: controllerCheck(),
-    noop        : noop
+    findKey         : findKey,
+    trim            : trim,
+    getByPath       : getByPath,
+    setByPath       : setByPath,
+    camelize        : camelize,
+    decamelize      : decamelize,
+    uuid            : uuid,
+    extend          : extend,
+    deepExtend      : deepExtend,
+    deepCompare     : deepCompare,
+    isMobile        : mobilecheck(),
+    isController    : controllerCheck(),
+    mode            : modeCheck(),
+    docRef          : docRef,
+    broadcast       : broadcast,
+    on              : on,
+    off             : off,
+    defer           : defer,
+    noop            : noop
 };

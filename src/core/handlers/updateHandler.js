@@ -1,35 +1,37 @@
-import {findKey, setByPath} from '../../utils/helpers.js';
-import {vffData} from '../vffdata.js';
+import {setByPath, defer} from '../../utils/helpers.js';
+import {vffData} from '../vffData.js';
 import {EXPOSE_DELIMITER} from '../consts';
 import {VFF_EVENT} from '../../utils/events';
 
 function update(data){
-    let isDataChanged = false;
 
-    document.dispatchEvent(new CustomEvent(VFF_EVENT, { detail: data }));
-    for(let template in vffData._main) {
-        let key = findKey(data, template);
-        for(let item in data[key]){
-            let controlKey = findKey(vffData._main[template], item);
+    let promises = []
+    Object.keys(data).forEach(function(templateName){
 
-            vffData._main[template][controlKey || item] = data[key][item];
-            isDataChanged = true;
+    });
 
-            updateDom(template, controlKey || item, data[key][item], data[key].__timecode__);
-
+    for(let templateName in data){
+        let template = vffData.getTemplate(templateName);
+        if(template){
+            let deferred = defer();
+            template._runMiddleware(data[templateName]).then((result) => {
+                vffData.registerTemplate(templateName, result);
+                for(let key in result){
+                    updateDom(template, key, result[key], result.__timecode__);
+                }
+                vffData.updateCB();
+                deferred.resolve();
+            });
+            promises.push(deferred.promise);
         }
     }
-    if(isDataChanged) {
-        vffData.updateCB();
-    }
+
+    document.dispatchEvent(new CustomEvent(VFF_EVENT, { detail: data }));
+    return Promise.all(promises);
 }
 
-
 function updateDom(template, control, value, timecode){
-    let templateSelector = '[vff-template="' + template + '" i]';
-    let controlSelector = '[vff-name="' + control.split(EXPOSE_DELIMITER)[0] + '" i]';
-    let selector = templateSelector + ' ' + controlSelector + ',' + templateSelector + controlSelector;
-    let dom = document.querySelector(selector);
+    let dom = template.$element(control.split(EXPOSE_DELIMITER)[0]);
     if(dom){
         if(timecode !== undefined){
             setByPath(dom, "__timecode__", timecode);

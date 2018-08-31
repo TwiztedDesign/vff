@@ -11,9 +11,12 @@ module.exports = {
     "OUTGOING_EVENT": "taco-event-sent",
     "VFF_EVENT"     : "taco-event-received",
     "ACK"           : "taco-ack",
+    "TRACK_EVENT"   : "vff-track-event",
 
 
     "TOUCH"         : "taco-touch-element",
     "MOUSE_MOVE"    : "taco-mouse-move",
-    "BUBBLE_UP"     : "taco-bubble-up"
+    "BUBBLE_UP"     : "taco-bubble-up",
+
+    "PAGES_UPDATE"  : "vff-pages-update"
 };

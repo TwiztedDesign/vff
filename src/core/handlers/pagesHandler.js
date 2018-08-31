@@ -1,4 +1,4 @@
-import {vffData} from '../vffdata.js';
+import {vffData} from '../vffData.js';
 
 function pages(data) {
     vffData.addPages(data);

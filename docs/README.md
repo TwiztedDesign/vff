@@ -9,7 +9,6 @@ the project. For example, you might want to display more data if the project is 
 VFF is extensible, the extensions are designed to add extra functionality that otherwise would not be available in traditional HTML workflows. For example a drawing surface that would allow users to draw on top of the overlay.
 
 
-
 # Getting Started
 
 ## Create your overlay app
@@ -58,9 +57,41 @@ project to the "Overlay" filed of you project. Here is the full basic core:
 </html>
 ```
 
+# VFF Global
+
+After including the vff script in your html file, a "vff" object is set on the window object.
+
+## Methods
+|       Method     | Details                                                                                             |
+|------------------|-----------------------------------------------------------------------------------------------------|
+| registerTemplate(**name**, **data**)| Registers a template in the VFF and returns a template object<br>**name** - _string_ - name of the template<br>**data** - _object_ - data of the template|
+| getTemplate(**name**)               | Returns a registered template by name<br>**name** - _string_ - name of the template to return|
+| getTemplates()                      | Returns an array of all the registered templates|
+
+
 # Templates
 Once the VFF lib is registered, it generates a global object that you can access from anywhere in your code. The global object "vff" contains all the functions and the properties you need to generate templates and control your overlay.
 The "vff" object also contains events that will be fired based on various conditions, such as a change in a data that arrives from an external source like a controller or an API call.
+
+
+## Methods
+|        Method      | Details                                                                                               |
+|--------------------|-------------------------------------------------------------------------------------------------------|
+| $element()         | Returns the DOM element of the template if exists                                                     |
+| $show()            | Set "visibility" property in the template to true                                                     |
+| $hide()            | Set "visibility" property in the template to false                                                    |
+| $toggle()          | Toggle "visibility" property in the template                                                          |
+| $on(**callback**, **options**)  | triggers callback when data for the template arrives<br>**callback** - _function(**data**)_ - data handler<br>**options** - _object(optional)_ - options object (described [here](#options))|
+| $on(**path**, **callback**, **options**)| trigger callback when data for the **path** in the template arrives<br>**path** - _string_ - dot delimited string that describes a path in the template<br>**callback** - _function(**data**)_ - data handler<br>**options** - _object(optional)_ - options object (described [here](#options))|
+| $emit(**payload**) | Emits a message to every player with the same project<br>**payload** - _object_ - data to be sent     |
+
+
+## options
+|        Property    | Type      |  Default   | Details                                                                                         |
+|--------------------|-----------|------------|-------------------------------------------------------------------------------------------------|
+| changeOnly         | _Boolean_ | *true*     | trigger callback only if dat is changed |
+
+
 
 ## Adding templates (JavaScript)
 ```javascript
@@ -70,10 +101,10 @@ var lowerThird = {
     subTitle    : "This is a subtitle"
 };
 // Register the object as a template
-var lowerThird = vff.addTemplate("Lower Third", lowerThird);
+var lowerThird = vff.registerTemplate("Lower Third", lowerThird);
 ```
 The above code will generate the same result as the code we used in the "Getting Started" example in the HTML file. The name of the template is the object name, and the properties of the template as the object properties.
-The function "addTemplate" will return a template object that will contain functions for events and additional data. Note that when registering the template via js, you can specify any name you want for the template,
+The function "registerTemplate" will return a template object that will contain functions for events and additional data. Note that when registering the template via js, you can specify any name you want for the template,
 the first pram is the name of the template as it would be displayed in the controller (Lower Third) and the second param is the object that will be used to contain the data of the template.
 
 ## Working with Frameworks
@@ -105,7 +136,7 @@ angular.module('tfApp', [])
             subTitle    : "This is a subtitle"
         };
         // Register the object as a template
-        var lowerThird = vff.addTemplate("Lower Third", lowerThird);
+        var lowerThird = vff.registerTemplate("Lower Third", lowerThird);
         }
     ]);
 ```
@@ -134,7 +165,7 @@ var lowerThird = {
     ]
 };
 // Register the object as a template
-var lowerThird = vff.addTemplate("Lower Third", lowerThird);
+var lowerThird = vff.registerTemplate("Lower Third", lowerThird);
 ```
 The controller will still show only the "Title" and the "Sub Title" properties. It will ignore any objects that are not primitives unless they follow a specific structure that describes a UI element such as a dropdown.
 While the property "stockData" will not be shown by the controller, it will still be active and available.
@@ -145,12 +176,12 @@ Your entire template can be viewed as an object at any time in the data dashboar
 
 ## Custom UI Elements
 So far we have been adding only primitive objects to our template. In the previous example have added two strings. Additional primitives you can add are numbers and booleans. In addition to the primitive types
-you can also create custom objects that will be used to extend the UI elements that can be used in the template. Normally objects are now shown in the UI of the controller, unless you follow the UI element object structure.
+you can also create custom objects that will be used to extend the UI elements that can be used in the template. Normally objects are not shown in the UI of the controller, unless you follow the UI element object structure.
 
 ```javascript
 var myTemplate = {
-    myDropdown = {
-        type        : 'ui-dropdown',
+    myDropdown : {
+        ui          : 'dropdown',
         value       : 'USA',
         options     : [
             'USA',
@@ -163,14 +194,14 @@ var myTemplate = {
 ```
 The above example will create a template, with a single ui element, that will be presented as a dropdown box, with the options 'USA', 'Canada', 'Mexico' & 'UK' to choose from, and 'USA' as the default selected value.
 When you make another selection from the drop down, the "value" property will be updated. Keep that in mind when binding your elements to the template object.
-The key part here is the "type" property. Without the type property & without the appropriate type value, this object would have been ignored by the controller and you would not see it in the UI.
+The key part here is the "ui" property. Without the ui property & without the appropriate ui value, this object would have been ignored by the controller and you would not see it in the UI.
 
 ### Dropdown
 ```javascript
 var myTemplate = {
-    myDropdown = {
+    myDropdown : {
         //Declare the type of the ui element
-        type        : 'ui-dropdown',
+        ui          : 'dropdown',
         //Bind your element to the value property
         value       : 'USA',
         options     : [
@@ -185,9 +216,9 @@ var myTemplate = {
 ### Radio Group
 ```javascript
 var myTemplate = {
-    myRadioGroup = {
+    myRadioGroup : {
         //Declare the type of the ui element
-        type        : 'ui-radio',
+        ui          : 'radio',
         //Bind your element to the value property
         value       : 'USA',
         options     : [
@@ -203,9 +234,9 @@ var myTemplate = {
 ### Range Slider
 ```javascript
 var myTemplate = {
-    mySlider = {
+    mySlider : {
         //Declare the type of the ui element
-        type        : 'ui-range',
+        ui        : 'range',
         //Bind your element to the value property
         value       : '0',
         min         : -50,
@@ -225,15 +256,44 @@ var lowerThird = {
     subTitle    : "This is a subtitle",
 };
 // Register the object as a template
-var lowerThird = vff.addTemplate("Lower Third", lowerThird);
+var lowerThird = vff.registerTemplate("Lower Third", lowerThird);
 
-vff.onEvent("lowerThird", function(data){
+lowerThird.onData(function(data){
     // Respond to the event
     var d = new Date(data.__timecode__);
     alert("New data received on " + d.toString());
 });
 ```
 The "data" object of the function carries the template object with extra property for the time code (__timecode__).
+
+A template can emit a message which will be received by all opened Videoflow players.
+
+```javascript
+var lowerThird = vff.getTemplate("lowerThird");
+lowerThird.emit({"title" : "Breaking News"});
+```
+
+The code above will emit a message from the "lowerThird" template with a new title.
+It will be received in all of the open Videoflow players and the title will be changed.
+Any appropriate "onData" listeners will be triggered;
+
+The received message
+```json
+{
+  "overlay": "the overlay url",
+  "template": "template name",
+  "data": {
+    "title": "Breaking News"
+  },
+  "query": {//query params from the emitting project
+    "param1" : "value1"
+  },
+  "origin": "origin url",
+  "channel": "lowerThird"
+}
+```
+
+
 
 ## getPages
 ```javascript
@@ -261,16 +321,6 @@ vff.define(name, element)
 Define a vff custom element  
 Name - string - element name should be at least two words, dash separated (i.e vff-telestrator) **should consider auto ?vff-? prefix
 -->
-## emit
-```javascript
-vff.emit(payload);
-```
-Emit gfx event to all open players **no fully working yet
-## onEvent
-```javascript
-vff.onEvent(template, cb, options)
-vff.onEvent(cb, options)
-```
 
 # Player control
 
@@ -289,7 +339,10 @@ Go to page
 
 ## show
 ```javascript
-vff.show(template)
+template.show();
+// OR
+vff.show('templateName');
+
 ```
 Set "visibility" property in the template to true
 
@@ -297,7 +350,9 @@ Set "visibility" property in the template to true
 
 ## hide
 ```javascript
-vff.hide(template)
+template.hide();
+// OR
+vff.hide('templateName');
 ```
 Set "visibility" property in the template to false
 
@@ -305,7 +360,9 @@ Set "visibility" property in the template to false
 
 ## toggle
 ```javascript
-vff.toggle(template)
+template.toggle();
+// OR
+vff.toggle('templateName');
 ```
 Toggle "visibility" property in the template
 
@@ -316,9 +373,16 @@ Toggle "visibility" property in the template
 
 ## isMobile
 
+**boolean**
+
+
 ## isController
 
+**boolean**
 
+## mode
+
+**String:** _normal_ | _controller-preview_ | _controller-program_
 
 [![travis build](https://img.shields.io/travis/TwiztedDesign/vff.svg)](https://travis-ci.org/TwiztedDesign/vff)
 ![version](https://img.shields.io/npm/v/vff.svg)

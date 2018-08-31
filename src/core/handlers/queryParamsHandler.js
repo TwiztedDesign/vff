@@ -1,4 +1,4 @@
-import {vffData} from '../vffdata.js';
+import {vffData} from '../vffData.js';
 
 function queryParams(data) {
     vffData.addQueryParams(data);

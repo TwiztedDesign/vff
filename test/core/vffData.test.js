@@ -1,6 +1,8 @@
-import {vffData} from '../../src/core/vffdata.js';
+import {vffData} from '../../src/core/vffData.js';
 const messenger = require('../../src/utils/messenger.js');
-// import  from '../../src/utils/messenger.js';
+import {ADD} from "../../src/utils/events";
+import {docRef} from "../../src/utils/helpers";
+import {REGISTER_TEMPLATE} from "../../src/utils/docRefs";
 
 let data = {visibility: false};
 let send = jest.spyOn(messenger, 'send');
@@ -10,159 +12,184 @@ describe('vff Data', () => {
         vffData.clear();
     });
 
-    describe('Clear', () => {
+    describe('clear', () => {
         it('Should clear all the data', () => {
-            vffData.addTemplate('test', data);
-            expect(vffData._main).toHaveProperty('test');
-            expect(vffData._proxy).toHaveProperty('test');
+            vffData.registerTemplate('test', data);
+            expect(vffData.getTemplate('test')).toBeDefined();
+            expect(vffData.getTemplates().length).toBe(1);
             vffData.clear();
-            expect(vffData._main).toEqual({});
-            expect(vffData._proxy).toEqual({});
+            expect(vffData.getTemplate('test')).toBeUndefined();
+            expect(vffData.getTemplates().length).toBe(0);
         });
     });
 
-
-    describe('Add template', () => {
-        it('Should add a template to a page', () => {
-            vffData.addTemplate('test', data);
-            expect(vffData._main).toHaveProperty('test');
-            expect(vffData._proxy).toHaveProperty('test');
-            expect(vffData._main['test']).toEqual(data);
-            expect(vffData._proxy['test']).toEqual(data);
-
-            expect(send).toHaveBeenCalledTimes(1);
-
-
+    describe('registerTemplate', () => {
+        it('Should return a template object', () => {
+            var template = vffData.registerTemplate('test', data);
+            expect(template).toBeDefined();
         });
-
+        it('Should add a template', () => {
+            expect(vffData.getTemplates().length).toBe(0);
+            vffData.registerTemplate('test', data);
+            expect(vffData.getTemplates().length).toBe(1)
+        });
         it('Should update or add the data to an already existing template', () => {
-            vffData.addTemplate('test', data);
-            expect(vffData._main).toHaveProperty('test');
-            expect(vffData._proxy).toHaveProperty('test');
-
-            // add to existing template with existing data
-            expect(vffData._main['test']['visibility']).toBe(false);
-            expect(vffData._proxy['test']['visibility']).toBe(false);
-            vffData.addTemplate('test', {visibility: true});
-            expect(vffData._main['test']['visibility']).toBe(true);
-            expect(vffData._proxy['test']['visibility']).toBe(true);
-
-            // add to existing template with new data
-            expect(vffData._main['test']['count']).toBe(undefined);
-            expect(vffData._proxy['test']['count']).toBe(undefined);
-            vffData.addTemplate('test', {count: 2});
-            expect(vffData._main['test']['visibility']).toBe(true);
-            expect(vffData._proxy['test']['visibility']).toBe(true);
-            expect(vffData._main['test']['count']).toBe(2);
-            expect(vffData._proxy['test']['count']).toBe(2);
-
-            expect(send).toHaveBeenCalledTimes(3);
-        });
-
-        it('Should add and update data in an existing template', () => {
-            vffData.addTemplate('myTest', {count: 2, visibility: true});
-
-            expect(vffData._main['myTest']).toHaveProperty('count');
-            expect(vffData._proxy['myTest']).toHaveProperty('visibility');
-            expect(vffData._proxy['myTest']).not.toHaveProperty('title');
-            vffData.addTemplate('myTest', {count: 3, visibility: false, title: 'new title'});
-            expect(vffData._main['myTest']['visibility']).toBe(false);
-            expect(vffData._proxy['myTest']['visibility']).toBe(false);
-            expect(vffData._main['myTest']['count']).toBe(3);
-            expect(vffData._proxy['myTest']['count']).toBe(3);
-            expect(vffData._proxy['myTest']).toHaveProperty('title');
-            expect(vffData._main['myTest']['title']).toBe('new title');
-            expect(vffData._proxy['myTest']['title']).toBe('new title');
-
-            expect(send).toHaveBeenCalledTimes(2);
+            let template = vffData.registerTemplate('test', data);
+            expect(template.newProp).toBeUndefined();
+            vffData.registerTemplate('test', {newProp : 'some value'});
+            expect(template.newProp).toBeDefined();
+            expect(vffData.getTemplates().length).toBe(1);
 
         });
-
         it('Should not affect or add to the data of an already existing template when passed empty data', () => {
-            vffData.addTemplate('test', data);
-            let initialData = vffData._main['test'];
-            expect(vffData._main).toHaveProperty('test');
-            expect(vffData._proxy).toHaveProperty('test');
-            vffData.addTemplate('test', {});
-            expect(vffData._main['test']).toEqual(initialData);
-            expect(vffData._proxy['test']).toEqual(initialData);
+            let template = vffData.registerTemplate('test', data);
+            expect(template.visibility).toBe(false);
+            vffData.registerTemplate('test', {});
+            expect(template.visibility).toBe(false);
+            expect(vffData.getTemplates().length).toBe(1);
         });
-
-        it('Should add template with empty data when passed empty data', () => {
-            expect(vffData._main).not.toHaveProperty('myTemplate');
-            expect(vffData._proxy).not.toHaveProperty('myTemplate');
-            vffData.addTemplate('myTemplate', {});
-            expect(vffData._main).toHaveProperty('myTemplate');
-            expect(vffData._proxy).toHaveProperty('myTemplate');
-            expect(vffData._main['myTemplate']).toEqual({});
-            expect(vffData._proxy['myTemplate']).toEqual({});
-
-            expect(send).toHaveBeenCalled();
+        it('Should emit an event', () => {
+            vffData.registerTemplate('test', data);
+            expect(send).toHaveBeenCalledTimes(1);
+            expect(send).toHaveBeenCalledWith(ADD, {
+                channel : 'test',
+                options : expect.anything(),
+                data    : data
+            });
+        });
+        it('Should emit an event with options', () => {
+            vffData.registerTemplate('test', data, {someOption : 'opt1'});
+            expect(send).toHaveBeenCalledTimes(1);
+            expect(send).toHaveBeenCalledWith(ADD, {
+                channel : 'test',
+                options : expect.objectContaining({someOption: 'opt1'}),
+                data    : data
+            });
+        });
+        it('Should emit an event with overridden options', () => {
+            vffData.registerTemplate('test', data, {updateOn : 'control'});
+            expect(send).toHaveBeenCalledTimes(1);
+            expect(send).toHaveBeenCalledWith(ADD, {
+                channel : 'test',
+                options : expect.objectContaining({updateOn: 'control'}),
+                data    : data
+            });
+        });
+        it('Should throw an error triggered with missing arguments, without data', () => {
+            expect(() => {
+                vffData.registerTemplate('test');
+            }).toThrow(new Error('Missing Arguments, please refer to: ' + docRef(REGISTER_TEMPLATE)));
         });
     });
 
-    describe('Show', () => {
-        it('Should set the visibility property value to true in the given template', () => {
-            vffData.addTemplate('test', data);
-            vffData._main['test']['visibility'] = false;
-            vffData._proxy['test']['visibility'] = false;
+    describe('getTemplates', () => {
+        it('should return all templates', () => {
+            let template1 = vffData.registerTemplate('test1', data);
+            let template2 = vffData.registerTemplate('test2', data);
+            expect(vffData.getTemplates()).toEqual(expect.arrayContaining([template1, template2]));
+            expect(vffData.getTemplates().length).toBe(2);
+        })
+    });
+
+    describe('getTemplate', () => {
+        it('should return a template by name', () => {
+            let template = vffData.registerTemplate('test', data);
+            expect(vffData.getTemplate('test')).toEqual(template);
+        });
+    });
+
+    describe('show', () => {
+        it('Should set the visibility property value to TRUE in the given template', () => {
+            let template = vffData.registerTemplate('test', {visibility : false});
+            expect(template.visibility).toBeFalsy();
             vffData.show('test');
-            expect(vffData._main['test']['visibility']).toBe(true);
-            expect(vffData._proxy['test']['visibility']).toBe(true);
-        });
+            expect(template.visibility).toBeTruthy();
 
-        it('Should affect the visibility property value in the given template if visibility does not exists' , () => {
-            vffData.addTemplate('myTemplate', {});
-            expect(vffData._main).toHaveProperty('myTemplate');
-            expect(vffData._proxy).toHaveProperty('myTemplate');
-            expect(vffData._main['myTemplate']).not.toHaveProperty('visibility');
-            expect(vffData._proxy['myTemplate']).not.toHaveProperty('visibility');
-            vffData.show('myTemplate');
-            expect(vffData._main['myTemplate']).not.toHaveProperty('visibility');
-            expect(vffData._proxy['myTemplate']).not.toHaveProperty('visibility');
+        });
+        it('Should NOT affect the visibility property value in the given template if visibility does not exists' , () => {
+            let template = vffData.registerTemplate('test', {"some prop" : "some value"});
+            expect(template.visibility).toBeUndefined();
+            vffData.show('test');
+            expect(template.visibility).toBeUndefined();
         });
     });
-
-    describe('Hide', () => {
-        it('Should set the visibility property value to false in the given template', () => {
-            vffData.addTemplate('test', data);
-            vffData._main['test']['visibility'] = true;
-            vffData._proxy['test']['visibility'] = true;
+    describe('hide', () => {
+        it('Should set the visibility property value to FALSE in the given template', () => {
+            let template = vffData.registerTemplate('test', {visibility : true});
+            expect(template.visibility).toBeTruthy();
             vffData.hide('test');
-            expect(vffData._main['test']['visibility']).toBe(false);
-            expect(vffData._proxy['test']['visibility']).toBe(false);
-        });
+            expect(template.visibility).toBeFalsy();
 
-        it('Should affect the visibility property value in the given template if visibility doesn\'t exists' , () => {
-            vffData.addTemplate('myTemplate', {});
-            expect(vffData._main).toHaveProperty('myTemplate');
-            expect(vffData._proxy).toHaveProperty('myTemplate');
-            expect(vffData._main['myTemplate']).not.toHaveProperty('visibility');
-            expect(vffData._proxy['myTemplate']).not.toHaveProperty('visibility');
-            vffData.hide('myTemplate');
-            expect(vffData._main['myTemplate']).not.toHaveProperty('visibility');
-            expect(vffData._proxy['myTemplate']).not.toHaveProperty('visibility');
+        });
+        it('Should NOT affect the visibility property value in the given template if visibility does not exists' , () => {
+            let template = vffData.registerTemplate('test', {"some prop" : "some value"});
+            expect(template.visibility).toBeUndefined();
+            vffData.hide('test');
+            expect(template.visibility).toBeUndefined();
         });
     });
-
-    describe('Toggle', () => {
-        it('Should set the visibility property to the opposite of the current value in the given template', () => {
-            vffData.addTemplate('test', data);
-            let currentVisibility = vffData._main['test']['visibility'];
+    describe('toggle', () => {
+        it('Should toggle the visibility property value in the given template', () => {
+            let template = vffData.registerTemplate('test', {visibility : true});
             vffData.toggle('test');
-            expect(vffData._main['test']['visibility']).toBe(!currentVisibility);
-            expect(vffData._proxy['test']['visibility']).toBe(!currentVisibility);
-        });
+            expect(template.visibility).toBeFalsy();
+            vffData.toggle('test');
+            expect(template.visibility).toBeTruthy();
 
-        it('Should affect the visibility property value in the given template if visibility doesn\'t exists' , () => {
-            vffData.addTemplate('myTemplate', {});
-            expect(vffData._main).toHaveProperty('myTemplate');
-            expect(vffData._proxy).toHaveProperty('myTemplate');
-            expect(vffData._main['myTemplate']).not.toHaveProperty('visibility');
-            expect(vffData._proxy['myTemplate']).not.toHaveProperty('visibility');
-            vffData.toggle('myTemplate');
-            expect(vffData._main['myTemplate']).not.toHaveProperty('visibility');
-            expect(vffData._proxy['myTemplate']).not.toHaveProperty('visibility');
+        });
+        it('Should NOT affect the visibility property value in the given template if visibility does not exists' , () => {
+            let template = vffData.registerTemplate('test', {"some prop" : "some value"});
+            expect(template.visibility).toBeUndefined();
+            vffData.toggle('test');
+            expect(template.visibility).toBeUndefined();
+        });
+    });
+    describe('onUpdate', () => {
+        it('Should set the CB function', () => {
+            let updateFunc = () => {};
+            vffData.onUpdate(updateFunc);
+            expect(vffData._updateCB).toEqual(updateFunc);
+        });
+    });
+    describe('onPages', () => {
+        it('Should replace the passed pages in vff _pages', (done) => {
+            let spy = jest.spyOn(vffData, 'updateCB');
+            let pages = [{name: 'page1'}, {name: 'page2'}];
+            vffData.addPages(pages);
+            vffData.onPages((p) => {
+                    expect(p).toEqual(pages);
+                    done();
+            });
+            expect(spy).toHaveBeenCalledTimes(1);
+        });
+    });
+    describe('getPages', () => {
+        it('Should return the vff _pages', (done) => {
+            let pages = [{name: 'page1'}, {name: 'page2'}];
+            vffData.addPages(pages);
+            vffData.getPages().then((p) => {
+                expect(pages).toEqual(p);
+                done();
+            });
+        });
+    });
+    describe('getQueryParams', () => {
+        it('Should return the vff _queryParams', () => {
+            let params = [{name: 'param1', value:'val1'}, {name: 'param2', value:'val2'}];
+            vffData.addQueryParams(params);
+            expect(vffData.getQueryParams()).toEqual(params);
+        });
+    });
+    describe('addQueryParams', () => {
+        it('Should replace the passed params in vff _queryParams', () => {
+            let spy = jest.spyOn(vffData, 'updateCB');
+            let params = [{name: 'param1', value:'val1'}, {name: 'param2', value:'val2'}];
+            vffData.addQueryParams(params);
+            expect(vffData.getQueryParams()).toEqual(params);
+            params = [{name: 'param3', value:'val3'}, {name: 'param4', value:'val4'}];
+            vffData.addQueryParams(params);
+            expect(vffData.getQueryParams()).toEqual(params);
+            expect(spy).toHaveBeenCalledTimes(2);
         });
     });
 

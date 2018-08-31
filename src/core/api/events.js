@@ -1,6 +1,7 @@
-import {VFF_EVENT, OUTGOING_EVENT} from '../../utils/events.js';
+import {VFF_EVENT, TRACK_EVENT} from '../../utils/events.js';
 import {findKey} from '../../utils/helpers';
 import {send} from '../../utils/messenger';
+import {vffData} from '../../core/vffData';
 let timeouts = {};
 
 
@@ -52,9 +53,20 @@ module.exports = {
         document.addEventListener(VFF_EVENT, listener);
     },
 
-    emit : (payload) => {
-        send(OUTGOING_EVENT, payload);
+    track : (name, data) => {
+        let payload = {};
+        payload.name = name;
+        payload.data = data;
+        payload.query = vffData.getQueryParams();
+        send(TRACK_EVENT, payload);
     }
+
+    // emit : (data) => {
+    //     let payload = {};
+    //     payload.data = data;
+    //     payload.query = vffData.getQueryParams();
+    //     send(OUTGOING_EVENT, payload);
+    // }
 
 };
 

@@ -1,0 +1,305 @@
+import {USER_UPDATE, VFF_EVENT, OUTGOING_EVENT} from "../utils/events";
+import {EXPOSE_DELIMITER} from './consts';
+import {findKey, deepExtend, getByPath, uuid, deepCompare, defer} from '../utils/helpers.js';
+import {send} from '../utils/messenger';
+import {vffData} from './vffData';
+const bypassPrefix = '___bypass___', parentObject = '__parent_object__', parentKey = '__parent_key__';
+const defaultListenerOptions = {
+    changeOnly  : true,
+    throttle    : true
+};
+const defaultTemplateOptions = {
+    updateOn : 'all' // all, template, control
+};
+//getElement, update, show, hide, toggle, onData, emit
+class Template{
+    constructor(name, data, options) {
+        this._name = name;
+        this._options = Object.assign({}, defaultTemplateOptions, options);
+        this._proxy = new Proxy(this._copy(data), this._traps(name));
+        this._element = this._options.element;
+        this._proxies = {};
+        this._timeouts = {};
+        this._middleware = [];
+    }
+    $element(control){
+        if(this._element && control){
+            return this._element.getAttribute('vff-name') === control?
+                this._element : this._element.querySelector('[vff-name=' + control +']');
+        }
+        return this._element;
+    }
+    $show(){
+        this._setValue("visibility", true);
+    }
+    $hide(){
+        this._setValue("visibility", false);
+    }
+    $toggle(){
+        let visibility = this._getValue('visibility');
+        if(visibility !== undefined){
+            this._setValue('visibility', !visibility);
+        }
+    }
+    $emit(data){
+        let payload = {};
+        payload.data = data;
+        payload.query = vffData.getQueryParams();
+        payload.channel = this._name;
+        send(OUTGOING_EVENT, payload);
+    }
+    $before(...args){
+        args = this._arguments(...args);
+        args.options = Object.assign({}, defaultListenerOptions, args.options);
+        this._middleware.push(args);
+    }
+    $on(...args){
+        args = this._arguments(...args);
+        let path = args.path, callback = args.callback, options = args.options;
+
+        options = Object.assign({}, defaultListenerOptions, options);
+
+        let self = this;
+
+        function runCB(data){
+            self._runCallback(callback, path, options, data);
+        }
+
+        function listener(event){
+            let key = findKey(event.detail, self._name);
+            if(key) {
+
+                if(path && options.changeOnly && (getByPath(event.detail[key], path) === getByPath(self._proxy, path) || getByPath(event.detail[key], path) === undefined )){
+                    return;
+                } else if (!path && options.changeOnly && deepCompare(event.detail[key], self._proxy)){
+                    return;
+                }
+
+                if(path && getByPath(event.detail[key], path) !== undefined){
+                    runCB(getByPath(event.detail[key], path));
+                } else if(!path){
+                    runCB(event.detail[key]);
+                }
+            }
+        }
+        document.addEventListener(VFF_EVENT, listener);
+    }
+
+
+    getElement(){ return this.$element(); }
+    show(){ return this.$show(); }
+    hide(){ return this.$hide(); }
+    toggle(){ return this.$toggle(); }
+    onData(...args){ return this.$on(...args); }
+    emit(data){ return this.$emit(data); }
+
+    _update(data){
+        let toUpdate = this._copy(data, bypassPrefix);
+        deepExtend(this._proxy, toUpdate);
+    }
+    _copy(o, prefix) {
+        prefix = prefix || '';
+        let output, v, key;
+        output = Array.isArray(o) ? [] : {};
+        for (key in o) {
+            v = o[key];
+            if(Array.isArray(output)){
+                output[key] = (typeof v === "object") ? this._copy(v, prefix) : v;
+            } else {
+                output[prefix + key] = (typeof v === "object") ? this._copy(v, prefix) : v;
+            }
+        }
+        return output;
+    }
+    _set(target, key, value){
+        target[bypassPrefix + key] = value;
+    }
+
+    _sendUserUpdateEvent(name, target, key, value){
+        let payload = {}, po, pk, originalTarget = target;
+        payload[name] = {};
+
+
+        if(!target[parentObject]){
+            payload[name][key] = value;
+        } else {
+            let ancestors = [];
+            while(target[parentObject]){
+                ancestors.unshift(target[parentKey]);
+                target = target[parentObject];
+            }
+
+            let ancestor = '',
+                tmp = payload[name];
+            for(ancestor of ancestors) {
+                tmp[ancestor] = {};
+                if(ancestors[ancestors.length -1 !== ancestor]){
+                    tmp = tmp[ancestor];
+                }
+
+            }
+
+            po = originalTarget[parentObject];
+            pk = originalTarget[parentKey];
+            delete originalTarget[parentObject];
+            delete originalTarget[parentKey];
+            tmp[ancestor] = originalTarget;
+        }
+
+        send(USER_UPDATE, payload);
+
+        if(po) originalTarget[parentObject] = po;
+        if(pk) originalTarget[parentKey] = pk;
+    }
+
+    _traps(name){
+        let self = this;
+        let traps = {
+            set: function (target, key, value) {
+                let bypass = key.startsWith(bypassPrefix);
+                if(bypass && !target.__isProxy){
+                    key = key.substr(bypassPrefix.length);
+                }
+                target[key] = value;
+                if(!bypass && !target.__isProxy && typeof value !== 'object'){
+                    self._sendUserUpdateEvent(name, target, key, value);
+                }
+                return true;
+            },
+            get: function (target, key) {
+                if(key === '__isProxy'){return true;}
+                if(key.startsWith && key.startsWith(bypassPrefix))  key = key.substr(bypassPrefix.length);
+
+                if (typeof target[key] === 'object' && target[key] !== null && !target[key].__isProxy && !key.startsWith('__')) {
+                    if(target[key].__proxy){
+                        return self._proxies[target[key].__proxy];
+                    } else {
+                        let proxy = new Proxy(target[key], traps);
+                        self._set(proxy, parentObject, target);
+                        self._set(proxy, parentKey, key);
+                        let proxyID = uuid();
+                        self._proxies[proxyID] = proxy;
+                        target[key].__proxy = proxyID;
+                        return proxy;
+                    }
+                }
+                else {
+                    return target[key];
+                }
+            }
+        };
+
+        return traps;
+    }
+    _setValue(key, value){
+        key = findKey(this._proxy, key);
+        if(key){
+            this._proxy[key] = value;
+        }
+    }
+    _getValue(key){
+        return this._proxy[findKey(this._proxy, key)];
+    }
+    _runMiddleware(data){
+        let self = this;
+        return this._middleware.reduce((prev, curr) => {
+            return prev.then((data) => {
+                let d = defer();
+
+                if(!curr.path || (curr.path && getByPath(data, curr.path) !== undefined)){
+                    self._runCallback(curr.callback, curr.path, curr.options || {}, data, d.resolve);
+                } else {
+                    d.resolve(data);
+                }
+
+                return d.promise;
+            });
+        }, Promise.resolve(data));
+    }
+
+    _arguments(arg1, arg2, arg3){
+        let path, callback, options;
+        switch (arguments.length){
+            case 0:
+                throw new Error("No arguments error");
+            case 1:
+                callback = arg1;
+                break;
+            default:
+                if(typeof arg1 === 'string'){
+                    path = arg1;
+                    callback = arg2;
+                    options = arg3 || {};
+                } else if(typeof arg1 === 'function'){
+                    callback = arg1;
+                    options = arg2 || {};
+                }
+                break;
+        }
+        return {
+            path : path,
+            callback : callback,
+            options : options
+        };
+    }
+
+    _runCallback(callback, path, options, ...data){
+        if(options.consolidate || options.throttle){
+
+            let callbacks = this._timeouts[path || '__global_event__'];
+            if(!callbacks){
+                this._timeouts[path || '__global_event__'] = new WeakMap();
+            }
+
+            clearTimeout(this._timeouts[path || '__global_event__'].get(callback));
+            this._timeouts[path || '__global_event__'].set(callback, setTimeout(function(){
+                callback(...data);
+            }, (typeof options.throttle === 'number')? options.throttle : 50));
+        } else {
+            callback(...data);
+        }
+    }
+}
+
+export default class VffTemplate extends Template {
+    constructor(name, data, element){
+        super(name, data, element);
+
+        let self = this;
+        return new Proxy(this, {
+            get : function(target, prop){
+                if(prop in target){
+                    return target[prop];
+                } else if(target._element && target._element.expose && findExposed(prop, target._proxy)){
+                    return target._proxy[findExposed(prop, target._proxy)];
+                }
+                return self._proxy[prop];
+            },
+            set : function(target, prop, value){
+                if(prop in target){
+                    throw  new Error("Override Error: " + prop + " is an internal vff property and can't be overridden");
+                    // return target[prop] = value;
+                }
+                else if(target._element && target._element.expose && findExposed(prop, target._proxy)){
+                    target._proxy[findExposed(prop, target._proxy)] = value;
+                }
+                else {
+                    target._proxy[prop] = value;
+                }
+                return true;
+            }
+        });
+    }
+}
+
+
+function findExposed(key, values){
+    values = Object.keys(values);
+    for (let i = 0; i < values.length; i++) {
+        const prop = values[i].split(EXPOSE_DELIMITER)[1];
+        if(prop && prop.toLowerCase() === key.toLowerCase()){
+            return values[i];
+        }
+
+    }
+}
