@@ -381,6 +381,7 @@ module.exports = {
     "VFF_EVENT": "taco-event-received",
     "ACK": "taco-ack",
     "TRACK_EVENT": "vff-track-event",
+    "RELOAD": "vff-reload",
 
     "TOUCH": "taco-touch-element",
     "MOUSE_MOVE": "taco-mouse-move",
@@ -627,7 +628,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Interval = __webpack_require__(33);
+var Interval = __webpack_require__(34);
 
 var BasicClock = function (_HTMLElement) {
     _inherits(BasicClock, _HTMLElement);
@@ -763,31 +764,31 @@ var _vffData = __webpack_require__(2);
 
 var _listener = __webpack_require__(10);
 
-var _initDOM = __webpack_require__(15);
+var _initDOM = __webpack_require__(16);
 
-var _vffElement = __webpack_require__(16);
+var _vffElement = __webpack_require__(17);
 
 var _vffElement2 = _interopRequireDefault(_vffElement);
 
-__webpack_require__(18);
-
 __webpack_require__(19);
+
+__webpack_require__(20);
 
 var _helpers = __webpack_require__(0);
 
-var _events2 = __webpack_require__(36);
+var _events2 = __webpack_require__(37);
 
 var eventsApi = _interopRequireWildcard(_events2);
 
-var _player = __webpack_require__(37);
+var _player = __webpack_require__(38);
 
 var playerApi = _interopRequireWildcard(_player);
 
-var _visibility = __webpack_require__(38);
+var _visibility = __webpack_require__(39);
 
 var visibilityApi = _interopRequireWildcard(_visibility);
 
-var _http = __webpack_require__(39);
+var _http = __webpack_require__(40);
 
 var httpApi = _interopRequireWildcard(_http);
 
@@ -795,7 +796,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-__webpack_require__(40);
+__webpack_require__(41);
 
 (0, _listener.start)();
 (0, _initDOM.init)();
@@ -923,6 +924,8 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var bypassPrefix = '___bypass___',
@@ -987,15 +990,23 @@ var Template = function () {
         }
     }, {
         key: '$before',
-        value: function $before(arg1, arg2, arg3) {
-            var args = this._arguments(arg1, arg2, arg3);
+        value: function $before() {
+            for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+                args[_key] = arguments[_key];
+            }
+
+            args = this._arguments.apply(this, _toConsumableArray(args));
             args.options = Object.assign({}, defaultListenerOptions, args.options);
             this._middleware.push(args);
         }
     }, {
         key: '$on',
-        value: function $on(arg1, arg2, arg3) {
-            var args = this._arguments(arg1, arg2, arg3);
+        value: function $on() {
+            for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+                args[_key2] = arguments[_key2];
+            }
+
+            args = this._arguments.apply(this, _toConsumableArray(args));
             var path = args.path,
                 callback = args.callback,
                 options = args.options;
@@ -1049,8 +1060,8 @@ var Template = function () {
         }
     }, {
         key: 'onData',
-        value: function onData(arg1, arg2, arg3) {
-            return this.$on(arg1, arg2, arg3);
+        value: function onData() {
+            return this.$on.apply(this, arguments);
         }
     }, {
         key: 'emit',
@@ -1251,8 +1262,8 @@ var Template = function () {
     }, {
         key: '_runCallback',
         value: function _runCallback(callback, path, options) {
-            for (var _len = arguments.length, data = Array(_len > 3 ? _len - 3 : 0), _key = 3; _key < _len; _key++) {
-                data[_key - 3] = arguments[_key];
+            for (var _len3 = arguments.length, data = Array(_len3 > 3 ? _len3 - 3 : 0), _key3 = 3; _key3 < _len3; _key3++) {
+                data[_key3 - 3] = arguments[_key3];
             }
 
             if (options.consolidate || options.throttle) {
@@ -1381,6 +1392,8 @@ var _pagesHandler = __webpack_require__(13);
 
 var _queryParamsHandler = __webpack_require__(14);
 
+var _reloadHandler = __webpack_require__(15);
+
 var events = __webpack_require__(1);
 
 
@@ -1388,6 +1401,7 @@ var handlers = {};
 handlers[events.UPDATE] = _updateHandler.update;
 handlers[events.PAGES] = _pagesHandler.pages;
 handlers[events.QUERY_PARAMS] = _queryParamsHandler.queryParams;
+handlers[events.RELOAD] = _reloadHandler.reload;
 
 module.exports = handlers;
 
@@ -1407,16 +1421,22 @@ var _consts = __webpack_require__(5);
 var _events = __webpack_require__(1);
 
 function update(data) {
+
+    var promises = [];
+
     var _loop = function _loop(templateName) {
         var template = _vffData.vffData.getTemplate(templateName);
         if (template) {
+            var deferred = (0, _helpers.defer)();
             template._runMiddleware(data[templateName]).then(function (result) {
                 _vffData.vffData.registerTemplate(templateName, result);
                 for (var key in result) {
                     updateDom(template, key, result[key], result.__timecode__);
                 }
                 _vffData.vffData.updateCB();
+                deferred.resolve();
             });
+            promises.push(deferred.promise);
         }
     };
 
@@ -1425,6 +1445,7 @@ function update(data) {
     }
 
     document.dispatchEvent(new CustomEvent(_events.VFF_EVENT, { detail: data }));
+    return Promise.all(promises);
 }
 
 function updateDom(template, control, value, timecode) {
@@ -1485,6 +1506,21 @@ module.exports = {
 
 /***/ }),
 /* 15 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+function reload() {
+    window.location.reload();
+}
+
+module.exports = {
+    reload: reload
+};
+
+/***/ }),
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1578,7 +1614,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1590,7 +1626,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _htmlAccessorObserver = __webpack_require__(17);
+var _htmlAccessorObserver = __webpack_require__(18);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -1661,7 +1697,7 @@ var VffElement = function () {
 exports.default = VffElement;
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1732,7 +1768,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1752,41 +1788,41 @@ HTMLImageElement.prototype.expose = function () {
 };
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-__webpack_require__(20);
-
 __webpack_require__(21);
 
-var _emoji = __webpack_require__(22);
+__webpack_require__(22);
+
+var _emoji = __webpack_require__(23);
 
 var _emoji2 = _interopRequireDefault(_emoji);
 
-var _dragArea = __webpack_require__(23);
+var _dragArea = __webpack_require__(24);
 
 var _dragArea2 = _interopRequireDefault(_dragArea);
 
-var _telestratorElement = __webpack_require__(24);
+var _telestratorElement = __webpack_require__(25);
 
 var _telestratorElement2 = _interopRequireDefault(_telestratorElement);
 
-var _clockSimple = __webpack_require__(30);
+var _clockSimple = __webpack_require__(31);
 
 var _clockSimple2 = _interopRequireDefault(_clockSimple);
 
-var _systemClock = __webpack_require__(32);
+var _systemClock = __webpack_require__(33);
 
 var _systemClock2 = _interopRequireDefault(_systemClock);
 
-var _countdown = __webpack_require__(34);
+var _countdown = __webpack_require__(35);
 
 var _countdown2 = _interopRequireDefault(_countdown);
 
-var _stopwatch = __webpack_require__(35);
+var _stopwatch = __webpack_require__(36);
 
 var _stopwatch2 = _interopRequireDefault(_stopwatch);
 
@@ -1814,7 +1850,7 @@ define('basic-clock', _basicClock2.default);
 // }
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports) {
 
 (function(){
@@ -1857,7 +1893,7 @@ define('basic-clock', _basicClock2.default);
 
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports) {
 
 /* eslint-disable */
@@ -1881,7 +1917,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 /* eslint-enable */
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1975,7 +2011,7 @@ var MyElement = function (_HTMLElement) {
 exports.default = MyElement;
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2156,7 +2192,7 @@ var DragArea = function (_HTMLElement) {
 exports.default = DragArea;
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2168,7 +2204,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-__webpack_require__(25);
+__webpack_require__(26);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -2360,11 +2396,11 @@ var Telestrator = function (_HTMLElement) {
 exports.default = Telestrator;
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
-var content = __webpack_require__(26);
+var content = __webpack_require__(27);
 
 if(typeof content === 'string') content = [[module.i, content, '']];
 
@@ -2378,7 +2414,7 @@ var options = {"hmr":true}
 options.transform = transform
 options.insertInto = undefined;
 
-var update = __webpack_require__(28)(content, options);
+var update = __webpack_require__(29)(content, options);
 
 if(content.locals) module.exports = content.locals;
 
@@ -2410,10 +2446,10 @@ if(false) {
 }
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(27)(false);
+exports = module.exports = __webpack_require__(28)(false);
 // imports
 
 
@@ -2424,7 +2460,7 @@ exports.push([module.i, "telestrator-element #telestrator-canvas {\n  position: 
 
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, exports) {
 
 /*
@@ -2506,7 +2542,7 @@ function toComment(sourceMap) {
 
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -2572,7 +2608,7 @@ var singleton = null;
 var	singletonCounter = 0;
 var	stylesInsertedAtTop = [];
 
-var	fixUrls = __webpack_require__(29);
+var	fixUrls = __webpack_require__(30);
 
 module.exports = function(list, options) {
 	if (typeof DEBUG !== "undefined" && DEBUG) {
@@ -2888,7 +2924,7 @@ function updateLink (link, options, obj) {
 
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ (function(module, exports) {
 
 
@@ -2983,7 +3019,7 @@ module.exports = function (css) {
 
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3001,7 +3037,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var work = __webpack_require__(31);
+var work = __webpack_require__(32);
 
 function createWorker() {
     var blobURL = URL.createObjectURL(new Blob(['(', work.toString(), ')()'], { type: 'application/javascript' }));
@@ -3220,7 +3256,7 @@ var Clock = function (_HTMLElement) {
 exports.default = Clock;
 
 /***/ }),
-/* 31 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3283,7 +3319,7 @@ function worker() {
 module.exports = worker;
 
 /***/ }),
-/* 32 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3356,7 +3392,7 @@ var Countdown = function (_BasicClock) {
 exports.default = Countdown;
 
 /***/ }),
-/* 33 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3440,7 +3476,7 @@ var Interval = function () {
 module.exports = Interval;
 
 /***/ }),
-/* 34 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3503,7 +3539,7 @@ var Countdown = function (_BasicClock) {
 exports.default = Countdown;
 
 /***/ }),
-/* 35 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3621,7 +3657,7 @@ var Stopwatch = function (_BasicClock) {
 exports.default = Stopwatch;
 
 /***/ }),
-/* 36 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3707,7 +3743,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 37 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3734,7 +3770,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 38 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3755,7 +3791,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 39 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3789,7 +3825,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 40 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";

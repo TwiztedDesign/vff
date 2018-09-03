@@ -5,11 +5,7 @@ import {VFF_EVENT} from '../../utils/events';
 
 function update(data){
 
-    let promises = []
-    Object.keys(data).forEach(function(templateName){
-
-    });
-
+    let promises = [];
     for(let templateName in data){
         let template = vffData.getTemplate(templateName);
         if(template){
