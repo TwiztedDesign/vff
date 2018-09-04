@@ -3,12 +3,15 @@ body{
 }
 
 .sidebar{
-    background: rgba(0, 0, 0, 0.2);
-    background: -moz-linear-gradient(top, rgb(7, 19, 47) 0%, rgb(47, 19, 64) 100%); /* FF3.6-15 */
-    background: -webkit-linear-gradient(top, rgb(7, 19, 47) 0%,rgb(47, 19, 64) 100%); /* Chrome10-25,Safari5.1-6 */
-    background: linear-gradient(to bottom, rgb(7, 19, 47) 0%,rgb(47, 19, 64) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    /*background: rgba(0, 0, 0, 0.2);*/
+    /*background: -moz-linear-gradient(top, rgb(7, 19, 47) 0%, rgb(47, 19, 64) 100%); !* FF3.6-15 *!*/
+    /*background: -webkit-linear-gradient(top, rgb(7, 19, 47) 0%,rgb(47, 19, 64) 100%); !* Chrome10-25,Safari5.1-6 *!*/
+    /*background: linear-gradient(to bottom, rgb(7, 19, 47) 0%,rgb(47, 19, 64) 100%); !* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ *!*/
 
+    /*border-right: 1px solid rgba(255, 255, 255, 0.1);*/
+    background-color: rgba(0,0,0,0.2);
     border-right: 1px solid rgba(255, 255, 255, 0.1);
+    min-width: 260px;
 }
 
 .sidebar-toggle{
