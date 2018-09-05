@@ -704,7 +704,14 @@ var BasicClock = function (_HTMLElement) {
         value: function expose() {
             return {
                 visibility: 'show',
-                Run: 'run'
+                run: 'run'
+            };
+        }
+    }, {
+        key: 'options',
+        value: function options() {
+            return {
+                updateOn: 'control'
             };
         }
     }, {
@@ -1558,6 +1565,9 @@ function initDOM() {
         } catch (err) {
             options = {};
         }
+        if (control.options && typeof control.options === 'function') {
+            options = Object.assign({}, control.options(), options);
+        }
         options.element = template || control;
 
         var templateName = (template || control).getAttribute('vff-template');
@@ -1567,7 +1577,14 @@ function initDOM() {
         for (var prop in exposed) {
             if (exposed.hasOwnProperty(prop)) {
                 (function () {
+
                     var path = _typeof(exposed[prop]) === 'object' ? exposed[prop].path : exposed[prop];
+
+                    if (prop === path) {
+                        //Slightly change the name of the property to avoid infinite looping
+                        prop = prop[0] === prop[0].toUpperCase() ? prop.charAt(0).toLowerCase() + prop.substr(1) : prop.charAt(0).toUpperCase() + prop.substr(1);
+                    }
+
                     data[controlName + _consts.EXPOSE_DELIMITER + prop] = (0, _helpers.getByPath)(control, path);
 
                     Object.defineProperty(control, prop, {

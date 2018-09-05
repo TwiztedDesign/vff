@@ -27,7 +27,11 @@ function initDOM(){
         } catch (err){
             options = {};
         }
+        if(control.options && typeof control.options === 'function'){
+            options = Object.assign({}, control.options(), options);
+        }
         options.element = (template || control);
+
 
         let templateName = (template || control).getAttribute('vff-template');
         let controlName = control.getAttribute('vff-name');
@@ -35,7 +39,13 @@ function initDOM(){
         let data = {};
         for (let prop in exposed) {
             if (exposed.hasOwnProperty(prop)) {
+
                 let path = typeof exposed[prop] === 'object'? exposed[prop].path : exposed[prop];
+
+                if(prop === path){ //Slightly change the name of the property to avoid infinite looping
+                    prop = prop[0] === prop[0].toUpperCase()? (prop.charAt(0).toLowerCase() + prop.substr(1)) : (prop.charAt(0).toUpperCase() + prop.substr(1));
+                }
+
                 data[controlName + EXPOSE_DELIMITER + prop] = getByPath(control, path);
 
                 Object.defineProperty(control, prop, {
