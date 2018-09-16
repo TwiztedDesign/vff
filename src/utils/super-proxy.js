@@ -9,8 +9,11 @@ const
     SELF            = '__self__';
 
 
+const isInternalName = function(name){
+    return name.startsWith('__') && name.endsWith('__');
+};
 const isInternalProperty = function(prop){
-    return prop.startsWith('__') && prop.endsWith('__') && prop !== '__proxy__';
+    return isInternalName(prop) && prop !== '__proxy__';
 };
 const cleanInternal = function(object){
     Object.keys(object).forEach((key) => {
@@ -81,7 +84,7 @@ export default class SuperProxy {
             v = o[key];
             if (Array.isArray(output)) {
                 output[key] = (typeof v === "object") ? this._copy(v, prefix) : v;
-            } else {
+            } else if(!isInternalName(key)){
                 output[prefix + key] = (typeof v === "object") ? this._copy(v, prefix) : v;
             }
         }

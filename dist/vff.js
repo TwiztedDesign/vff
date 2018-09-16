@@ -1277,8 +1277,11 @@ var BYPASS_PREFIX = '__bypass__',
     IS_PROXY = '__isProxy__',
     SELF = '__self__';
 
+var isInternalName = function isInternalName(name) {
+    return name.startsWith('__') && name.endsWith('__');
+};
 var isInternalProperty = function isInternalProperty(prop) {
-    return prop.startsWith('__') && prop.endsWith('__') && prop !== '__proxy__';
+    return isInternalName(prop) && prop !== '__proxy__';
 };
 var cleanInternal = function cleanInternal(object) {
     Object.keys(object).forEach(function (key) {
@@ -1362,7 +1365,7 @@ var SuperProxy = function () {
                 v = o[key];
                 if (Array.isArray(output)) {
                     output[key] = (typeof v === 'undefined' ? 'undefined' : _typeof(v)) === "object" ? this._copy(v, prefix) : v;
-                } else {
+                } else if (!isInternalName(key)) {
                     output[prefix + key] = (typeof v === 'undefined' ? 'undefined' : _typeof(v)) === "object" ? this._copy(v, prefix) : v;
                 }
             }
