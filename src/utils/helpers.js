@@ -15,6 +15,10 @@ function trim(str, charList) {
         .replace(new RegExp("[" + charList + "]+$"), "");
 }
 
+function isObject(obj){
+    return obj === Object(obj) && !Array.isArray(obj) && !(obj instanceof HTMLElement);
+}
+
 function getByPath(obj, path){
     path = path? trim(path, '.').split('.') : [""];
 
@@ -93,9 +97,9 @@ function extend(a, b){
 
 function deepExtend(destination, source) {
     for (let property in source) {
-        if (source[property] && source[property].constructor &&
-            source[property].constructor === Object && !source[property].__isProxy) {
-            destination[property] = (destination[property] && destination[property].constructor && destination[property].constructor === Object)?
+        // if (source[property] && source[property].constructor && source[property].constructor === Object) {
+        if (source[property] && isObject(source[property])) {
+            destination[property] = (destination[property] && isObject(destination[property]))?
                 destination[property] : {};
             deepExtend(destination[property], source[property]);
         } else {

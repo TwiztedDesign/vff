@@ -83,6 +83,7 @@ The "vff" object also contains events that will be fired based on various condit
 | $toggle()          | Toggle "visibility" property in the template                                                          |
 | $on(**callback**, **options**)  | triggers callback when data for the template arrives<br>**callback** - _function(**data**)_ - data handler<br>**options** - _object(optional)_ - options object (described [here](#options))|
 | $on(**path**, **callback**, **options**)| trigger callback when data for the **path** in the template arrives<br>**path** - _string_ - dot delimited string that describes a path in the template<br>**callback** - _function(**data**)_ - data handler<br>**options** - _object(optional)_ - options object (described [here](#options))|
+| $before(**middleware**, **options**)| add a middleware function that will be triggered in the order of the addition when data for the template arrives<br>**middleware** - _function(**data**, **next**)_ - the middleware function ([read more](#middleware))<br>**options** - _object(optional)_ - options object (described [here](#options))|
 | $emit(**payload**) | Emits a message to every player with the same project<br>**payload** - _object_ - data to be sent     |
 
 
@@ -212,6 +213,38 @@ var myTemplate = {
         ]
     }
 }
+```
+
+### Multiselect
+```javascript
+var myTemplate = {
+    myMultiselect : {
+        //Declare the type of the ui element
+        ui          : 'multiselect',
+        //Bind your element to the value property
+        value       : [],
+        options     : [
+            'NY',
+            'CA',
+            'FL',
+            'IN',
+            'NJ'
+        ],
+        //Options can also be set as an object
+        options     : {
+            'NY'    : 'New York',
+            'CA'    : 'California',
+            'FL'    : 'Florida',
+            'IN'    : 'Indiana',
+            'NJ'    : 'New Jersey'
+        },
+        config : {
+            search : true, //Enable search bar - default false
+            itemsInView : 3 //Visible area of3 items (others are scrolled) - default 5
+        }
+    }
+}
+
 ```
 ### Radio Group
 ```javascript
@@ -368,7 +401,27 @@ Toggle "visibility" property in the template
 
 * template - _string_ - the name of the template
 
-
+# Middleware
+Middleware functions are functions that have access to the template data, and the next middleware function. 
+The next middleware function is commonly denoted by a variable named *next*.
+A middleware function can be used to manipulate data before it arrives to the DOM or the *$on* handler.
+Any middleware function must call the next middleware function with the data (unless it wants to stop the data from propagating further).
+To register a middleware function use the [$before](#methods-1) method.
+## Usage example
+The following example uses middleware to filer title by length and capitalize the title only if it passes the length filter.
+```javascript
+let template = vff.registerTemplate('template', {title: ''});
+template.$before((data, next) => {
+   if(data.title && data.title.length <= 140){
+       next(data);
+   } 
+});
+template.$before((data, next) => {
+   data.title = data.title.toUpperCase();
+   next(data);
+});
+```
+  
 # Globals
 
 ## isMobile

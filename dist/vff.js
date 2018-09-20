@@ -70,7 +70,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 6);
+/******/ 	return __webpack_require__(__webpack_require__.s = 7);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -95,6 +95,10 @@ function trim(str, charList) {
         charList = "\\s";
     }
     return str.replace(new RegExp("^[" + charList + "]+"), "").replace(new RegExp("[" + charList + "]+$"), "");
+}
+
+function isObject(obj) {
+    return obj === Object(obj) && !Array.isArray(obj) && !(obj instanceof HTMLElement);
 }
 
 function getByPath(obj, path) {
@@ -173,8 +177,9 @@ function extend(a, b) {
 
 function deepExtend(destination, source) {
     for (var property in source) {
-        if (source[property] && source[property].constructor && source[property].constructor === Object && !source[property].__isProxy) {
-            destination[property] = destination[property] && destination[property].constructor && destination[property].constructor === Object ? destination[property] : {};
+        // if (source[property] && source[property].constructor && source[property].constructor === Object) {
+        if (source[property] && isObject(source[property])) {
+            destination[property] = destination[property] && isObject(destination[property]) ? destination[property] : {};
             deepExtend(destination[property], source[property]);
         } else {
             destination[property] = source[property];
@@ -410,9 +415,9 @@ var _helpers = __webpack_require__(0);
 
 var _messenger = __webpack_require__(3);
 
-var _docRefs = __webpack_require__(8);
+var _docRefs = __webpack_require__(9);
 
-var _vffTemplate = __webpack_require__(9);
+var _vffTemplate = __webpack_require__(10);
 
 var _vffTemplate2 = _interopRequireDefault(_vffTemplate);
 
@@ -607,10 +612,35 @@ module.exports = {
     send: sendMessage,
     request: request
 };
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(7)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(8)))
 
 /***/ }),
 /* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _helpers = __webpack_require__(0);
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var UIElement = function UIElement(data, defaults) {
+    _classCallCheck(this, UIElement);
+
+    defaults = defaults || {};
+    Object.assign(this, defaults);
+    (0, _helpers.deepExtend)(this, data);
+};
+
+exports.default = UIElement;
+
+/***/ }),
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -628,7 +658,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Interval = __webpack_require__(34);
+var Interval = __webpack_require__(40);
 
 var BasicClock = function (_HTMLElement) {
     _inherits(BasicClock, _HTMLElement);
@@ -746,18 +776,24 @@ var BasicClock = function (_HTMLElement) {
 exports.default = BasicClock;
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 module.exports = {
-    "EXPOSE_DELIMITER": " "
+    "EXPOSE_DELIMITER": " ",
+    UI: {
+        MULTISELECT: 'multiselect',
+        DROPDOWN: 'dropdown',
+        RADIO: 'radio',
+        RANGE: 'range'
+    }
 };
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -769,33 +805,33 @@ var _events = __webpack_require__(1);
 
 var _vffData = __webpack_require__(2);
 
-var _listener = __webpack_require__(10);
+var _listener = __webpack_require__(16);
 
-var _initDOM = __webpack_require__(16);
+var _initDOM = __webpack_require__(22);
 
-var _vffElement = __webpack_require__(17);
+var _vffElement = __webpack_require__(23);
 
 var _vffElement2 = _interopRequireDefault(_vffElement);
 
-__webpack_require__(19);
+__webpack_require__(25);
 
-__webpack_require__(20);
+__webpack_require__(26);
 
 var _helpers = __webpack_require__(0);
 
-var _events2 = __webpack_require__(37);
+var _events2 = __webpack_require__(43);
 
 var eventsApi = _interopRequireWildcard(_events2);
 
-var _player = __webpack_require__(38);
+var _player = __webpack_require__(44);
 
 var playerApi = _interopRequireWildcard(_player);
 
-var _visibility = __webpack_require__(39);
+var _visibility = __webpack_require__(45);
 
 var visibilityApi = _interopRequireWildcard(_visibility);
 
-var _http = __webpack_require__(40);
+var _http = __webpack_require__(46);
 
 var httpApi = _interopRequireWildcard(_http);
 
@@ -803,7 +839,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-__webpack_require__(41);
+__webpack_require__(47);
 
 (0, _listener.start)();
 (0, _initDOM.init)();
@@ -865,7 +901,7 @@ vff.extend('http', httpApi);
 module.exports = vff;
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, exports) {
 
 var g;
@@ -892,7 +928,7 @@ module.exports = g;
 
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -903,7 +939,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -913,19 +949,39 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _events = __webpack_require__(1);
 
-var _consts = __webpack_require__(5);
+var _consts = __webpack_require__(6);
 
 var _helpers = __webpack_require__(0);
 
 var _messenger = __webpack_require__(3);
 
 var _vffData = __webpack_require__(2);
+
+var _superProxy = __webpack_require__(11);
+
+var _superProxy2 = _interopRequireDefault(_superProxy);
+
+var _uiMultiselect = __webpack_require__(12);
+
+var _uiMultiselect2 = _interopRequireDefault(_uiMultiselect);
+
+var _uiDropdown = __webpack_require__(13);
+
+var _uiDropdown2 = _interopRequireDefault(_uiDropdown);
+
+var _uiRadio = __webpack_require__(14);
+
+var _uiRadio2 = _interopRequireDefault(_uiRadio);
+
+var _uiRange = __webpack_require__(15);
+
+var _uiRange2 = _interopRequireDefault(_uiRange);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
@@ -935,9 +991,6 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var bypassPrefix = '___bypass___',
-    parentObject = '__parent_object__',
-    parentKey = '__parent_key__';
 var defaultListenerOptions = {
     changeOnly: true,
     throttle: true
@@ -953,11 +1006,12 @@ var Template = function () {
 
         this._name = name;
         this._options = Object.assign({}, defaultTemplateOptions, options);
-        this._proxy = new Proxy(this._copy(data), this._traps(name));
+        this._middleware = [];
+        this._createUIElements(data);
+        this._proxy = new _superProxy2.default(data, this._traps(name));
         this._element = this._options.element;
         this._proxies = {};
         this._timeouts = {};
-        this._middleware = [];
     }
 
     _createClass(Template, [{
@@ -1032,7 +1086,7 @@ var Template = function () {
 
                     if (path && options.changeOnly && ((0, _helpers.getByPath)(event.detail[key], path) === (0, _helpers.getByPath)(self._proxy, path) || (0, _helpers.getByPath)(event.detail[key], path) === undefined)) {
                         return;
-                    } else if (!path && options.changeOnly && (0, _helpers.deepCompare)(event.detail[key], self._proxy)) {
+                    } else if (!path && options.changeOnly && self._proxy.equals(event.detail[key])) {
                         return;
                     }
 
@@ -1078,91 +1132,29 @@ var Template = function () {
     }, {
         key: '_update',
         value: function _update(data) {
-            var toUpdate = this._copy(data, bypassPrefix);
-            (0, _helpers.deepExtend)(this._proxy, toUpdate);
-        }
-    }, {
-        key: '_copy',
-        value: function _copy(o, prefix) {
-            prefix = prefix || '';
-            var output = void 0,
-                v = void 0,
-                key = void 0;
-            output = Array.isArray(o) ? [] : {};
-            for (key in o) {
-                v = o[key];
-                if (Array.isArray(output)) {
-                    output[key] = (typeof v === 'undefined' ? 'undefined' : _typeof(v)) === "object" ? this._copy(v, prefix) : v;
-                } else {
-                    output[prefix + key] = (typeof v === 'undefined' ? 'undefined' : _typeof(v)) === "object" ? this._copy(v, prefix) : v;
-                }
-            }
-            return output;
-        }
-    }, {
-        key: '_set',
-        value: function _set(target, key, value) {
-            target[bypassPrefix + key] = value;
+            this._proxy.update(data);
         }
     }, {
         key: '_sendUserUpdateEvent',
-        value: function _sendUserUpdateEvent(name, target, key, value) {
-            var payload = {},
-                po = void 0,
-                pk = void 0,
-                originalTarget = target;
+        value: function _sendUserUpdateEvent(name, target, path, value) {
+            var payload = {};
             payload[name] = {};
-
-            if (!target[parentObject]) {
-                payload[name][key] = value;
+            if (path.length === 1) {
+                payload[name][path[0]] = value;
             } else {
-                var ancestors = [];
-                while (target[parentObject]) {
-                    ancestors.unshift(target[parentKey]);
-                    target = target[parentObject];
-                }
+                var tmp = payload[name];
+                for (var i = 0; i < path.length - 1; i++) {
+                    var key = path[i];
 
-                var ancestor = '',
-                    tmp = payload[name];
-                var _iteratorNormalCompletion = true;
-                var _didIteratorError = false;
-                var _iteratorError = undefined;
-
-                try {
-                    for (var _iterator = ancestors[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                        ancestor = _step.value;
-
-                        tmp[ancestor] = {};
-                        if (ancestors[ancestors.length - 1 !== ancestor]) {
-                            tmp = tmp[ancestor];
-                        }
-                    }
-                } catch (err) {
-                    _didIteratorError = true;
-                    _iteratorError = err;
-                } finally {
-                    try {
-                        if (!_iteratorNormalCompletion && _iterator.return) {
-                            _iterator.return();
-                        }
-                    } finally {
-                        if (_didIteratorError) {
-                            throw _iteratorError;
-                        }
+                    if (i === path.length - 2) {
+                        tmp[key] = target;
+                    } else {
+                        tmp[key] = {};
+                        tmp = tmp[key];
                     }
                 }
-
-                po = originalTarget[parentObject];
-                pk = originalTarget[parentKey];
-                delete originalTarget[parentObject];
-                delete originalTarget[parentKey];
-                tmp[ancestor] = originalTarget;
             }
-
             (0, _messenger.send)(_events.USER_UPDATE, payload);
-
-            if (po) originalTarget[parentObject] = po;
-            if (pk) originalTarget[parentKey] = pk;
         }
     }, {
         key: '_traps',
@@ -1170,46 +1162,15 @@ var Template = function () {
             var self = this;
             var traps = {
                 set: function set(target, key, value) {
-                    var bypass = key.startsWith(bypassPrefix);
-                    if (bypass && !target.__isProxy) {
-                        key = key.substr(bypassPrefix.length);
-                    }
-                    target[key] = value;
-                    if (!bypass && !target.__isProxy && (typeof value === 'undefined' ? 'undefined' : _typeof(value)) !== 'object') {
-                        self._sendUserUpdateEvent(name, target, key, value);
-                    }
-                    return true;
-                },
-                get: function get(target, key) {
-                    if (key === '__isProxy') {
-                        return true;
-                    }
-                    if (key.startsWith && key.startsWith(bypassPrefix)) key = key.substr(bypassPrefix.length);
-
-                    if (_typeof(target[key]) === 'object' && target[key] !== null && !target[key].__isProxy && !key.startsWith('__')) {
-                        if (target[key].__proxy) {
-                            return self._proxies[target[key].__proxy];
-                        } else {
-                            var proxy = new Proxy(target[key], traps);
-                            self._set(proxy, parentObject, target);
-                            self._set(proxy, parentKey, key);
-                            var proxyID = (0, _helpers.uuid)();
-                            self._proxies[proxyID] = proxy;
-                            target[key].__proxy = proxyID;
-                            return proxy;
-                        }
-                    } else {
-                        return target[key];
-                    }
+                    self._sendUserUpdateEvent(name, target, key, value);
                 }
             };
-
             return traps;
         }
     }, {
         key: '_setValue',
         value: function _setValue(key, value) {
-            key = (0, _helpers.findKey)(this._proxy, key);
+            key = this._proxy.findKey(key);
             if (key) {
                 this._proxy[key] = value;
             }
@@ -1217,7 +1178,7 @@ var Template = function () {
     }, {
         key: '_getValue',
         value: function _getValue(key) {
-            return this._proxy[(0, _helpers.findKey)(this._proxy, key)];
+            return this._proxy[key];
         }
     }, {
         key: '_runMiddleware',
@@ -1288,6 +1249,24 @@ var Template = function () {
                 callback.apply(undefined, data);
             }
         }
+    }, {
+        key: '_createUIElements',
+        value: function _createUIElements(data) {
+            Object.keys(data).forEach(function (key) {
+                if (data[key] && data[key].constructor && data[key].constructor === Object) {
+                    switch (data[key].ui) {
+                        case _consts.UI.MULTISELECT:
+                            data[key] = new _uiMultiselect2.default(data[key]);break;
+                        case _consts.UI.DROPDOWN:
+                            data[key] = new _uiDropdown2.default(data[key]);break;
+                        case _consts.UI.RADIO:
+                            data[key] = new _uiRadio2.default(data[key]);break;
+                        case _consts.UI.RANGE:
+                            data[key] = new _uiRange2.default(data[key]);break;
+                    }
+                }
+            });
+        }
     }]);
 
     return Template;
@@ -1344,13 +1323,402 @@ function findExposed(key, values) {
 }
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _handlers = __webpack_require__(11);
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+var _helpers = __webpack_require__(0);
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var BYPASS_PREFIX = '__bypass__',
+    PARENT_ID = '__parent_id__',
+    PARENT_KEY = '__parent_key__',
+    PROXY_ID = '__proxy__',
+    IS_PROXY = '__isProxy__',
+    SELF = '__self__';
+
+var isInternalName = function isInternalName(name) {
+    return name.startsWith('__') && name.endsWith('__');
+};
+var isInternalProperty = function isInternalProperty(prop) {
+    return isInternalName(prop) && prop !== '__proxy__';
+};
+var cleanInternal = function cleanInternal(object) {
+    Object.keys(object).forEach(function (key) {
+        if (isInternalProperty(key)) {
+            delete object[key];
+        }if (_typeof(object[key]) === 'object') {
+            cleanInternal(object[key]);
+        }
+    });
+};
+var noBypass = function noBypass(key) {
+    return typeof key === 'string' ? key.replace(BYPASS_PREFIX, '') : '';
+};
+
+var SuperProxy = function () {
+    function SuperProxy(data, traps) {
+        _classCallCheck(this, SuperProxy);
+
+        this._proxies = {};
+
+        this._parents = new WeakMap();
+        this._parentIDs = {};
+
+        traps = traps || {};
+        this._proxy = new Proxy(this._copy(data), this._traps(traps));
+
+        var self = this;
+
+        return new Proxy(this, {
+            get: function get(target, prop) {
+
+                if (prop in target) {
+                    return target[prop];
+                }
+                var key = (0, _helpers.findKey)(self._proxy, noBypass(prop));
+                prop = key || prop;
+                return self._proxy[prop];
+            },
+            set: function set(target, prop, value) {
+                if (prop in target) {
+                    throw new Error("Override Error: " + prop + " is an internal vff property and can't be overridden");
+                    // return target[prop] = value;
+                } else {
+                    target._proxy[prop] = value;
+                }
+                return true;
+            }
+        });
+    }
+    /************************* PUBLIC *****************************/
+
+
+    _createClass(SuperProxy, [{
+        key: 'findKey',
+        value: function findKey(key) {
+            return (0, _helpers.findKey)(this._proxy, key);
+        }
+    }, {
+        key: 'update',
+        value: function update(data) {
+            var toUpdate = this._copy(data, BYPASS_PREFIX);
+            (0, _helpers.deepExtend)(this._proxy, toUpdate);
+        }
+    }, {
+        key: 'equals',
+        value: function equals(data) {
+            return (0, _helpers.deepCompare)(this._proxy, data);
+        }
+
+        /************************* PRIVATE *****************************/
+
+    }, {
+        key: '_copy',
+        value: function _copy(o, prefix) {
+            prefix = prefix || '';
+            var output = void 0,
+                v = void 0,
+                key = void 0;
+            output = Array.isArray(o) ? [] : {};
+            for (key in o) {
+                v = o[key];
+                if (Array.isArray(output)) {
+                    output[key] = (typeof v === 'undefined' ? 'undefined' : _typeof(v)) === "object" ? this._copy(v, prefix) : v;
+                } else if (!isInternalName(key)) {
+                    output[prefix + key] = (typeof v === 'undefined' ? 'undefined' : _typeof(v)) === "object" ? this._copy(v, prefix) : v;
+                }
+            }
+            return output;
+        }
+    }, {
+        key: '_set',
+        value: function _set(target, key, value) {
+            target[BYPASS_PREFIX + key] = value;
+        }
+    }, {
+        key: '_getPath',
+        value: function _getPath(obj, key) {
+            var path = key ? [key] : [];
+            var tmp = obj;
+            while (tmp[PARENT_ID]) {
+                path.unshift(tmp[PARENT_KEY]);
+                tmp = this._parentIDs[tmp[PARENT_ID]];
+            }
+            return path;
+        }
+    }, {
+        key: '_traps',
+        value: function _traps(trapFuncs) {
+            var self = this;
+
+            var traps = {
+                set: function set(target, key, value) {
+                    var bypass = key.startsWith(BYPASS_PREFIX);
+                    // if (bypass && !target[IS_PROXY]) {
+                    if (bypass) {
+                        key = key.substr(BYPASS_PREFIX.length);
+                    }
+                    target[key] = value;
+                    // if (!bypass && !target[IS_PROXY] && typeof value !== 'object') {
+                    if (!bypass) {
+                        if (trapFuncs.set) {
+                            //set with parent object, path array, value
+                            var path = self._getPath(target, key);
+                            // cleanInternal(target);
+                            trapFuncs.set(target, path, value);
+                        }
+                    }
+                    return true;
+                },
+                get: function get(target, key) {
+                    if (key === IS_PROXY) {
+                        return true;
+                    }
+                    if (key === SELF) {
+                        cleanInternal(target);
+                        return target;
+                    }
+                    if (key.startsWith && key.startsWith(BYPASS_PREFIX)) {
+                        key = key.substr(BYPASS_PREFIX.length);
+                    }
+
+                    // if (typeof target[key] === 'object' && target[key] !== null && !target[key][IS_PROXY] && !isInternalProperty(key)) {
+                    if (_typeof(target[key]) === 'object' && target[key] !== null && !isInternalProperty(key)) {
+                        if (target[key][PROXY_ID]) {
+                            return self._proxies[target[key][PROXY_ID]];
+                        } else {
+                            var proxy = new Proxy(target[key], traps);
+
+                            var parentID = void 0;
+                            if (!self._parents.has(target)) {
+                                parentID = (0, _helpers.uuid)();
+                                self._parents.set(target, parentID);
+                                self._parentIDs[parentID] = target;
+                            }
+                            parentID = parentID || self._parents.get(target);
+
+                            self._set(proxy, PARENT_KEY, key);
+                            self._set(proxy, PARENT_ID, parentID);
+                            var proxyID = (0, _helpers.uuid)();
+                            self._proxies[proxyID] = proxy;
+                            target[key][PROXY_ID] = proxyID;
+                            return proxy;
+                        }
+                    } else {
+                        return target[key];
+                    }
+                }
+            };
+            return traps;
+        }
+    }]);
+
+    return SuperProxy;
+}();
+
+exports.default = SuperProxy;
+
+/***/ }),
+/* 12 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _uiElement = __webpack_require__(4);
+
+var _uiElement2 = _interopRequireDefault(_uiElement);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var defaults = {
+    value: [],
+    options: [],
+    config: {
+        search: false,
+        clearOnChange: false,
+        itemsInView: 5
+    }
+};
+
+var UIMultiselect = function (_UIElement) {
+    _inherits(UIMultiselect, _UIElement);
+
+    function UIMultiselect(data) {
+        _classCallCheck(this, UIMultiselect);
+
+        return _possibleConstructorReturn(this, (UIMultiselect.__proto__ || Object.getPrototypeOf(UIMultiselect)).call(this, data, defaults));
+    }
+
+    return UIMultiselect;
+}(_uiElement2.default);
+
+exports.default = UIMultiselect;
+
+/***/ }),
+/* 13 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _uiElement = __webpack_require__(4);
+
+var _uiElement2 = _interopRequireDefault(_uiElement);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var defaults = {
+    value: '',
+    options: []
+};
+
+var UIDropdown = function (_UIElement) {
+    _inherits(UIDropdown, _UIElement);
+
+    function UIDropdown(data) {
+        _classCallCheck(this, UIDropdown);
+
+        var _this = _possibleConstructorReturn(this, (UIDropdown.__proto__ || Object.getPrototypeOf(UIDropdown)).call(this, data, defaults));
+
+        if (!_this.value && _this.options.length) _this.value = _this.options[0];
+        return _this;
+    }
+
+    return UIDropdown;
+}(_uiElement2.default);
+
+exports.default = UIDropdown;
+
+/***/ }),
+/* 14 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _uiElement = __webpack_require__(4);
+
+var _uiElement2 = _interopRequireDefault(_uiElement);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var defaults = {
+    value: '',
+    options: []
+};
+
+var UIRadio = function (_UIElement) {
+    _inherits(UIRadio, _UIElement);
+
+    function UIRadio(data) {
+        _classCallCheck(this, UIRadio);
+
+        var _this = _possibleConstructorReturn(this, (UIRadio.__proto__ || Object.getPrototypeOf(UIRadio)).call(this, data, defaults));
+
+        if (!_this.value && _this.options.length) _this.value = _this.options[0];
+        return _this;
+    }
+
+    return UIRadio;
+}(_uiElement2.default);
+
+exports.default = UIRadio;
+
+/***/ }),
+/* 15 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _uiElement = __webpack_require__(4);
+
+var _uiElement2 = _interopRequireDefault(_uiElement);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var defaults = {
+    value: '0',
+    min: 0,
+    max: 0,
+    step: 1
+};
+
+var UIRange = function (_UIElement) {
+    _inherits(UIRange, _UIElement);
+
+    function UIRange(data) {
+        _classCallCheck(this, UIRange);
+
+        return _possibleConstructorReturn(this, (UIRange.__proto__ || Object.getPrototypeOf(UIRange)).call(this, data, defaults));
+    }
+
+    return UIRange;
+}(_uiElement2.default);
+
+exports.default = UIRange;
+
+/***/ }),
+/* 16 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _handlers = __webpack_require__(17);
 
 var handlers = _interopRequireWildcard(_handlers);
 
@@ -1387,19 +1755,19 @@ module.exports = {
 };
 
 /***/ }),
-/* 11 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _updateHandler = __webpack_require__(12);
+var _updateHandler = __webpack_require__(18);
 
-var _pagesHandler = __webpack_require__(13);
+var _pagesHandler = __webpack_require__(19);
 
-var _queryParamsHandler = __webpack_require__(14);
+var _queryParamsHandler = __webpack_require__(20);
 
-var _reloadHandler = __webpack_require__(15);
+var _reloadHandler = __webpack_require__(21);
 
 var events = __webpack_require__(1);
 
@@ -1413,7 +1781,7 @@ handlers[events.RELOAD] = _reloadHandler.reload;
 module.exports = handlers;
 
 /***/ }),
-/* 12 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1423,7 +1791,7 @@ var _helpers = __webpack_require__(0);
 
 var _vffData = __webpack_require__(2);
 
-var _consts = __webpack_require__(5);
+var _consts = __webpack_require__(6);
 
 var _events = __webpack_require__(1);
 
@@ -1478,7 +1846,7 @@ module.exports = {
  ************************/
 
 /***/ }),
-/* 13 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1495,7 +1863,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 14 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1512,7 +1880,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 15 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1527,7 +1895,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 16 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1539,7 +1907,7 @@ var _helpers = __webpack_require__(0);
 
 var _vffData = __webpack_require__(2);
 
-var _consts = __webpack_require__(5);
+var _consts = __webpack_require__(6);
 
 function initDOM() {
     var untitledTemplateCount = 0;
@@ -1631,7 +1999,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 17 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1643,7 +2011,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _htmlAccessorObserver = __webpack_require__(18);
+var _htmlAccessorObserver = __webpack_require__(24);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -1714,7 +2082,7 @@ var VffElement = function () {
 exports.default = VffElement;
 
 /***/ }),
-/* 18 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1785,7 +2153,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 19 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1805,45 +2173,45 @@ HTMLImageElement.prototype.expose = function () {
 };
 
 /***/ }),
-/* 20 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-__webpack_require__(21);
+__webpack_require__(27);
 
-__webpack_require__(22);
+__webpack_require__(28);
 
-var _emoji = __webpack_require__(23);
+var _emoji = __webpack_require__(29);
 
 var _emoji2 = _interopRequireDefault(_emoji);
 
-var _dragArea = __webpack_require__(24);
+var _dragArea = __webpack_require__(30);
 
 var _dragArea2 = _interopRequireDefault(_dragArea);
 
-var _telestratorElement = __webpack_require__(25);
+var _telestratorElement = __webpack_require__(31);
 
 var _telestratorElement2 = _interopRequireDefault(_telestratorElement);
 
-var _clockSimple = __webpack_require__(31);
+var _clockSimple = __webpack_require__(37);
 
 var _clockSimple2 = _interopRequireDefault(_clockSimple);
 
-var _systemClock = __webpack_require__(33);
+var _systemClock = __webpack_require__(39);
 
 var _systemClock2 = _interopRequireDefault(_systemClock);
 
-var _countdown = __webpack_require__(35);
+var _countdown = __webpack_require__(41);
 
 var _countdown2 = _interopRequireDefault(_countdown);
 
-var _stopwatch = __webpack_require__(36);
+var _stopwatch = __webpack_require__(42);
 
 var _stopwatch2 = _interopRequireDefault(_stopwatch);
 
-var _basicClock = __webpack_require__(4);
+var _basicClock = __webpack_require__(5);
 
 var _basicClock2 = _interopRequireDefault(_basicClock);
 
@@ -1867,7 +2235,7 @@ define('basic-clock', _basicClock2.default);
 // }
 
 /***/ }),
-/* 21 */
+/* 27 */
 /***/ (function(module, exports) {
 
 (function(){
@@ -1910,7 +2278,7 @@ define('basic-clock', _basicClock2.default);
 
 
 /***/ }),
-/* 22 */
+/* 28 */
 /***/ (function(module, exports) {
 
 /* eslint-disable */
@@ -1934,7 +2302,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 /* eslint-enable */
 
 /***/ }),
-/* 23 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2028,7 +2396,7 @@ var MyElement = function (_HTMLElement) {
 exports.default = MyElement;
 
 /***/ }),
-/* 24 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2209,7 +2577,7 @@ var DragArea = function (_HTMLElement) {
 exports.default = DragArea;
 
 /***/ }),
-/* 25 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2221,7 +2589,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-__webpack_require__(26);
+__webpack_require__(32);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -2413,11 +2781,11 @@ var Telestrator = function (_HTMLElement) {
 exports.default = Telestrator;
 
 /***/ }),
-/* 26 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
-var content = __webpack_require__(27);
+var content = __webpack_require__(33);
 
 if(typeof content === 'string') content = [[module.i, content, '']];
 
@@ -2431,7 +2799,7 @@ var options = {"hmr":true}
 options.transform = transform
 options.insertInto = undefined;
 
-var update = __webpack_require__(29)(content, options);
+var update = __webpack_require__(35)(content, options);
 
 if(content.locals) module.exports = content.locals;
 
@@ -2463,10 +2831,10 @@ if(false) {
 }
 
 /***/ }),
-/* 27 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(28)(false);
+exports = module.exports = __webpack_require__(34)(false);
 // imports
 
 
@@ -2477,7 +2845,7 @@ exports.push([module.i, "telestrator-element #telestrator-canvas {\n  position: 
 
 
 /***/ }),
-/* 28 */
+/* 34 */
 /***/ (function(module, exports) {
 
 /*
@@ -2559,7 +2927,7 @@ function toComment(sourceMap) {
 
 
 /***/ }),
-/* 29 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -2625,7 +2993,7 @@ var singleton = null;
 var	singletonCounter = 0;
 var	stylesInsertedAtTop = [];
 
-var	fixUrls = __webpack_require__(30);
+var	fixUrls = __webpack_require__(36);
 
 module.exports = function(list, options) {
 	if (typeof DEBUG !== "undefined" && DEBUG) {
@@ -2941,7 +3309,7 @@ function updateLink (link, options, obj) {
 
 
 /***/ }),
-/* 30 */
+/* 36 */
 /***/ (function(module, exports) {
 
 
@@ -3036,7 +3404,7 @@ module.exports = function (css) {
 
 
 /***/ }),
-/* 31 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3054,7 +3422,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var work = __webpack_require__(32);
+var work = __webpack_require__(38);
 
 function createWorker() {
     var blobURL = URL.createObjectURL(new Blob(['(', work.toString(), ')()'], { type: 'application/javascript' }));
@@ -3273,7 +3641,7 @@ var Clock = function (_HTMLElement) {
 exports.default = Clock;
 
 /***/ }),
-/* 32 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3336,7 +3704,7 @@ function worker() {
 module.exports = worker;
 
 /***/ }),
-/* 33 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3350,7 +3718,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-var _basicClock = __webpack_require__(4);
+var _basicClock = __webpack_require__(5);
 
 var _basicClock2 = _interopRequireDefault(_basicClock);
 
@@ -3409,7 +3777,7 @@ var Countdown = function (_BasicClock) {
 exports.default = Countdown;
 
 /***/ }),
-/* 34 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3493,7 +3861,7 @@ var Interval = function () {
 module.exports = Interval;
 
 /***/ }),
-/* 35 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3507,7 +3875,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-var _basicClock = __webpack_require__(4);
+var _basicClock = __webpack_require__(5);
 
 var _basicClock2 = _interopRequireDefault(_basicClock);
 
@@ -3556,7 +3924,7 @@ var Countdown = function (_BasicClock) {
 exports.default = Countdown;
 
 /***/ }),
-/* 36 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3570,7 +3938,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-var _basicClock = __webpack_require__(4);
+var _basicClock = __webpack_require__(5);
 
 var _basicClock2 = _interopRequireDefault(_basicClock);
 
@@ -3674,7 +4042,7 @@ var Stopwatch = function (_BasicClock) {
 exports.default = Stopwatch;
 
 /***/ }),
-/* 37 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3760,7 +4128,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 38 */
+/* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3787,7 +4155,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 39 */
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3808,7 +4176,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 40 */
+/* 46 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3842,7 +4210,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 41 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";

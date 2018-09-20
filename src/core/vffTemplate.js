@@ -1,9 +1,14 @@
 import {USER_UPDATE, VFF_EVENT, OUTGOING_EVENT} from "../utils/events";
-import {EXPOSE_DELIMITER} from './consts';
-import {findKey, deepExtend, getByPath, uuid, deepCompare, defer} from '../utils/helpers.js';
+import {EXPOSE_DELIMITER, UI} from './consts';
+import {findKey, getByPath, defer} from '../utils/helpers.js';
 import {send} from '../utils/messenger';
 import {vffData} from './vffData';
-const bypassPrefix = '___bypass___', parentObject = '__parent_object__', parentKey = '__parent_key__';
+import SuperProxy from "../utils/super-proxy";
+import UIMultiselect from './ui/uiMultiselect';
+import UIDropdown from './ui/uiDropdown';
+import UIRadio from './ui/uiRadio';
+import UIRange from './ui/uiRange';
+
 const defaultListenerOptions = {
     changeOnly  : true,
     throttle    : true
@@ -16,11 +21,12 @@ class Template{
     constructor(name, data, options) {
         this._name = name;
         this._options = Object.assign({}, defaultTemplateOptions, options);
-        this._proxy = new Proxy(this._copy(data), this._traps(name));
+        this._middleware = [];
+        this._createUIElements(data);
+        this._proxy = new SuperProxy(data, this._traps(name));
         this._element = this._options.element;
         this._proxies = {};
         this._timeouts = {};
-        this._middleware = [];
     }
     $element(control){
         if(this._element && control){
@@ -71,7 +77,7 @@ class Template{
 
                 if(path && options.changeOnly && (getByPath(event.detail[key], path) === getByPath(self._proxy, path) || getByPath(event.detail[key], path) === undefined )){
                     return;
-                } else if (!path && options.changeOnly && deepCompare(event.detail[key], self._proxy)){
+                } else if (!path && options.changeOnly && self._proxy.equals(event.detail[key])){
                     return;
                 }
 
@@ -94,111 +100,48 @@ class Template{
     emit(data){ return this.$emit(data); }
 
     _update(data){
-        let toUpdate = this._copy(data, bypassPrefix);
-        deepExtend(this._proxy, toUpdate);
-    }
-    _copy(o, prefix) {
-        prefix = prefix || '';
-        let output, v, key;
-        output = Array.isArray(o) ? [] : {};
-        for (key in o) {
-            v = o[key];
-            if(Array.isArray(output)){
-                output[key] = (typeof v === "object") ? this._copy(v, prefix) : v;
-            } else {
-                output[prefix + key] = (typeof v === "object") ? this._copy(v, prefix) : v;
-            }
-        }
-        return output;
-    }
-    _set(target, key, value){
-        target[bypassPrefix + key] = value;
+        this._proxy.update(data);
     }
 
-    _sendUserUpdateEvent(name, target, key, value){
-        let payload = {}, po, pk, originalTarget = target;
+    _sendUserUpdateEvent(name, target, path, value){
+        let payload = {};
         payload[name] = {};
-
-
-        if(!target[parentObject]){
-            payload[name][key] = value;
+        if(path.length === 1){
+            payload[name][path[0]] = value;
         } else {
-            let ancestors = [];
-            while(target[parentObject]){
-                ancestors.unshift(target[parentKey]);
-                target = target[parentObject];
-            }
+            let tmp = payload[name];
+            for (let i = 0; i < path.length -1; i++) {
+                const key = path[i];
 
-            let ancestor = '',
-                tmp = payload[name];
-            for(ancestor of ancestors) {
-                tmp[ancestor] = {};
-                if(ancestors[ancestors.length -1 !== ancestor]){
-                    tmp = tmp[ancestor];
+                if(i === path.length - 2){
+                    tmp[key] = target;
+                } else {
+                    tmp[key] = {};
+                    tmp = tmp[key];
                 }
 
             }
-
-            po = originalTarget[parentObject];
-            pk = originalTarget[parentKey];
-            delete originalTarget[parentObject];
-            delete originalTarget[parentKey];
-            tmp[ancestor] = originalTarget;
         }
-
         send(USER_UPDATE, payload);
-
-        if(po) originalTarget[parentObject] = po;
-        if(pk) originalTarget[parentKey] = pk;
     }
 
-    _traps(name){
+    _traps(name) {
         let self = this;
         let traps = {
-            set: function (target, key, value) {
-                let bypass = key.startsWith(bypassPrefix);
-                if(bypass && !target.__isProxy){
-                    key = key.substr(bypassPrefix.length);
-                }
-                target[key] = value;
-                if(!bypass && !target.__isProxy && typeof value !== 'object'){
-                    self._sendUserUpdateEvent(name, target, key, value);
-                }
-                return true;
-            },
-            get: function (target, key) {
-                if(key === '__isProxy'){return true;}
-                if(key.startsWith && key.startsWith(bypassPrefix))  key = key.substr(bypassPrefix.length);
-
-                if (typeof target[key] === 'object' && target[key] !== null && !target[key].__isProxy && !key.startsWith('__')) {
-                    if(target[key].__proxy){
-                        return self._proxies[target[key].__proxy];
-                    } else {
-                        let proxy = new Proxy(target[key], traps);
-                        self._set(proxy, parentObject, target);
-                        self._set(proxy, parentKey, key);
-                        let proxyID = uuid();
-                        self._proxies[proxyID] = proxy;
-                        target[key].__proxy = proxyID;
-                        return proxy;
-                    }
-                }
-                else {
-                    return target[key];
-                }
+            set: (target, key, value) => {
+                self._sendUserUpdateEvent(name, target, key, value);
             }
         };
-
         return traps;
     }
     _setValue(key, value){
-        key = findKey(this._proxy, key);
+        key = this._proxy.findKey(key);
         if(key){
             this._proxy[key] = value;
         }
     }
     _getValue(key){
-        return this._proxy[findKey(this._proxy, key)];
+        return this._proxy[key];
     }
     _runMiddleware(data){
         let self = this;
@@ -258,6 +201,19 @@ class Template{
         } else {
             callback(...data);
         }
+    }
+
+    _createUIElements(data){
+        Object.keys(data).forEach(function(key){
+            if(data[key] && data[key].constructor && data[key].constructor === Object){
+                switch(data[key].ui){
+                    case UI.MULTISELECT : data[key] = new UIMultiselect(data[key]); break;
+                    case UI.DROPDOWN    : data[key] = new UIDropdown(data[key]); break;
+                    case UI.RADIO       : data[key] = new UIRadio(data[key]); break;
+                    case UI.RANGE       : data[key] = new UIRange(data[key]); break;
+                }
+            }
+        });
     }
 }
 
