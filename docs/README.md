@@ -84,7 +84,6 @@ The "vff" object also contains events that will be fired based on various condit
 | $on(**callback**, **options**)  | triggers callback when data for the template arrives<br>**callback** - _function(**data**)_ - data handler<br>**options** - _object(optional)_ - options object (described [here](#options))|
 | $on(**path**, **callback**, **options**)| trigger callback when data for the **path** in the template arrives<br>**path** - _string_ - dot delimited string that describes a path in the template<br>**callback** - _function(**data**)_ - data handler<br>**options** - _object(optional)_ - options object (described [here](#options))|
 | $before(**middleware**, **options**)| add a middleware function that will be triggered in the order of the addition when data for the template arrives<br>**middleware** - _function(**data**, **next**)_ - the middleware function ([read more](#middleware))<br>**options** - _object(optional)_ - options object (described [here](#options))|
-| $before(**path**, **middleware**, **options**)| add a middleware function that will be triggered in the order of the addition when data for the **path** in the template arrives<br>**middleware** - _function(**data**, **next**)_ - the middleware function ([read more](#middleware))<br>**options** - _object(optional)_ - options object (described [here](#options))|
 | $emit(**payload**) | Emits a message to every player with the same project<br>**payload** - _object_ - data to be sent     |
 
 
@@ -241,8 +240,7 @@ var myTemplate = {
         },
         config : {
             search : true, //Enable search bar - default false
-            clearOnChange : true, //Clear the selection if the options were changed - default false
-            itemsInView : 3 //Visible area of 3 items (others are scrolled) - default 4
+            itemsInView : 3 //Visible area of3 items (others are scrolled) - default 5
         }
     }
 }
@@ -413,13 +411,13 @@ To register a middleware function use the [$before](#methods-1) method.
 The following example uses middleware to filer title by length and capitalize the title only if it passes the length filter.
 ```javascript
 let template = vff.registerTemplate('template', {title: ''});
-template.$before('title', (data, next) => {
-   if(data.length <= 140){
+template.$before((data, next) => {
+   if(data.title && data.title.length <= 140){
        next(data);
    } 
 });
-template.$before('title', (data, next) => {
-   data = data.toUpperCase();
+template.$before((data, next) => {
+   data.title = data.title.toUpperCase();
    next(data);
 });
 ```

@@ -1,9 +1,14 @@
 import {USER_UPDATE, VFF_EVENT, OUTGOING_EVENT} from "../utils/events";
-import {EXPOSE_DELIMITER} from './consts';
+import {EXPOSE_DELIMITER, UI} from './consts';
 import {findKey, getByPath, defer} from '../utils/helpers.js';
 import {send} from '../utils/messenger';
 import {vffData} from './vffData';
 import SuperProxy from "../utils/super-proxy";
+import UIMultiselect from './ui/uiMultiselect';
+import UIDropdown from './ui/uiDropdown';
+import UIRadio from './ui/uiRadio';
+import UIRange from './ui/uiRange';
+
 const defaultListenerOptions = {
     changeOnly  : true,
     throttle    : true
@@ -16,11 +21,12 @@ class Template{
     constructor(name, data, options) {
         this._name = name;
         this._options = Object.assign({}, defaultTemplateOptions, options);
+        this._middleware = [];
+        this._createUIElements(data);
         this._proxy = new SuperProxy(data, this._traps(name));
         this._element = this._options.element;
         this._proxies = {};
         this._timeouts = {};
-        this._middleware = [];
     }
     $element(control){
         if(this._element && control){
@@ -195,6 +201,19 @@ class Template{
         } else {
             callback(...data);
         }
+    }
+
+    _createUIElements(data){
+        Object.keys(data).forEach(function(key){
+            if(data[key] && data[key].constructor && data[key].constructor === Object){
+                switch(data[key].ui){
+                    case UI.MULTISELECT : data[key] = new UIMultiselect(data[key]); break;
+                    case UI.DROPDOWN    : data[key] = new UIDropdown(data[key]); break;
+                    case UI.RADIO       : data[key] = new UIRadio(data[key]); break;
+                    case UI.RANGE       : data[key] = new UIRange(data[key]); break;
+                }
+            }
+        });
     }
 }
 
