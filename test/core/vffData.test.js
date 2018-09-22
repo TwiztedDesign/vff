@@ -22,7 +22,6 @@ describe('vff Data', () => {
             expect(vffData.getTemplates().length).toBe(0);
         });
     });
-
     describe('registerTemplate', () => {
         it('Should return a template object', () => {
             var template = vffData.registerTemplate('test', data);
@@ -81,7 +80,6 @@ describe('vff Data', () => {
             }).toThrow(new Error('Missing Arguments, please refer to: ' + docRef(REGISTER_TEMPLATE)));
         });
     });
-
     describe('getTemplates', () => {
         it('should return all templates', () => {
             let template1 = vffData.registerTemplate('test1', data);
@@ -89,16 +87,14 @@ describe('vff Data', () => {
             let templates = vffData.getTemplates();
             expect(templates).toEqual(expect.arrayContaining([template1, template2]));
             expect(vffData.getTemplates().length).toBe(2);
-        })
+        });
     });
-
     describe('getTemplate', () => {
         it('should return a template by name', () => {
             let template = vffData.registerTemplate('test', data);
             expect(vffData.getTemplate('test')).toEqual(template);
         });
     });
-
     describe('show', () => {
         it('Should set the visibility property value to TRUE in the given template', () => {
             let template = vffData.registerTemplate('test', {visibility : false});
@@ -193,5 +189,16 @@ describe('vff Data', () => {
             expect(spy).toHaveBeenCalledTimes(2);
         });
     });
-
+    describe('getTargetGeo', () => {
+        it('Should return the vff target geo', () => {
+            let params = [{name:'_targetgeo', value:'123.456,123.456'}];
+            vffData.addQueryParams(params);
+            expect(vffData.getTargetGeo()).toEqual(params);
+        });
+        it('Should return undefined from vff target geo since _targetgeo is not exists', () => {
+            let params = [{name: 'param1', value:'val1'}, {name: 'param2', value:'val2'}];
+            vffData.addQueryParams(params);
+            expect(vffData.getTargetGeo()).toEqual(undefined);
+        });
+    });
 });

@@ -96,6 +96,9 @@ class VffData {
     getQueryParams(){
         return this._queryParams;
     }
+    getTargetGeo(){
+        return this._queryParams && this._queryParams._targetgeo;
+    }
 }
 
 

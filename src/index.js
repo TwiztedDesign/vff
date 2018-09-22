@@ -33,6 +33,7 @@ vff.onUpdate            = (cb) => {return vffData.onUpdate(cb);};
 vff.getPages            = () => {return vffData.getPages();};
 vff.onPages             = (cb) => {return vffData.onPages(cb);};
 vff.getQueryParams      = () => {return vffData.getQueryParams();};
+vff.getTargetGeo      = () => {return vffData.getTargetGeo();};
 vff.send                = (type, payload) => { send(type, payload); };
 vff.request             = (type, payload, cb) => { request(type, payload, cb); };
 vff.isMobile            = isMobile;
