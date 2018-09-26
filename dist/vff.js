@@ -996,7 +996,8 @@ var defaultListenerOptions = {
     throttle: true
 };
 var defaultTemplateOptions = {
-    updateOn: 'all' // all, template, control
+    updateOn: 'all', // all, template, control
+    global: false
 };
 //getElement, update, show, hide, toggle, onData, emit
 
