@@ -1,5 +1,5 @@
 import * as handlers from '../core/handlers';
-import ACK from './events';
+import {ACK} from './events';
 
 
 function messageHandler(message){
