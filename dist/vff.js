@@ -892,6 +892,7 @@ vff.extend = function (name, extension) {
 vff.define = function (name, element) {
     customElements.define(name, element);
 };
+vff.uuid = (0, _helpers.uuid)();
 
 (0, _helpers.extend)(vff, playerApi);
 (0, _helpers.extend)(vff, visibilityApi);
@@ -1725,10 +1726,6 @@ var handlers = _interopRequireWildcard(_handlers);
 
 var _events = __webpack_require__(1);
 
-var _events2 = _interopRequireDefault(_events);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function messageHandler(message) {
@@ -1737,7 +1734,8 @@ function messageHandler(message) {
         var type = messageData.type;
         var handler = handlers[type];
         if (messageData.cid && message.source && message.source.postMessage) {
-            message.source.postMessage(JSON.stringify({ type: _events2.default, cid: messageData.cid }), '*');
+            var msg = { type: _events.ACK, cid: messageData.cid };
+            message.source.postMessage(JSON.stringify(msg), '*');
         }
         if (handler) {
             handler(messageData.payload);
@@ -1814,14 +1812,40 @@ function update(data) {
             });
             promises.push(deferred.promise);
         }
+        if (['mousemove', 'mousedown', 'mouseup', 'click'].indexOf(templateName) > -1 && data[templateName].uid !== vff.uuid) {
+            // if(['click'].indexOf(templateName) > -1 && data[templateName].uid !== vff.uuid){
+            target = lookupElementByXPath(data[templateName].target);
+
+            console.log(templateName, target);
+            // data[templateName].target = target;
+            data[templateName].bubbles = true;
+            data[templateName].cancelable = true;
+            data[templateName].ctrlKey = true;
+            // if(vff.mode === 'normal' || vff.mode === 'controller-program') {
+            target.dispatchEvent(new MouseEvent(templateName, data[templateName]));
+            // target.dispatchEvent(new CustomEvent(templateName, {bubble: true, detail : data[templateName]}));
+            // }
+        }
     };
 
     for (var templateName in data) {
+        var target;
+
         _loop(templateName);
     }
 
     document.dispatchEvent(new CustomEvent(_events.VFF_EVENT, { detail: data }));
     return Promise.all(promises);
+}
+
+function lookupElementByXPath(path) {
+    var evaluator = new XPathEvaluator();
+    var result = evaluator.evaluate(path, document.documentElement, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+    return result.singleNodeValue;
+}
+
+function getElementByXpath(path) {
+    return document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
 }
 
 function updateDom(template, control, value, timecode) {
@@ -4221,6 +4245,8 @@ var _messenger = __webpack_require__(3);
 
 var _events = __webpack_require__(1);
 
+var _helpers = __webpack_require__(0);
+
 function touchesToJson(touches) {
     if (!touches) return touches;
     var touchArray = [];
@@ -4238,19 +4264,52 @@ function touchesToJson(touches) {
 }
 
 function bubbleUpMouseEvent(e) {
-    (0, _messenger.send)(_events.BUBBLE_UP, {
-        event: e.type,
-        data: {
-            pageX: e.pageX,
-            pageY: e.pageY,
-            clientX: e.clientX,
-            clientY: e.clientY,
-            touches: touchesToJson(e.touches),
-            targetTouches: touchesToJson(e.targetTouches),
-            changedTouches: touchesToJson(e.changedTouches)
-        }
-    });
+    if (!e.ctrlKey) {
+        // console.log(e.type);
+        (0, _messenger.send)(_events.BUBBLE_UP, {
+            event: e.type,
+            data: {
+                uid: vff.uuid,
+                pageX: e.pageX,
+                pageY: e.pageY,
+                clientX: e.clientX,
+                clientY: e.clientY,
+                target: createXPathFromElement(e.target),
+                touches: touchesToJson(e.touches),
+                targetTouches: touchesToJson(e.targetTouches),
+                changedTouches: touchesToJson(e.changedTouches)
+
+            }
+        });
+    }
 }
+
+function createXPathFromElement(elm) {
+    var allNodes = document.getElementsByTagName('*');
+    for (var segs = []; elm && elm.nodeType == 1; elm = elm.parentNode) {
+        if (elm.hasAttribute('id')) {
+            var uniqueIdCount = 0;
+            for (var n = 0; n < allNodes.length; n++) {
+                if (allNodes[n].hasAttribute('id') && allNodes[n].id == elm.id) uniqueIdCount++;
+                if (uniqueIdCount > 1) break;
+            };
+            if (uniqueIdCount == 1) {
+                segs.unshift('id("' + elm.getAttribute('id') + '")');
+                return segs.join('/');
+            } else {
+                segs.unshift(elm.localName.toLowerCase() + '[@id="' + elm.getAttribute('id') + '"]');
+            }
+        } else if (elm.hasAttribute('class')) {
+            segs.unshift(elm.localName.toLowerCase() + '[@class="' + elm.getAttribute('class') + '"]');
+        } else {
+            for (var i = 1, sib = elm.previousSibling; sib; sib = sib.previousSibling) {
+                if (sib.localName == elm.localName) i++;
+            };
+            segs.unshift(elm.localName.toLowerCase() + '[' + i + ']');
+        };
+    };
+    return segs.length ? '/' + segs.join('/') : null;
+};
 
 function onTouchStart(e) {
     (0, _messenger.send)(_events.TOUCH, e.target.tagName);
@@ -4281,11 +4340,12 @@ window.addEventListener('load', function () {
 
     document.body.addEventListener('touchstart', bubbleUpMouseEvent);
     document.body.addEventListener('touchend', bubbleUpMouseEvent);
-    document.body.addEventListener('touchmove', bubbleUpMouseEvent);
+    // document.body.addEventListener('touchmove', bubbleUpMouseEvent);
 
-    document.body.addEventListener('mousemove', bubbleUpMouseEvent);
-    document.body.addEventListener("mousedown", bubbleUpMouseEvent);
-    document.body.addEventListener("mouseup", bubbleUpMouseEvent);
+    // document.body.addEventListener('mousemove', bubbleUpMouseEvent);
+    // document.body.addEventListener("mousedown", bubbleUpMouseEvent);
+    // document.body.addEventListener("mouseup", bubbleUpMouseEvent);
+    document.body.addEventListener("click", bubbleUpMouseEvent);
 });
 
 /***/ })

@@ -1,5 +1,6 @@
 import {send} from '../utils/messenger';
 import {TOUCH, MOUSE_MOVE, BUBBLE_UP} from '../utils/events';
+import {uuid} from '../utils/helpers';
 
 
 function touchesToJson(touches){
@@ -19,24 +20,25 @@ function touchesToJson(touches){
 }
 
 function bubbleUpMouseEvent(e){
-    if(e.ctrlKey){
-        console.log('with ctrl');
-        return;  
-    } 
-    send(BUBBLE_UP,{
-        event : e.type,
-        data  : {
-            pageX : e.pageX,
-            pageY : e.pageY,
-            clientX : e.clientX,
-            clientY : e.clientY,
-            target : createXPathFromElement(e.target),
-            touches : touchesToJson(e.touches),
-            targetTouches : touchesToJson(e.targetTouches),
-            changedTouches : touchesToJson(e.changedTouches)
+    if(!e.ctrlKey){
+        // console.log(e.type);
+        send(BUBBLE_UP,{
+            event : e.type,
+            data  : {
+                uid   : vff.uuid,
+                pageX : e.pageX,
+                pageY : e.pageY,
+                clientX : e.clientX,
+                clientY : e.clientY,
+                target : createXPathFromElement(e.target),
+                touches : touchesToJson(e.touches),
+                targetTouches : touchesToJson(e.targetTouches),
+                changedTouches : touchesToJson(e.changedTouches)
 
-        }
-    });
+            }
+        });
+    } 
+
 }
 
 
@@ -106,11 +108,11 @@ window.addEventListener('load', () => {
 
     document.body.addEventListener('touchstart', bubbleUpMouseEvent);
     document.body.addEventListener('touchend', bubbleUpMouseEvent);
-    document.body.addEventListener('touchmove', bubbleUpMouseEvent);
+    // document.body.addEventListener('touchmove', bubbleUpMouseEvent);
 
-    document.body.addEventListener('mousemove', bubbleUpMouseEvent);
-    document.body.addEventListener("mousedown", bubbleUpMouseEvent);
-    document.body.addEventListener("mouseup", bubbleUpMouseEvent);
+    // document.body.addEventListener('mousemove', bubbleUpMouseEvent);
+    // document.body.addEventListener("mousedown", bubbleUpMouseEvent);
+    // document.body.addEventListener("mouseup", bubbleUpMouseEvent);
     document.body.addEventListener("click", bubbleUpMouseEvent);
 
 

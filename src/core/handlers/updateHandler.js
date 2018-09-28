@@ -4,7 +4,7 @@ import {EXPOSE_DELIMITER} from '../consts';
 import {VFF_EVENT} from '../../utils/events';
 
 function update(data){
-
+    
     let promises = [];
     for(let templateName in data){
         let template = vffData.getTemplate(templateName);
@@ -20,16 +20,17 @@ function update(data){
             });
             promises.push(deferred.promise);
         }
-        // if(['mousemove', 'mousedown', 'mouseup','click'].indexOf(templateName) ){
-        if(['click'].indexOf(templateName) > -1 ){
+        if(['mousemove', 'mousedown', 'mouseup','click'].indexOf(templateName) > -1 && data[templateName].uid !== vff.uuid){
+        // if(['click'].indexOf(templateName) > -1 && data[templateName].uid !== vff.uuid){
             var target = lookupElementByXPath(data[templateName].target);
+            console.log(templateName, target);
             // data[templateName].target = target;
             data[templateName].bubbles = true;
-            data[templateName].detail = {vff: 'vff'};
+            data[templateName].cancelable = true;
             data[templateName].ctrlKey = true;
             // if(vff.mode === 'normal' || vff.mode === 'controller-program') {
-                target.dispatchEvent(new MouseEvent(templateName, data[templateName]));
-                // target.dispatchEvent(new CustomEvent(templateName, {bubble: true, detail : data[templateName]}));
+            target.dispatchEvent(new MouseEvent(templateName, data[templateName]));
+            // target.dispatchEvent(new CustomEvent(templateName, {bubble: true, detail : data[templateName]}));
             // }
         }
     }
