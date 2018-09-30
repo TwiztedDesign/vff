@@ -11,6 +11,8 @@ import * as eventsApi from './core/api/events';
 import * as playerApi from './core/api/player';
 import * as visibilityApi from './core/api/visibility';
 import * as httpApi from './core/api/http';
+import * as syncApi from './core/api/sync';
+
 require('./core/interactionEvents');
 
 startListener();
@@ -45,6 +47,17 @@ vff.define              = (name, element) => { customElements.define(name, eleme
 extend(vff, playerApi);
 extend(vff, visibilityApi);
 extend(vff, eventsApi);
+extend(vff, syncApi);
+
+window.onload = function(){
+    // setTimeout(function(){
+        vff.syncStart();
+    // },3000 +  (Math.random() * 5000));
+
+};
+
+
+
 vff.extend('http', httpApi);
 
 
