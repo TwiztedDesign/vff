@@ -13,6 +13,7 @@ module.exports = {
     "ACK"           : "taco-ack",
     "TRACK_EVENT"   : "vff-track-event",
     "RELOAD"        : "vff-reload",
+    "VF_DATA"       : "vff-vf-data",
 
 
     "TOUCH"         : "taco-touch-element",

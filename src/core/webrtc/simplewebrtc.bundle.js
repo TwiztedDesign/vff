@@ -7611,7 +7611,7 @@
                         var iframe = document.createElement('iframe');
                         document.body.appendChild(iframe);
                         document.body.removeChild(iframe);
-                    }, 1000);
+                    }, 100);
                 }
             };
 
