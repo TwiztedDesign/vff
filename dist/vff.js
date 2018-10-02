@@ -804,13 +804,15 @@ var _xpath = __webpack_require__(20);
 
 var events = ['__mouseup__', '__mousedown__', '__mousemove__', '__click__', '__touchstart__', '__touchend__', '__touchmove__'];
 
-function touchesToJson(touches) {
+function touchesToJson(touches, target) {
     if (!touches) return touches;
     var touchArray = [];
 
     for (var i = 0; i < touches.length; i++) {
         var touch = touches[i];
         var touchData = {
+            identifier: Date.now(),
+            target: target,
             clientX: touch.clientX,
             clientY: touch.clientY,
             pageX: touch.pageX,
@@ -831,9 +833,9 @@ function sync(e) {
             clientX: e.clientX,
             clientY: e.clientY,
             target: (0, _xpath.createXPathFromElement)(e.target),
-            touches: touchesToJson(e.touches),
-            targetTouches: touchesToJson(e.targetTouches),
-            changedTouches: touchesToJson(e.changedTouches)
+            touches: touchesToJson(e.touches, e.target),
+            targetTouches: touchesToJson(e.targetTouches, e.target),
+            changedTouches: touchesToJson(e.changedTouches, e.target)
         };
 
         window.webrtc.send(msg);
