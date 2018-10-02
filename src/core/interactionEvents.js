@@ -3,13 +3,15 @@ import {createXPathFromElement, lookupElementByXPath} from '../utils/xpath';
 
 const events = ['__mouseup__', '__mousedown__', '__mousemove__', '__click__', '__touchstart__', '__touchend__', '__touchmove__'];
 
-function touchesToJson(touches){
+function touchesToJson(touches, target){
     if(!touches) return touches;
     var touchArray = [];
 
     for (let i = 0; i < touches.length; i++) {
         let touch = touches[i];
         let touchData = {
+            identifier: Date.now(),
+            target  : target,
             clientX : touch.clientX,
             clientY : touch.clientY,
             pageX   : touch.pageX,
@@ -30,9 +32,9 @@ function sync(e){
             clientX: e.clientX,
             clientY: e.clientY,
             target: createXPathFromElement(e.target),
-            touches: touchesToJson(e.touches),
-            targetTouches: touchesToJson(e.targetTouches),
-            changedTouches: touchesToJson(e.changedTouches)
+            touches: touchesToJson(e.touches, e.target),
+            targetTouches: touchesToJson(e.targetTouches, e.target),
+            changedTouches: touchesToJson(e.changedTouches, e.target)
         };
 
         window.webrtc.send(msg);
