@@ -968,7 +968,9 @@ function update(data) {
 
 function updateInteraction(data) {
     for (var event in data) {
-        (0, _interactionEvents.dispatchEvent)(event, data[event]);
+        if ((0, _interactionEvents.isInteractionEvent)(event)) {
+            (0, _interactionEvents.dispatchEvent)(event, data[event]);
+        }
     }
 }
 
@@ -2074,8 +2076,6 @@ var _webrtc = __webpack_require__(25);
 
 var _webrtc2 = _interopRequireDefault(_webrtc);
 
-var _interactionEvents = __webpack_require__(5);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function handleVFData(data) {
@@ -2083,9 +2083,7 @@ function handleVFData(data) {
         // window.webrtc.close();
         window.webrtc = new _webrtc2.default(data.token, 'sync', {
             onMessage: function onMessage(message) {
-                if ((0, _interactionEvents.isInteractionEvent)(event)) {
-                    (0, _updateHandler.updateInteraction)(message);
-                }
+                (0, _updateHandler.updateInteraction)(message);
             }
         });
     }

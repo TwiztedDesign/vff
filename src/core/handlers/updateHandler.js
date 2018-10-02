@@ -2,7 +2,7 @@ import {setByPath, defer} from '../../utils/helpers.js';
 import {vffData} from '../vffData.js';
 import {EXPOSE_DELIMITER} from '../consts';
 import {VFF_EVENT} from '../../utils/events';
-import {dispatchEvent} from '../interactionEvents';
+import {isInteractionEvent, dispatchEvent} from '../interactionEvents';
 
 function update(data){
     
@@ -29,7 +29,9 @@ function update(data){
 
 function updateInteraction(data){
     for(let event in data){
-        dispatchEvent(event, data[event]);
+        if(isInteractionEvent(event)){
+            dispatchEvent(event, data[event]);
+        }
     }
 }
 
