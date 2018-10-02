@@ -2,7 +2,7 @@ import {setByPath, defer} from '../../utils/helpers.js';
 import {vffData} from '../vffData.js';
 import {EXPOSE_DELIMITER} from '../consts';
 import {VFF_EVENT} from '../../utils/events';
-import {isInteractionEvent, dispatchEvent} from '../interactionEvents';
+import {dispatchEvent} from '../interactionEvents';
 
 function update(data){
     
@@ -20,13 +20,17 @@ function update(data){
                 deferred.resolve();
             });
             promises.push(deferred.promise);
-        } else if(isInteractionEvent(templateName)){
-            dispatchEvent(templateName, data[templateName]);
         }
     }
 
     document.dispatchEvent(new CustomEvent(VFF_EVENT, { detail: data }));
     return Promise.all(promises);
+}
+
+function updateInteraction(data){
+    for(let event in data){
+        dispatchEvent(event, data[event]);
+    }
 }
 
 function updateDom(template, control, value, timecode){
@@ -40,7 +44,8 @@ function updateDom(template, control, value, timecode){
 }
 
 module.exports = {
-    update : update
+    update : update,
+    updateInteraction : updateInteraction
 };
 
 

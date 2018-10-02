@@ -3,21 +3,19 @@ import {createXPathFromElement, lookupElementByXPath} from '../utils/xpath';
 
 const events = ['__mouseup__', '__mousedown__', '__mousemove__', '__click__', '__touchstart__', '__touchend__', '__touchmove__'];
 
-function touchesToJson(touches, target){
+function touchesToJson(touches){
     if(!touches) return touches;
-    var touchArray = [];
+    let touchArray = [];
 
     for (let i = 0; i < touches.length; i++) {
         let touch = touches[i];
         let touchData = {
-            identifier: Date.now(),
-            target  : target,
             clientX : touch.clientX,
             clientY : touch.clientY,
             pageX   : touch.pageX,
             pageY   : touch.pageY
         };
-        touchArray.push(window.Touch? new Touch(touchData) : touchData);
+        touchArray.push(touchData);
     }
     return touchArray;
 }
@@ -32,9 +30,9 @@ function sync(e){
             clientX: e.clientX,
             clientY: e.clientY,
             target: createXPathFromElement(e.target),
-            touches: touchesToJson(e.touches, e.target),
-            targetTouches: touchesToJson(e.targetTouches, e.target),
-            changedTouches: touchesToJson(e.changedTouches, e.target)
+            touches: touchesToJson(e.touches),
+            targetTouches: touchesToJson(e.targetTouches),
+            changedTouches: touchesToJson(e.changedTouches)
         };
 
         window.webrtc.send(msg);
@@ -57,12 +55,27 @@ function dispatchEvent(event, data){
 
     if(target){
         if(['__touchstart__', '__touchend__', '__touchmove__'].indexOf(event) > -1){
-            target.dispatchEvent(new TouchEvent(event.slice(2, -2), data));
+            target.dispatchEvent(new TouchEvent(event.slice(2, -2), handleTouchEvent(data,target)));
         } else {
             target.dispatchEvent(new MouseEvent(event.slice(2, -2), data));
         }
 
     }
+}
+
+function handleTouchEvent(data,target){
+    data.changedTouches = createTouchArray(data.changedTouches,target);
+    data.targetTouches = createTouchArray(data.targetTouches,target);
+    data.touches = createTouchArray(data.touches,target);
+    return data;
+}
+
+function createTouchArray(touches,target){
+    return touches.map(function(touch){
+        touch.identifier = Date.now();
+        touch.target = target;
+        return new Touch(touch);
+    });
 }
 
 function isInteractionEvent(event){

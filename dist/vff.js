@@ -659,7 +659,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Interval = __webpack_require__(45);
+var Interval = __webpack_require__(44);
 
 var BasicClock = function (_HTMLElement) {
     _inherits(BasicClock, _HTMLElement);
@@ -800,25 +800,23 @@ module.exports = {
 "use strict";
 
 
-var _xpath = __webpack_require__(20);
+var _xpath = __webpack_require__(51);
 
 var events = ['__mouseup__', '__mousedown__', '__mousemove__', '__click__', '__touchstart__', '__touchend__', '__touchmove__'];
 
-function touchesToJson(touches, target) {
+function touchesToJson(touches) {
     if (!touches) return touches;
     var touchArray = [];
 
     for (var i = 0; i < touches.length; i++) {
         var touch = touches[i];
         var touchData = {
-            identifier: Date.now(),
-            target: target,
             clientX: touch.clientX,
             clientY: touch.clientY,
             pageX: touch.pageX,
             pageY: touch.pageY
         };
-        touchArray.push(window.Touch ? new Touch(touchData) : touchData);
+        touchArray.push(touchData);
     }
     return touchArray;
 }
@@ -833,9 +831,9 @@ function sync(e) {
             clientX: e.clientX,
             clientY: e.clientY,
             target: (0, _xpath.createXPathFromElement)(e.target),
-            touches: touchesToJson(e.touches, e.target),
-            targetTouches: touchesToJson(e.targetTouches, e.target),
-            changedTouches: touchesToJson(e.changedTouches, e.target)
+            touches: touchesToJson(e.touches),
+            targetTouches: touchesToJson(e.targetTouches),
+            changedTouches: touchesToJson(e.changedTouches)
         };
 
         window.webrtc.send(msg);
@@ -858,11 +856,26 @@ function dispatchEvent(event, data) {
 
     if (target) {
         if (['__touchstart__', '__touchend__', '__touchmove__'].indexOf(event) > -1) {
-            target.dispatchEvent(new TouchEvent(event.slice(2, -2), data));
+            target.dispatchEvent(new TouchEvent(event.slice(2, -2), handleTouchEvent(data, target)));
         } else {
             target.dispatchEvent(new MouseEvent(event.slice(2, -2), data));
         }
     }
+}
+
+function handleTouchEvent(data, target) {
+    data.changedTouches = createTouchArray(data.changedTouches, target);
+    data.targetTouches = createTouchArray(data.targetTouches, target);
+    data.touches = createTouchArray(data.touches, target);
+    return data;
+}
+
+function createTouchArray(touches, target) {
+    return touches.map(function (touch) {
+        touch.identifier = Date.now();
+        touch.target = target;
+        return new Touch(touch);
+    });
 }
 
 function isInteractionEvent(event) {
@@ -942,8 +955,6 @@ function update(data) {
                 deferred.resolve();
             });
             promises.push(deferred.promise);
-        } else if ((0, _interactionEvents.isInteractionEvent)(templateName)) {
-            (0, _interactionEvents.dispatchEvent)(templateName, data[templateName]);
         }
     };
 
@@ -953,6 +964,12 @@ function update(data) {
 
     document.dispatchEvent(new CustomEvent(_events.VFF_EVENT, { detail: data }));
     return Promise.all(promises);
+}
+
+function updateInteraction(data) {
+    for (var event in data) {
+        (0, _interactionEvents.dispatchEvent)(event, data[event]);
+    }
 }
 
 function updateDom(template, control, value, timecode) {
@@ -966,7 +983,8 @@ function updateDom(template, control, value, timecode) {
 }
 
 module.exports = {
-    update: update
+    update: update,
+    updateInteraction: updateInteraction
 };
 
 /** to update angular *****
@@ -992,31 +1010,31 @@ var _vffData = __webpack_require__(2);
 
 var _listener = __webpack_require__(18);
 
-var _initDOM = __webpack_require__(27);
+var _initDOM = __webpack_require__(26);
 
-var _vffElement = __webpack_require__(28);
+var _vffElement = __webpack_require__(27);
 
 var _vffElement2 = _interopRequireDefault(_vffElement);
 
-__webpack_require__(30);
+__webpack_require__(29);
 
-__webpack_require__(31);
+__webpack_require__(30);
 
 var _helpers = __webpack_require__(0);
 
-var _events2 = __webpack_require__(48);
+var _events2 = __webpack_require__(47);
 
 var eventsApi = _interopRequireWildcard(_events2);
 
-var _player = __webpack_require__(49);
+var _player = __webpack_require__(48);
 
 var playerApi = _interopRequireWildcard(_player);
 
-var _visibility = __webpack_require__(50);
+var _visibility = __webpack_require__(49);
 
 var visibilityApi = _interopRequireWildcard(_visibility);
 
-var _http = __webpack_require__(51);
+var _http = __webpack_require__(50);
 
 var httpApi = _interopRequireWildcard(_http);
 
@@ -1924,13 +1942,13 @@ module.exports = {
 
 var _updateHandler = __webpack_require__(9);
 
-var _pagesHandler = __webpack_require__(21);
+var _pagesHandler = __webpack_require__(20);
 
-var _queryParamsHandler = __webpack_require__(22);
+var _queryParamsHandler = __webpack_require__(21);
 
-var _reloadHandler = __webpack_require__(23);
+var _reloadHandler = __webpack_require__(22);
 
-var _vfDataHandler = __webpack_require__(24);
+var _vfDataHandler = __webpack_require__(23);
 
 var events = __webpack_require__(1);
 
@@ -1951,56 +1969,6 @@ module.exports = handlers;
 "use strict";
 
 
-module.exports = {
-
-    createXPathFromElement: function createXPathFromElement(elm) {
-        var allNodes = document.getElementsByTagName('*');
-        var segs = void 0,
-            sib = void 0,
-            i = void 0;
-        for (segs = []; elm && elm.nodeType == 1; elm = elm.parentNode) {
-            if (elm.hasAttribute('id')) {
-                var uniqueIdCount = 0;
-                for (var n = 0; n < allNodes.length; n++) {
-                    if (allNodes[n].hasAttribute('id') && allNodes[n].id == elm.id) uniqueIdCount++;
-                    if (uniqueIdCount > 1) break;
-                }
-                if (uniqueIdCount == 1) {
-                    segs.unshift('id("' + elm.getAttribute('id') + '")');
-                    return segs.join('/');
-                } else {
-                    segs.unshift(elm.localName.toLowerCase() + '[@id="' + elm.getAttribute('id') + '"]');
-                }
-            } else if (elm.hasAttribute('class')) {
-                segs.unshift(elm.localName.toLowerCase() + '[@class="' + elm.getAttribute('class') + '"]');
-            } else {
-                for (i = 1, sib = elm.previousSibling; sib; sib = sib.previousSibling) {
-                    if (sib.localName == elm.localName) i++;
-                }
-                segs.unshift(elm.localName.toLowerCase() + '[' + i + ']');
-            }
-        }
-        return segs.length ? '/' + segs.join('/') : null;
-    },
-
-    lookupElementByXPath: function lookupElementByXPath(path) {
-        var evaluator = new XPathEvaluator();
-        var result = evaluator.evaluate(path, document.documentElement, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
-        return result.singleNodeValue;
-    },
-    getElementByXpath: function getElementByXpath(path) {
-        return document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-    }
-
-};
-
-/***/ }),
-/* 21 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
 var _vffData = __webpack_require__(2);
 
 function pages(data) {
@@ -2012,7 +1980,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 22 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2029,7 +1997,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 23 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2044,7 +2012,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 24 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2052,9 +2020,11 @@ module.exports = {
 
 var _updateHandler = __webpack_require__(9);
 
-var _webrtc = __webpack_require__(25);
+var _webrtc = __webpack_require__(24);
 
 var _webrtc2 = _interopRequireDefault(_webrtc);
+
+var _interactionEvents = __webpack_require__(7);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -2063,7 +2033,9 @@ function handleVFData(data) {
         // window.webrtc.close();
         window.webrtc = new _webrtc2.default(data.token, 'sync', {
             onMessage: function onMessage(message) {
-                (0, _updateHandler.update)(message);
+                if ((0, _interactionEvents.isInteractionEvent)(event)) {
+                    (0, _updateHandler.updateInteraction)(message);
+                }
             }
         });
     }
@@ -2074,7 +2046,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 25 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2088,7 +2060,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var SimpleWebRTC = __webpack_require__(26);
+var SimpleWebRTC = __webpack_require__(25);
 var noop = function noop() {};
 var defaults = {
     signalingServer: "https://rtc.videoflow.io",
@@ -2202,7 +2174,7 @@ var WebRTC = function () {
 exports.default = WebRTC;
 
 /***/ }),
-/* 26 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5944,7 +5916,7 @@ WebRTC.prototype.sendDirectlyToAll=function(channel,message,payload){this.peers.
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(8)))
 
 /***/ }),
-/* 27 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6058,7 +6030,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 28 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6070,7 +6042,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _htmlAccessorObserver = __webpack_require__(29);
+var _htmlAccessorObserver = __webpack_require__(28);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -6141,7 +6113,7 @@ var VffElement = function () {
 exports.default = VffElement;
 
 /***/ }),
-/* 29 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6212,7 +6184,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 30 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6232,41 +6204,41 @@ HTMLImageElement.prototype.expose = function () {
 };
 
 /***/ }),
-/* 31 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+__webpack_require__(31);
+
 __webpack_require__(32);
 
-__webpack_require__(33);
-
-var _emoji = __webpack_require__(34);
+var _emoji = __webpack_require__(33);
 
 var _emoji2 = _interopRequireDefault(_emoji);
 
-var _dragArea = __webpack_require__(35);
+var _dragArea = __webpack_require__(34);
 
 var _dragArea2 = _interopRequireDefault(_dragArea);
 
-var _telestratorElement = __webpack_require__(36);
+var _telestratorElement = __webpack_require__(35);
 
 var _telestratorElement2 = _interopRequireDefault(_telestratorElement);
 
-var _clockSimple = __webpack_require__(42);
+var _clockSimple = __webpack_require__(41);
 
 var _clockSimple2 = _interopRequireDefault(_clockSimple);
 
-var _systemClock = __webpack_require__(44);
+var _systemClock = __webpack_require__(43);
 
 var _systemClock2 = _interopRequireDefault(_systemClock);
 
-var _countdown = __webpack_require__(46);
+var _countdown = __webpack_require__(45);
 
 var _countdown2 = _interopRequireDefault(_countdown);
 
-var _stopwatch = __webpack_require__(47);
+var _stopwatch = __webpack_require__(46);
 
 var _stopwatch2 = _interopRequireDefault(_stopwatch);
 
@@ -6294,7 +6266,7 @@ define('basic-clock', _basicClock2.default);
 // }
 
 /***/ }),
-/* 32 */
+/* 31 */
 /***/ (function(module, exports) {
 
 (function(){
@@ -6337,7 +6309,7 @@ define('basic-clock', _basicClock2.default);
 
 
 /***/ }),
-/* 33 */
+/* 32 */
 /***/ (function(module, exports) {
 
 /* eslint-disable */
@@ -6361,7 +6333,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 /* eslint-enable */
 
 /***/ }),
-/* 34 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6455,7 +6427,7 @@ var MyElement = function (_HTMLElement) {
 exports.default = MyElement;
 
 /***/ }),
-/* 35 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6636,7 +6608,7 @@ var DragArea = function (_HTMLElement) {
 exports.default = DragArea;
 
 /***/ }),
-/* 36 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6648,7 +6620,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-__webpack_require__(37);
+__webpack_require__(36);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -6840,11 +6812,11 @@ var Telestrator = function (_HTMLElement) {
 exports.default = Telestrator;
 
 /***/ }),
-/* 37 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
-var content = __webpack_require__(38);
+var content = __webpack_require__(37);
 
 if(typeof content === 'string') content = [[module.i, content, '']];
 
@@ -6858,7 +6830,7 @@ var options = {"hmr":true}
 options.transform = transform
 options.insertInto = undefined;
 
-var update = __webpack_require__(40)(content, options);
+var update = __webpack_require__(39)(content, options);
 
 if(content.locals) module.exports = content.locals;
 
@@ -6890,10 +6862,10 @@ if(false) {
 }
 
 /***/ }),
-/* 38 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(39)(false);
+exports = module.exports = __webpack_require__(38)(false);
 // imports
 
 
@@ -6904,7 +6876,7 @@ exports.push([module.i, "telestrator-element #telestrator-canvas {\n  position: 
 
 
 /***/ }),
-/* 39 */
+/* 38 */
 /***/ (function(module, exports) {
 
 /*
@@ -6986,7 +6958,7 @@ function toComment(sourceMap) {
 
 
 /***/ }),
-/* 40 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -7052,7 +7024,7 @@ var singleton = null;
 var	singletonCounter = 0;
 var	stylesInsertedAtTop = [];
 
-var	fixUrls = __webpack_require__(41);
+var	fixUrls = __webpack_require__(40);
 
 module.exports = function(list, options) {
 	if (typeof DEBUG !== "undefined" && DEBUG) {
@@ -7368,7 +7340,7 @@ function updateLink (link, options, obj) {
 
 
 /***/ }),
-/* 41 */
+/* 40 */
 /***/ (function(module, exports) {
 
 
@@ -7463,7 +7435,7 @@ module.exports = function (css) {
 
 
 /***/ }),
-/* 42 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7481,7 +7453,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var work = __webpack_require__(43);
+var work = __webpack_require__(42);
 
 function createWorker() {
     var blobURL = URL.createObjectURL(new Blob(['(', work.toString(), ')()'], { type: 'application/javascript' }));
@@ -7700,7 +7672,7 @@ var Clock = function (_HTMLElement) {
 exports.default = Clock;
 
 /***/ }),
-/* 43 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7763,7 +7735,7 @@ function worker() {
 module.exports = worker;
 
 /***/ }),
-/* 44 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7836,7 +7808,7 @@ var Countdown = function (_BasicClock) {
 exports.default = Countdown;
 
 /***/ }),
-/* 45 */
+/* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7920,7 +7892,7 @@ var Interval = function () {
 module.exports = Interval;
 
 /***/ }),
-/* 46 */
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7983,7 +7955,7 @@ var Countdown = function (_BasicClock) {
 exports.default = Countdown;
 
 /***/ }),
-/* 47 */
+/* 46 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8101,7 +8073,7 @@ var Stopwatch = function (_BasicClock) {
 exports.default = Stopwatch;
 
 /***/ }),
-/* 48 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8187,7 +8159,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 49 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8214,7 +8186,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 50 */
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8235,7 +8207,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 51 */
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8265,6 +8237,56 @@ function get(url, callback) {
 
 module.exports = {
     get: get
+
+};
+
+/***/ }),
+/* 51 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = {
+
+    createXPathFromElement: function createXPathFromElement(elm) {
+        var allNodes = document.getElementsByTagName('*');
+        var segs = void 0,
+            sib = void 0,
+            i = void 0;
+        for (segs = []; elm && elm.nodeType == 1; elm = elm.parentNode) {
+            if (elm.hasAttribute('id')) {
+                var uniqueIdCount = 0;
+                for (var n = 0; n < allNodes.length; n++) {
+                    if (allNodes[n].hasAttribute('id') && allNodes[n].id == elm.id) uniqueIdCount++;
+                    if (uniqueIdCount > 1) break;
+                }
+                if (uniqueIdCount == 1) {
+                    segs.unshift('id("' + elm.getAttribute('id') + '")');
+                    return segs.join('/');
+                } else {
+                    segs.unshift(elm.localName.toLowerCase() + '[@id="' + elm.getAttribute('id') + '"]');
+                }
+            } else if (elm.hasAttribute('class')) {
+                segs.unshift(elm.localName.toLowerCase() + '[@class="' + elm.getAttribute('class') + '"]');
+            } else {
+                for (i = 1, sib = elm.previousSibling; sib; sib = sib.previousSibling) {
+                    if (sib.localName == elm.localName) i++;
+                }
+                segs.unshift(elm.localName.toLowerCase() + '[' + i + ']');
+            }
+        }
+        return segs.length ? '/' + segs.join('/') : null;
+    },
+
+    lookupElementByXPath: function lookupElementByXPath(path) {
+        var evaluator = new XPathEvaluator();
+        var result = evaluator.evaluate(path, document.documentElement, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+        return result.singleNodeValue;
+    },
+    getElementByXpath: function getElementByXpath(path) {
+        return document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+    }
 
 };
 
