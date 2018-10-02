@@ -647,107 +647,6 @@ exports.default = UIElement;
 "use strict";
 
 
-var _xpath = __webpack_require__(20);
-
-var events = ['__mouseup__', '__mousedown__', '__mousemove__', '__click__', '__touchstart__', '__touchend__', '__touchmove__'];
-
-function touchesToJson(touches) {
-    if (!touches) return touches;
-    var touchArray = [];
-
-    for (var i = 0; i < touches.length; i++) {
-        var touch = touches[i];
-        var touchData = {
-            clientX: touch.clientX,
-            clientY: touch.clientY,
-            pageX: touch.pageX,
-            pageY: touch.pageY
-        };
-        touchArray.push(touchData);
-    }
-    return touchArray;
-}
-
-function sync(e) {
-    if (e.ctrlKey && e.metaKey && e.altKey && e.shiftKey) return;
-    if (window.webrtc) {
-        var msg = {};
-        msg["__" + e.type + "__"] = {
-            pageX: e.pageX,
-            pageY: e.pageY,
-            clientX: e.clientX,
-            clientY: e.clientY,
-            target: (0, _xpath.createXPathFromElement)(e.target),
-            touches: touchesToJson(e.touches),
-            targetTouches: touchesToJson(e.targetTouches),
-            changedTouches: touchesToJson(e.changedTouches)
-        };
-
-        window.webrtc.send(msg);
-    }
-}
-
-function bindSyncEvents(element) {
-    events.forEach(function (event) {
-        event = event.replace(/__/g, '');
-        element.addEventListener(event, sync, false);
-    });
-}
-
-function dispatchEvent(event, data) {
-    var target = (0, _xpath.lookupElementByXPath)(data.target);
-    data.bubbles = true;
-    data.cancelable = true;
-    data.ctrlKey = data.metaKey = data.altKey = data.shiftKey = true; //Distinct the event to avoid looping
-    // data.detail = {"test" : true};
-
-    if (target) {
-        if (['__touchstart__', '__touchend__', '__touchmove__'].indexOf(event) > -1) {
-            target.dispatchEvent(new TouchEvent(event.slice(2, -2), handleTouchEvent(data, target)));
-        } else {
-            target.dispatchEvent(new MouseEvent(event.slice(2, -2), data));
-        }
-    }
-}
-
-function handleTouchEvent(data, target) {
-    data.changedTouches = createTouchArray(data.changedTouches, target);
-    data.targetTouches = createTouchArray(data.targetTouches, target);
-    data.touches = createTouchArray(data.touches, target);
-    return data;
-}
-
-function createTouchArray(touches, target) {
-    return touches.map(function (touch) {
-        touch.identifier = Date.now();
-        touch.target = target;
-        return new Touch(touch);
-    });
-}
-
-function isInteractionEvent(event) {
-    return events.indexOf(event) > -1;
-}
-
-window.addEventListener('load', function () {
-    bindSyncEvents(document);
-});
-
-module.exports = {
-    "sync": sync,
-    "events": events,
-    "bindSyncEvents": bindSyncEvents,
-    "isInteractionEvent": isInteractionEvent,
-    "dispatchEvent": dispatchEvent
-};
-
-/***/ }),
-/* 6 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
@@ -878,7 +777,7 @@ var BasicClock = function (_HTMLElement) {
 exports.default = BasicClock;
 
 /***/ }),
-/* 7 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -892,6 +791,107 @@ module.exports = {
         RADIO: 'radio',
         RANGE: 'range'
     }
+};
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _xpath = __webpack_require__(20);
+
+var events = ['__mouseup__', '__mousedown__', '__mousemove__', '__click__', '__touchstart__', '__touchend__', '__touchmove__'];
+
+function touchesToJson(touches) {
+    if (!touches) return touches;
+    var touchArray = [];
+
+    for (var i = 0; i < touches.length; i++) {
+        var touch = touches[i];
+        var touchData = {
+            clientX: touch.clientX,
+            clientY: touch.clientY,
+            pageX: touch.pageX,
+            pageY: touch.pageY
+        };
+        touchArray.push(touchData);
+    }
+    return touchArray;
+}
+
+function sync(e) {
+    if (e.ctrlKey && e.metaKey && e.altKey && e.shiftKey) return;
+    if (window.webrtc) {
+        var msg = {};
+        msg["__" + e.type + "__"] = {
+            pageX: e.pageX,
+            pageY: e.pageY,
+            clientX: e.clientX,
+            clientY: e.clientY,
+            target: (0, _xpath.createXPathFromElement)(e.target),
+            touches: touchesToJson(e.touches),
+            targetTouches: touchesToJson(e.targetTouches),
+            changedTouches: touchesToJson(e.changedTouches)
+        };
+
+        window.webrtc.send(msg);
+    }
+}
+
+function bindSyncEvents(element) {
+    events.forEach(function (event) {
+        event = event.replace(/__/g, '');
+        element.addEventListener(event, sync, false);
+    });
+}
+
+function dispatchEvent(event, data) {
+    var target = (0, _xpath.lookupElementByXPath)(data.target);
+    data.bubbles = true;
+    data.cancelable = true;
+    data.ctrlKey = data.metaKey = data.altKey = data.shiftKey = true; //Distinct the event to avoid looping
+    // data.detail = {"test" : true};
+
+    if (target) {
+        if (['__touchstart__', '__touchend__', '__touchmove__'].indexOf(event) > -1) {
+            target.dispatchEvent(new TouchEvent(event.slice(2, -2), handleTouchEvent(data, target)));
+        } else {
+            target.dispatchEvent(new MouseEvent(event.slice(2, -2), data));
+        }
+    }
+}
+
+function handleTouchEvent(data, target) {
+    data.changedTouches = createTouchArray(data.changedTouches, target);
+    data.targetTouches = createTouchArray(data.targetTouches, target);
+    data.touches = createTouchArray(data.touches, target);
+    return data;
+}
+
+function createTouchArray(touches, target) {
+    return touches.map(function (touch) {
+        touch.identifier = Date.now();
+        touch.target = target;
+        return new Touch(touch);
+    });
+}
+
+function isInteractionEvent(event) {
+    return events.indexOf(event) > -1;
+}
+
+window.addEventListener('load', function () {
+    bindSyncEvents(document);
+});
+
+module.exports = {
+    "sync": sync,
+    "events": events,
+    "bindSyncEvents": bindSyncEvents,
+    "isInteractionEvent": isInteractionEvent,
+    "dispatchEvent": dispatchEvent
 };
 
 /***/ }),
@@ -932,11 +932,11 @@ var _helpers = __webpack_require__(0);
 
 var _vffData = __webpack_require__(2);
 
-var _consts = __webpack_require__(7);
+var _consts = __webpack_require__(6);
 
 var _events = __webpack_require__(1);
 
-var _interactionEvents = __webpack_require__(5);
+var _interactionEvents = __webpack_require__(7);
 
 function update(data) {
 
@@ -1040,7 +1040,7 @@ var _http = __webpack_require__(51);
 
 var httpApi = _interopRequireWildcard(_http);
 
-var _interactionEvents = __webpack_require__(5);
+var _interactionEvents = __webpack_require__(7);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
@@ -1136,7 +1136,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _events = __webpack_require__(1);
 
-var _consts = __webpack_require__(7);
+var _consts = __webpack_require__(6);
 
 var _helpers = __webpack_require__(0);
 
@@ -2187,7 +2187,7 @@ var WebRTC = function () {
             });
 
             self.webrtc.on('createdPeer', function (peer) {
-                // console.log('WebRTC - Peer Created');
+                window.console.log('WebRTC - Peer Created');
                 self.options.onCreatedPeer(peer);
             });
 
@@ -5976,9 +5976,9 @@ var _helpers = __webpack_require__(0);
 
 var _vffData = __webpack_require__(2);
 
-var _consts = __webpack_require__(7);
+var _consts = __webpack_require__(6);
 
-var _interactionEvents = __webpack_require__(5);
+var _interactionEvents = __webpack_require__(7);
 
 function initDOM() {
     var untitledTemplateCount = 0;
@@ -6290,7 +6290,7 @@ var _stopwatch = __webpack_require__(47);
 
 var _stopwatch2 = _interopRequireDefault(_stopwatch);
 
-var _basicClock = __webpack_require__(6);
+var _basicClock = __webpack_require__(5);
 
 var _basicClock2 = _interopRequireDefault(_basicClock);
 
@@ -7797,7 +7797,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-var _basicClock = __webpack_require__(6);
+var _basicClock = __webpack_require__(5);
 
 var _basicClock2 = _interopRequireDefault(_basicClock);
 
@@ -7954,7 +7954,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-var _basicClock = __webpack_require__(6);
+var _basicClock = __webpack_require__(5);
 
 var _basicClock2 = _interopRequireDefault(_basicClock);
 
@@ -8017,7 +8017,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-var _basicClock = __webpack_require__(6);
+var _basicClock = __webpack_require__(5);
 
 var _basicClock2 = _interopRequireDefault(_basicClock);
 
