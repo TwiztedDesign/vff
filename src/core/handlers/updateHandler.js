@@ -2,9 +2,10 @@ import {setByPath, defer} from '../../utils/helpers.js';
 import {vffData} from '../vffData.js';
 import {EXPOSE_DELIMITER} from '../consts';
 import {VFF_EVENT} from '../../utils/events';
+import {isInteractionEvent, dispatchEvent} from '../interactionEvents';
 
 function update(data){
-
+    
     let promises = [];
     for(let templateName in data){
         let template = vffData.getTemplate(templateName);
@@ -19,6 +20,8 @@ function update(data){
                 deferred.resolve();
             });
             promises.push(deferred.promise);
+        } else if(isInteractionEvent(templateName)){
+            dispatchEvent(templateName, data[templateName]);
         }
     }
 
@@ -45,6 +48,6 @@ module.exports = {
 
     let $body = angular.element(document.body);
     let $rootScope =  $body.injector().get('$rootScope');
-    $rootScope.$appy();
+    $rootScope.$apply();
 
  ************************/

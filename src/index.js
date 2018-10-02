@@ -6,12 +6,12 @@ import {init as initVffDom} from './core/initDOM';
 import vffElement from './core/vffElement';
 import './core/defaultExpose';
 import "./components/components.js";
-import {isMobile, isController, mode, extend, defer} from './utils/helpers';
+import {isMobile, isController, mode, extend, defer, uuid} from './utils/helpers';
 import * as eventsApi from './core/api/events';
 import * as playerApi from './core/api/player';
 import * as visibilityApi from './core/api/visibility';
 import * as httpApi from './core/api/http';
-require('./core/interactionEvents');
+import {bindSyncEvents} from './core/interactionEvents';
 
 startListener();
 initVffDom();
@@ -41,10 +41,16 @@ vff.mode                = mode;
 vff.defer               = defer;
 vff.extend              = (name, extension) => { vff[name] = extension; };
 vff.define              = (name, element) => { customElements.define(name, element); };
+vff.uuid                = uuid();
+vff.sync                = (element) => { bindSyncEvents(element); };
 
 extend(vff, playerApi);
 extend(vff, visibilityApi);
 extend(vff, eventsApi);
+
+
+
+
 vff.extend('http', httpApi);
 
 

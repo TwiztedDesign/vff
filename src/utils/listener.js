@@ -8,7 +8,8 @@ function messageHandler(message){
         let type = messageData.type;
         let handler = handlers[type];
         if(messageData.cid && message.source && message.source.postMessage){
-            message.source.postMessage(JSON.stringify({type : ACK, cid: messageData.cid}),'*');
+            var msg = {type : ACK, cid: messageData.cid};
+            message.source.postMessage(JSON.stringify(msg),'*');
         }
         if(handler){
             handler(messageData.payload);

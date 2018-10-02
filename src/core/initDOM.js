@@ -1,6 +1,7 @@
 import {getByPath, setByPath, deepExtend} from '../utils/helpers';
 import {vffData} from './vffData';
 import {EXPOSE_DELIMITER} from './consts';
+import {bindSyncEvents} from './interactionEvents';
 
 function initDOM(){
     let untitledTemplateCount = 0;
@@ -68,6 +69,7 @@ function initDOM(){
     for (let template in templates) {
         vffData.registerTemplate(template, templates[template].data, templates[template].options);
     }
+    initSync();
 }
 
 function closest(element, selector){
@@ -79,6 +81,13 @@ function closest(element, selector){
         element = element.parentElement;
     }
 
+}
+
+function initSync(){
+    let elements = document.querySelectorAll('[vff-sync]');
+    elements.forEach((element) => {
+        bindSyncEvents(element);
+    });
 }
 
 

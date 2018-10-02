@@ -1,6 +1,7 @@
-import {send} from '../utils/messenger';
-import {TOUCH, MOUSE_MOVE, BUBBLE_UP} from '../utils/events';
+import {createXPathFromElement, lookupElementByXPath} from '../utils/xpath';
 
+
+const events = ['__mouseup__', '__mousedown__', '__mousemove__', '__click__', '__touchstart__', '__touchend__', '__touchmove__'];
 
 function touchesToJson(touches){
     if(!touches) return touches;
@@ -18,61 +19,57 @@ function touchesToJson(touches){
     return touchArray;
 }
 
-function bubbleUpMouseEvent(e){
-    send(BUBBLE_UP,{
-        event : e.type,
-        data  : {
-            pageX : e.pageX,
-            pageY : e.pageY,
-            clientX : e.clientX,
-            clientY : e.clientY,
-            touches : touchesToJson(e.touches),
-            targetTouches : touchesToJson(e.targetTouches),
-            changedTouches : touchesToJson(e.changedTouches)
-        }
-    });
-}
+function sync(e){
+    if(e.ctrlKey && e.metaKey && e.altKey && e.shiftKey) return;
+    if(window.webrtc) {
+        let msg = {};
+        msg["__" + e.type + "__"] = {
+            pageX: e.pageX,
+            pageY: e.pageY,
+            clientX: e.clientX,
+            clientY: e.clientY,
+            target: createXPathFromElement(e.target),
+            touches: touchesToJson(e.touches),
+            targetTouches: touchesToJson(e.targetTouches),
+            changedTouches: touchesToJson(e.changedTouches)
+        };
 
-
-function onTouchStart(e){
-    send(TOUCH, e.target.tagName);
-}
-
-
-let lastMouseMoveTime = 0;
-function onMouseMove(e){
-    send(BUBBLE_UP,{
-        event : 'mousemove',
-        data  : {
-            pageX : e.pageX,
-            pageY : e.pageY,
-            clientX : e.clientX,
-            clientY : e.clientY,
-        }
-    });
-    let mouseMoveTime = Date.now();
-    if(mouseMoveTime - lastMouseMoveTime < 100) {
-        send(MOUSE_MOVE);
+        window.webrtc.send(msg);
     }
-    lastMouseMoveTime = mouseMoveTime;
 }
 
+function bindSyncEvents(element){
+    events.forEach((event) => {
+        event = event.replace(/__/g, '');
+        element.addEventListener(event, sync, false);
+    });
+}
 
+function dispatchEvent(event, data){
+    let target = lookupElementByXPath(data.target);
+    data.bubbles = true;
+    data.cancelable = true;
+    data.ctrlKey = data.metaKey = data.altKey = data.shiftKey = true; //Distinct the event to avoid looping
+    // data.detail = {"test" : true};
+
+    if(target){
+        target.dispatchEvent(new MouseEvent(event.slice(2, -2), data));
+    }
+}
+
+function isInteractionEvent(event){
+    return events.indexOf(event) > -1;
+}
 
 window.addEventListener('load', () => {
-
-
-    document.body.addEventListener('touchstart', onTouchStart);
-    document.body.addEventListener('mousemove', onMouseMove);
-
-
-    document.body.addEventListener('touchstart', bubbleUpMouseEvent);
-    document.body.addEventListener('touchend', bubbleUpMouseEvent);
-    document.body.addEventListener('touchmove', bubbleUpMouseEvent);
-
-    document.body.addEventListener('mousemove', bubbleUpMouseEvent);
-    document.body.addEventListener("mousedown", bubbleUpMouseEvent);
-    document.body.addEventListener("mouseup", bubbleUpMouseEvent);
-
-
+    bindSyncEvents(document);
 });
+
+
+module.exports = {
+    "sync" : sync,
+    "events" : events,
+    "bindSyncEvents" : bindSyncEvents,
+    "isInteractionEvent" : isInteractionEvent,
+    "dispatchEvent" : dispatchEvent
+};
