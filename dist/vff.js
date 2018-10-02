@@ -810,12 +810,13 @@ function touchesToJson(touches) {
 
     for (var i = 0; i < touches.length; i++) {
         var touch = touches[i];
-        touchArray.push({
+        var touchData = {
             clientX: touch.clientX,
             clientY: touch.clientY,
             pageX: touch.pageX,
             pageY: touch.pageY
-        });
+        };
+        touchArray.push(window.Touch ? new Touch(touchData) : touchData);
     }
     return touchArray;
 }

@@ -7,14 +7,15 @@ function touchesToJson(touches){
     if(!touches) return touches;
     var touchArray = [];
 
-    for (var i = 0; i < touches.length; i++) {
-        var touch = touches[i];
-        touchArray.push({
+    for (let i = 0; i < touches.length; i++) {
+        let touch = touches[i];
+        let touchData = {
             clientX : touch.clientX,
             clientY : touch.clientY,
             pageX   : touch.pageX,
             pageY   : touch.pageY
-        });
+        };
+        touchArray.push(window.Touch? new Touch(touchData) : touchData);
     }
     return touchArray;
 }
