@@ -2061,7 +2061,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function handleVFData(data) {
     if (data.settings.sync && !window.webrtc) {
         // window.webrtc.close();
-        window.webrtc = new _webrtc2.default('vff', 'sync', {
+        window.webrtc = new _webrtc2.default(data.token, 'sync', {
             onMessage: function onMessage(message) {
                 (0, _updateHandler.update)(message);
             }
