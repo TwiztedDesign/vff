@@ -1,7 +1,7 @@
-import {createXPathFromElement} from '../utils/xpath';
+import {createXPathFromElement, lookupElementByXPath} from '../utils/xpath';
 
 
-const events = ['mouseup', 'mousedown', 'mousemove', 'click', 'touchstart', 'touchend', 'touchmove'];
+const events = ['__mouseup__', '__mousedown__', '__mousemove__', '__click__', '__touchstart__', '__touchend__', '__touchmove__'];
 
 function touchesToJson(touches){
     if(!touches) return touches;
@@ -23,7 +23,7 @@ function sync(e){
     if(e.ctrlKey && e.metaKey && e.altKey && e.shiftKey) return;
     if(window.webrtc) {
         let msg = {};
-        msg[e.type] = {
+        msg["__" + e.type + "__"] = {
             pageX: e.pageX,
             pageY: e.pageY,
             clientX: e.clientX,
@@ -40,8 +40,21 @@ function sync(e){
 
 function bindSyncEvents(element){
     events.forEach((event) => {
+        event = event.replace(/__/g, '');
         element.addEventListener(event, sync, false);
     });
+}
+
+function dispatchEvent(event, data){
+    let target = lookupElementByXPath(data.target);
+    data.bubbles = true;
+    data.cancelable = true;
+    data.ctrlKey = data.metaKey = data.altKey = data.shiftKey = true; //Distinct the event to avoid looping
+    // data.detail = {"test" : true};
+
+    if(target){
+        target.dispatchEvent(new MouseEvent(event.slice(2, -2), data));
+    }
 }
 
 function isInteractionEvent(event){
@@ -57,5 +70,6 @@ module.exports = {
     "sync" : sync,
     "events" : events,
     "bindSyncEvents" : bindSyncEvents,
-    "isInteractionEvent" : isInteractionEvent
+    "isInteractionEvent" : isInteractionEvent,
+    "dispatchEvent" : dispatchEvent
 };

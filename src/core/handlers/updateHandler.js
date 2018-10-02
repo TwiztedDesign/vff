@@ -2,8 +2,7 @@ import {setByPath, defer} from '../../utils/helpers.js';
 import {vffData} from '../vffData.js';
 import {EXPOSE_DELIMITER} from '../consts';
 import {VFF_EVENT} from '../../utils/events';
-import {lookupElementByXPath} from '../../utils/xpath';
-import {isInteractionEvent} from '../interactionEvents';
+import {isInteractionEvent, dispatchEvent} from '../interactionEvents';
 
 function update(data){
     
@@ -22,24 +21,12 @@ function update(data){
             });
             promises.push(deferred.promise);
         } else if(isInteractionEvent(templateName)){
-            updateInteraction(templateName, data[templateName]);
+            dispatchEvent(templateName, data[templateName]);
         }
     }
 
     document.dispatchEvent(new CustomEvent(VFF_EVENT, { detail: data }));
     return Promise.all(promises);
-}
-
-function updateInteraction(event, data){
-
-    let target = lookupElementByXPath(data.target);
-    data.bubbles = true;
-    data.cancelable = true;
-    data.ctrlKey = data.metaKey = data.altKey = data.shiftKey = true; //Distinct the event to avoid looping
-
-    if(target){
-        target.dispatchEvent(new MouseEvent(event, data));
-    }
 }
 
 function updateDom(template, control, value, timecode){

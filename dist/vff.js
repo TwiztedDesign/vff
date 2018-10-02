@@ -802,7 +802,7 @@ module.exports = {
 
 var _xpath = __webpack_require__(10);
 
-var events = ['mouseup', 'mousedown', 'mousemove', 'click', 'touchstart', 'touchend', 'touchmove'];
+var events = ['__mouseup__', '__mousedown__', '__mousemove__', '__click__', '__touchstart__', '__touchend__', '__touchmove__'];
 
 function touchesToJson(touches) {
     if (!touches) return touches;
@@ -824,7 +824,7 @@ function sync(e) {
     if (e.ctrlKey && e.metaKey && e.altKey && e.shiftKey) return;
     if (window.webrtc) {
         var msg = {};
-        msg[e.type] = {
+        msg["__" + e.type + "__"] = {
             pageX: e.pageX,
             pageY: e.pageY,
             clientX: e.clientX,
@@ -841,8 +841,21 @@ function sync(e) {
 
 function bindSyncEvents(element) {
     events.forEach(function (event) {
+        event = event.replace(/__/g, '');
         element.addEventListener(event, sync, false);
     });
+}
+
+function dispatchEvent(event, data) {
+    var target = (0, _xpath.lookupElementByXPath)(data.target);
+    data.bubbles = true;
+    data.cancelable = true;
+    data.ctrlKey = data.metaKey = data.altKey = data.shiftKey = true; //Distinct the event to avoid looping
+    // data.detail = {"test" : true};
+
+    if (target) {
+        target.dispatchEvent(new MouseEvent(event.slice(2, -2), data));
+    }
 }
 
 function isInteractionEvent(event) {
@@ -857,7 +870,8 @@ module.exports = {
     "sync": sync,
     "events": events,
     "bindSyncEvents": bindSyncEvents,
-    "isInteractionEvent": isInteractionEvent
+    "isInteractionEvent": isInteractionEvent,
+    "dispatchEvent": dispatchEvent
 };
 
 /***/ }),
@@ -902,8 +916,6 @@ var _consts = __webpack_require__(6);
 
 var _events = __webpack_require__(1);
 
-var _xpath = __webpack_require__(10);
-
 var _interactionEvents = __webpack_require__(7);
 
 function update(data) {
@@ -924,7 +936,7 @@ function update(data) {
             });
             promises.push(deferred.promise);
         } else if ((0, _interactionEvents.isInteractionEvent)(templateName)) {
-            updateInteraction(templateName, data[templateName]);
+            (0, _interactionEvents.dispatchEvent)(templateName, data[templateName]);
         }
     };
 
@@ -934,18 +946,6 @@ function update(data) {
 
     document.dispatchEvent(new CustomEvent(_events.VFF_EVENT, { detail: data }));
     return Promise.all(promises);
-}
-
-function updateInteraction(event, data) {
-
-    var target = (0, _xpath.lookupElementByXPath)(data.target);
-    data.bubbles = true;
-    data.cancelable = true;
-    data.ctrlKey = data.metaKey = data.altKey = data.shiftKey = true; //Distinct the event to avoid looping
-
-    if (target) {
-        target.dispatchEvent(new MouseEvent(event, data));
-    }
 }
 
 function updateDom(template, control, value, timecode) {
