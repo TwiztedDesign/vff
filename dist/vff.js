@@ -70,7 +70,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 11);
+/******/ 	return __webpack_require__(__webpack_require__.s = 10);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -416,9 +416,9 @@ var _helpers = __webpack_require__(0);
 
 var _messenger = __webpack_require__(3);
 
-var _docRefs = __webpack_require__(12);
+var _docRefs = __webpack_require__(11);
 
-var _vffTemplate = __webpack_require__(13);
+var _vffTemplate = __webpack_require__(12);
 
 var _vffTemplate2 = _interopRequireDefault(_vffTemplate);
 
@@ -800,7 +800,7 @@ module.exports = {
 "use strict";
 
 
-var _xpath = __webpack_require__(10);
+var _xpath = __webpack_require__(20);
 
 var events = ['__mouseup__', '__mousedown__', '__mousemove__', '__click__', '__touchstart__', '__touchend__', '__touchmove__'];
 
@@ -977,63 +977,13 @@ module.exports = {
 "use strict";
 
 
-module.exports = {
-
-    createXPathFromElement: function createXPathFromElement(elm) {
-        var allNodes = document.getElementsByTagName('*');
-        var segs = void 0,
-            sib = void 0,
-            i = void 0;
-        for (segs = []; elm && elm.nodeType == 1; elm = elm.parentNode) {
-            if (elm.hasAttribute('id')) {
-                var uniqueIdCount = 0;
-                for (var n = 0; n < allNodes.length; n++) {
-                    if (allNodes[n].hasAttribute('id') && allNodes[n].id == elm.id) uniqueIdCount++;
-                    if (uniqueIdCount > 1) break;
-                }
-                if (uniqueIdCount == 1) {
-                    segs.unshift('id("' + elm.getAttribute('id') + '")');
-                    return segs.join('/');
-                } else {
-                    segs.unshift(elm.localName.toLowerCase() + '[@id="' + elm.getAttribute('id') + '"]');
-                }
-            } else if (elm.hasAttribute('class')) {
-                segs.unshift(elm.localName.toLowerCase() + '[@class="' + elm.getAttribute('class') + '"]');
-            } else {
-                for (i = 1, sib = elm.previousSibling; sib; sib = sib.previousSibling) {
-                    if (sib.localName == elm.localName) i++;
-                }
-                segs.unshift(elm.localName.toLowerCase() + '[' + i + ']');
-            }
-        }
-        return segs.length ? '/' + segs.join('/') : null;
-    },
-
-    lookupElementByXPath: function lookupElementByXPath(path) {
-        var evaluator = new XPathEvaluator();
-        var result = evaluator.evaluate(path, document.documentElement, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
-        return result.singleNodeValue;
-    },
-    getElementByXpath: function getElementByXpath(path) {
-        return document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-    }
-
-};
-
-/***/ }),
-/* 11 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
 var _messenger = __webpack_require__(3);
 
 var _events = __webpack_require__(1);
 
 var _vffData = __webpack_require__(2);
 
-var _listener = __webpack_require__(19);
+var _listener = __webpack_require__(18);
 
 var _initDOM = __webpack_require__(27);
 
@@ -1134,7 +1084,7 @@ vff.extend('http', httpApi);
 module.exports = vff;
 
 /***/ }),
-/* 12 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1145,7 +1095,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 13 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1167,23 +1117,23 @@ var _messenger = __webpack_require__(3);
 
 var _vffData = __webpack_require__(2);
 
-var _superProxy = __webpack_require__(14);
+var _superProxy = __webpack_require__(13);
 
 var _superProxy2 = _interopRequireDefault(_superProxy);
 
-var _uiMultiselect = __webpack_require__(15);
+var _uiMultiselect = __webpack_require__(14);
 
 var _uiMultiselect2 = _interopRequireDefault(_uiMultiselect);
 
-var _uiDropdown = __webpack_require__(16);
+var _uiDropdown = __webpack_require__(15);
 
 var _uiDropdown2 = _interopRequireDefault(_uiDropdown);
 
-var _uiRadio = __webpack_require__(17);
+var _uiRadio = __webpack_require__(16);
 
 var _uiRadio2 = _interopRequireDefault(_uiRadio);
 
-var _uiRange = __webpack_require__(18);
+var _uiRange = __webpack_require__(17);
 
 var _uiRange2 = _interopRequireDefault(_uiRange);
 
@@ -1530,7 +1480,7 @@ function findExposed(key, values) {
 }
 
 /***/ }),
-/* 14 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1738,7 +1688,7 @@ var SuperProxy = function () {
 exports.default = SuperProxy;
 
 /***/ }),
-/* 15 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1785,7 +1735,7 @@ var UIMultiselect = function (_UIElement) {
 exports.default = UIMultiselect;
 
 /***/ }),
-/* 16 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1830,7 +1780,7 @@ var UIDropdown = function (_UIElement) {
 exports.default = UIDropdown;
 
 /***/ }),
-/* 17 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1875,7 +1825,7 @@ var UIRadio = function (_UIElement) {
 exports.default = UIRadio;
 
 /***/ }),
-/* 18 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1919,13 +1869,13 @@ var UIRange = function (_UIElement) {
 exports.default = UIRange;
 
 /***/ }),
-/* 19 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _handlers = __webpack_require__(20);
+var _handlers = __webpack_require__(19);
 
 var handlers = _interopRequireWildcard(_handlers);
 
@@ -1959,7 +1909,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 20 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1986,6 +1936,56 @@ handlers[events.RELOAD] = _reloadHandler.reload;
 handlers[events.VF_DATA] = _vfDataHandler.handleVFData;
 
 module.exports = handlers;
+
+/***/ }),
+/* 20 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = {
+
+    createXPathFromElement: function createXPathFromElement(elm) {
+        var allNodes = document.getElementsByTagName('*');
+        var segs = void 0,
+            sib = void 0,
+            i = void 0;
+        for (segs = []; elm && elm.nodeType == 1; elm = elm.parentNode) {
+            if (elm.hasAttribute('id')) {
+                var uniqueIdCount = 0;
+                for (var n = 0; n < allNodes.length; n++) {
+                    if (allNodes[n].hasAttribute('id') && allNodes[n].id == elm.id) uniqueIdCount++;
+                    if (uniqueIdCount > 1) break;
+                }
+                if (uniqueIdCount == 1) {
+                    segs.unshift('id("' + elm.getAttribute('id') + '")');
+                    return segs.join('/');
+                } else {
+                    segs.unshift(elm.localName.toLowerCase() + '[@id="' + elm.getAttribute('id') + '"]');
+                }
+            } else if (elm.hasAttribute('class')) {
+                segs.unshift(elm.localName.toLowerCase() + '[@class="' + elm.getAttribute('class') + '"]');
+            } else {
+                for (i = 1, sib = elm.previousSibling; sib; sib = sib.previousSibling) {
+                    if (sib.localName == elm.localName) i++;
+                }
+                segs.unshift(elm.localName.toLowerCase() + '[' + i + ']');
+            }
+        }
+        return segs.length ? '/' + segs.join('/') : null;
+    },
+
+    lookupElementByXPath: function lookupElementByXPath(path) {
+        var evaluator = new XPathEvaluator();
+        var result = evaluator.evaluate(path, document.documentElement, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+        return result.singleNodeValue;
+    },
+    getElementByXpath: function getElementByXpath(path) {
+        return document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+    }
+
+};
 
 /***/ }),
 /* 21 */
