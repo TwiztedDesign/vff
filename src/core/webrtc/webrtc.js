@@ -39,7 +39,7 @@ export default class WebRTC{
 
         self.webrtc.on('readyToCall', function () {
             // console.log('Client StrongID', self.webrtc.connection.connection.id);
-            self.webrtc.setInfo('vf'+ Math.random(), self.webrtc.connection.connection.id, ''); // Store strongId
+            self.webrtc.setInfo('vf'+ Math.random().toString().substr(2), self.webrtc.connection.connection.id, ''); // Store strongId
 
             if (self.room) {
                 self.webrtc.joinRoom(self.room);
@@ -83,9 +83,13 @@ export default class WebRTC{
 
     close(){
         try{
-            this.webrtc.leaveRoom();
-            this.webrtc.disconnect();
-        } catch(err){/**/}
+            if(this.webrtc.connection){
+                this.webrtc.leaveRoom();
+                this.webrtc.disconnect();
+            }
+        } catch(err){
+            console.log(err);
+        }
     }
 
     send(data){

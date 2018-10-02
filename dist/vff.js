@@ -1934,12 +1934,14 @@ var _webrtc2 = _interopRequireDefault(_webrtc);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function handleVFData() /*data*/{
-    if (window.webrtc) window.webrtc.close();
-    window.webrtc = new _webrtc2.default('vff', 'sync', {
-        onMessage: function onMessage(message) {
-            (0, _updateHandler.update)(message);
-        }
-    });
+    if (!window.webrtc) {
+        // window.webrtc.close();
+        window.webrtc = new _webrtc2.default('vff', 'sync', {
+            onMessage: function onMessage(message) {
+                (0, _updateHandler.update)(message);
+            }
+        });
+    }
 }
 
 module.exports = {
@@ -2005,7 +2007,7 @@ var WebRTC = function () {
 
             self.webrtc.on('readyToCall', function () {
                 // console.log('Client StrongID', self.webrtc.connection.connection.id);
-                self.webrtc.setInfo('vf' + Math.random(), self.webrtc.connection.connection.id, ''); // Store strongId
+                self.webrtc.setInfo('vf' + Math.random().toString().substr(2), self.webrtc.connection.connection.id, ''); // Store strongId
 
                 if (self.room) {
                     self.webrtc.joinRoom(self.room);
@@ -2050,9 +2052,13 @@ var WebRTC = function () {
         key: 'close',
         value: function close() {
             try {
-                this.webrtc.leaveRoom();
-                this.webrtc.disconnect();
-            } catch (err) {/**/}
+                if (this.webrtc.connection) {
+                    this.webrtc.leaveRoom();
+                    this.webrtc.disconnect();
+                }
+            } catch (err) {
+                console.log(err);
+            }
         }
     }, {
         key: 'send',
