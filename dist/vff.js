@@ -854,7 +854,11 @@ function dispatchEvent(event, data) {
     // data.detail = {"test" : true};
 
     if (target) {
-        target.dispatchEvent(new MouseEvent(event.slice(2, -2), data));
+        if (['__touchstart__', '__touchend__', '__touchmove__'].indexOf(event) > -1) {
+            target.dispatchEvent(new TouchEvent(event.slice(2, -2), data));
+        } else {
+            target.dispatchEvent(new MouseEvent(event.slice(2, -2), data));
+        }
     }
 }
 
