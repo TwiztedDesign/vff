@@ -821,7 +821,8 @@ function touchesToJson(touches) {
 }
 
 function sync(e) {
-    if (window.webrtc && !e.ctrlKey) {
+    if (e.ctrlKey && e.metaKey && e.altKey && e.shiftKey) return;
+    if (window.webrtc) {
         var msg = {};
         msg[e.type] = {
             pageX: e.pageX,
@@ -940,7 +941,8 @@ function updateInteraction(event, data) {
     var target = (0, _xpath.lookupElementByXPath)(data.target);
     data.bubbles = true;
     data.cancelable = true;
-    data.ctrlKey = true;
+    data.ctrlKey = data.metaKey = data.altKey = data.shiftKey = true; //Distinct the event to avoid looping
+
     if (target) {
         target.dispatchEvent(new MouseEvent(event, data));
     }

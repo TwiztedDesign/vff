@@ -35,7 +35,8 @@ function updateInteraction(event, data){
     let target = lookupElementByXPath(data.target);
     data.bubbles = true;
     data.cancelable = true;
-    data.ctrlKey = true;
+    data.ctrlKey = data.metaKey = data.altKey = data.shiftKey = true; //Distinct the event to avoid looping
+
     if(target){
         target.dispatchEvent(new MouseEvent(event, data));
     }

@@ -20,7 +20,8 @@ function touchesToJson(touches){
 }
 
 function sync(e){
-    if(window.webrtc && !e.ctrlKey) {
+    if(e.ctrlKey && e.metaKey && e.altKey && e.shiftKey) return;
+    if(window.webrtc) {
         let msg = {};
         msg[e.type] = {
             pageX: e.pageX,
