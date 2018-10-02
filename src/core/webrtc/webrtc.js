@@ -74,7 +74,7 @@ export default class WebRTC{
         });
 
         self.webrtc.on('createdPeer', function (peer) {
-            window.console.log('WebRTC - Peer Created');
+            // window.console.log('WebRTC - Peer Created');
             self.options.onCreatedPeer(peer);
         });
 
