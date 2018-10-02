@@ -2,6 +2,7 @@ const SimpleWebRTC = require('./simplewebrtc.bundle');
 const noop = () => {};
 const defaults = {
     signalingServer : "https://rtc.videoflow.io",
+    maxParticipants : 5,
     onVideoAdded    : noop,
     onVideoRemoved  : noop,
     onMessage       : noop,
@@ -42,7 +43,12 @@ export default class WebRTC{
             self.webrtc.setInfo('vf'+ Math.random().toString().substr(2), self.webrtc.connection.connection.id, ''); // Store strongId
 
             if (self.room) {
-                self.webrtc.joinRoom(self.room);
+                self.webrtc.joinRoom(self.room, function(err, room){
+                    let participants = Object.keys(room.clients);
+                    if(participants.length + 1 > self.options.maxParticipants){
+                        self.close();
+                    }
+                });
                 // self.webrtc.createRoom(self.room, function(){
                 //     self.webrtc.joinRoom(self.room);
                 // });
@@ -87,9 +93,7 @@ export default class WebRTC{
                 this.webrtc.leaveRoom();
                 this.webrtc.disconnect();
             }
-        } catch(err){
-            console.log(err);
-        }
+        } catch(err){/**/}
     }
 
     send(data){
