@@ -422,6 +422,36 @@ template.$before((data, next) => {
 });
 ```
   
+# Sync
+Videoflow allows syncing between projects with the same overlay.
+To turn on project sync, first go to the **Advanced** tab under project settings and turn on the **Project Sync** option.
+Once the sync is turned on, all mouse and touch events will be synced between overlays.
+
+**Note:** if an element has **stopPropagation** on one of the mouse or touch events, it wont bubble up and wont be synced.
+To overcome this issue, VFF offer the **vff-sync** attribute and **vff.sync(element)** function.
+
+## vff-sync and vff.sync(element)
+If an element stops any mouse or touch events from propagating, i.e:
+```html
+<input id="button" type="button" onclick="doSomething()" value="GO" />
+```
+```javascript
+function doSomething(){
+    event.stopPropagation();
+    //do something...
+}
+```
+A click on the button shown in the example above won't sync due to the mouse event not being propagated up the element tree.
+To solve this, use ether **vff-sync** attribute
+```html
+<input id="button" type="button" vff-sync onclick="doSomething()" value="GO" />
+```
+or the **vff.sync(element) function**
+```javascript
+let button = document.querySelector('#button');
+vff.sync(button);
+```   
+  
 # Globals
 
 ## isMobile
