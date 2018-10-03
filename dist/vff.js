@@ -843,7 +843,7 @@ function sync(e) {
 function bindSyncEvents(element) {
     events.forEach(function (event) {
         event = event.replace(/__/g, '');
-        element.addEventListener(event, sync, false);
+        element.addEventListener(event, sync, true);
     });
 }
 
