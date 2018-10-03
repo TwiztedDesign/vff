@@ -802,7 +802,7 @@ module.exports = {
 
 var _xpath = __webpack_require__(20);
 
-var events = ['__mouseup__', '__mousedown__', '__mousemove__', '__click__', '__touchstart__', '__touchend__', '__touchmove__'];
+var events = ['__mouseup__', '__mousedown__', '__mousemove__', '__mouseover__', '__mouseout__', '__mouseenter__', '__mouseleave__', '__click__', '__dblclick__', '__touchstart__', '__touchend__', '__touchmove__', '__drag__', '__dragstart__', '__dragend__', '__dragover__', '__dragenter__', '__dragleave__', '__dragexit__', '__drop__'];
 
 function touchesToJson(touches) {
     if (!touches) return touches;
@@ -883,7 +883,7 @@ function isInteractionEvent(event) {
 }
 
 window.addEventListener('load', function () {
-    bindSyncEvents(document);
+    bindSyncEvents(window);
 });
 
 module.exports = {
