@@ -13,7 +13,7 @@ function touchesToJson(touches){
             clientX : touch.clientX,
             clientY : touch.clientY,
             pageX   : touch.pageX,
-            pageY   : touch.pageY
+            pageY   : touch.pageY,
         };
         touchArray.push(touchData);
     }
