@@ -802,7 +802,7 @@ module.exports = {
 
 var _xpath = __webpack_require__(20);
 
-var events = ['__mouseup__', '__mousedown__', '__mousemove__', '__mouseover__', '__mouseout__', '__mouseenter__', '__mouseleave__', '__click__', '__dblclick__', '__touchstart__', '__touchend__', '__touchmove__', '__drag__', '__dragstart__', '__dragend__', '__dragover__', '__dragenter__', '__dragleave__', '__dragexit__', '__drop__'];
+var events = ['__mouseup__', '__mousedown__', '__mousemove__', '__mouseover__', '__mouseout__', '__mouseenter__', '__mouseleave__', '__click__', '__dblclick__', '__touchstart__', '__touchend__', '__touchmove__', '__drag__', '__dragstart__', '__dragend__', '__dragover__', '__dragenter__', '__dragleave__', '__dragexit__', '__drop__', '__wheel__'];
 
 function touchesToJson(touches) {
     if (!touches) return touches;
@@ -830,6 +830,10 @@ function sync(e) {
             pageY: e.pageY,
             clientX: e.clientX,
             clientY: e.clientY,
+            deltaX: e.deltaX,
+            deltaY: e.deltaY,
+            deltaZ: e.deltaZ,
+            deltaMode: e.deltaMode,
             target: (0, _xpath.createXPathFromElement)(e.target),
             touches: touchesToJson(e.touches),
             targetTouches: touchesToJson(e.targetTouches),
@@ -852,14 +856,19 @@ function dispatchEvent(event, data) {
     data.bubbles = true;
     data.cancelable = true;
     data.ctrlKey = data.metaKey = data.altKey = data.shiftKey = true; //Distinct the event to avoid looping
+    data.view = window;
     // data.detail = {"test" : true};
 
     if (target) {
         if (['__touchstart__', '__touchend__', '__touchmove__'].indexOf(event) > -1) {
             target.dispatchEvent(new TouchEvent(event.slice(2, -2), handleTouchEvent(data, target)));
+        } else if (event === '__wheel__') {
+            target.dispatchEvent(new WheelEvent(event.slice(2, -2), data));
         } else {
             target.dispatchEvent(new MouseEvent(event.slice(2, -2), data));
         }
+    } else {
+        window.console.log('cannot find target:', data.target);
     }
 }
 
@@ -2004,6 +2013,12 @@ module.exports = {
     },
 
     lookupElementByXPath: function lookupElementByXPath(path) {
+        path = path.replace(/\/svg\[(\d+)\]/g, "/*[name() = 'svg'][$1]");
+        path = path.replace(/\/g\[(\d+)\]/g, "/*[name() = 'g'][$1]");
+        path = path.replace(/\/circle\[(\d+)\]/g, "/*[name() = 'circle'][$1]");
+        path = path.replace(/\/rect\[(\d+)\]/g, "/*[name() = 'rect'][$1]");
+        path = path.replace(/\/path\[(\d+)\]/g, "/*[name() = 'path'][$1]");
+
         var evaluator = new XPathEvaluator();
         var result = evaluator.evaluate(path, document.documentElement, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
         return result.singleNodeValue;

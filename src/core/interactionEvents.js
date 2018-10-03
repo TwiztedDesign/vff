@@ -21,7 +21,8 @@ const events = [
     '__dragenter__',
     '__dragleave__',
     '__dragexit__',
-    '__drop__'
+    '__drop__',
+    '__wheel__'
 ];
 
 function touchesToJson(touches){
@@ -50,6 +51,10 @@ function sync(e){
             pageY: e.pageY,
             clientX: e.clientX,
             clientY: e.clientY,
+            deltaX : e.deltaX,
+            deltaY : e.deltaY,
+            deltaZ : e.deltaZ,
+            deltaMode : e.deltaMode,
             target: createXPathFromElement(e.target),
             touches: touchesToJson(e.touches),
             targetTouches: touchesToJson(e.targetTouches),
@@ -72,15 +77,19 @@ function dispatchEvent(event, data){
     data.bubbles = true;
     data.cancelable = true;
     data.ctrlKey = data.metaKey = data.altKey = data.shiftKey = true; //Distinct the event to avoid looping
+    data.view = window;
     // data.detail = {"test" : true};
 
     if(target){
         if(['__touchstart__', '__touchend__', '__touchmove__'].indexOf(event) > -1){
             target.dispatchEvent(new TouchEvent(event.slice(2, -2), handleTouchEvent(data,target)));
+        } else if(event === '__wheel__'){
+            target.dispatchEvent(new WheelEvent(event.slice(2, -2), data));
         } else {
             target.dispatchEvent(new MouseEvent(event.slice(2, -2), data));
         }
-
+    } else {
+        window.console.log('cannot find target:', data.target);
     }
 }
 

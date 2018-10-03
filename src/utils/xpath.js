@@ -29,6 +29,12 @@ module.exports = {
     },
 
     lookupElementByXPath : (path) => {
+        path = path.replace(/\/svg\[(\d+)\]/g, "/*[name() = 'svg'][$1]");
+        path = path.replace(/\/g\[(\d+)\]/g, "/*[name() = 'g'][$1]");
+        path = path.replace(/\/circle\[(\d+)\]/g, "/*[name() = 'circle'][$1]");
+        path = path.replace(/\/rect\[(\d+)\]/g, "/*[name() = 'rect'][$1]");
+        path = path.replace(/\/path\[(\d+)\]/g, "/*[name() = 'path'][$1]");
+
         let evaluator = new XPathEvaluator();
         let result = evaluator.evaluate(path, document.documentElement, null,XPathResult.FIRST_ORDERED_NODE_TYPE, null);
         return  result.singleNodeValue;
