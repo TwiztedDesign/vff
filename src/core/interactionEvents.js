@@ -73,7 +73,12 @@ function bindSyncEvents(element){
 }
 
 function dispatchEvent(event, data){
-    let target = lookupElementByXPath(data.target);
+    let target;
+    if(['__click__'].indexOf(event) > -1){
+        target = document.elementFromPoint(data.pageX, data.pageY);
+    } else {
+        target = lookupElementByXPath(data.target);
+    }
     data.bubbles = true;
     data.cancelable = true;
     data.ctrlKey = data.metaKey = data.altKey = data.shiftKey = true; //Distinct the event to avoid looping

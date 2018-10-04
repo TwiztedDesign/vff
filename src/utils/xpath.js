@@ -1,7 +1,7 @@
 function isSVGChild(elm){
-    if(elm.tagName === 'svg') return true;
-    while (elm = elm.parentNode) {
+    while (elm) {
         if (elm.tagName === 'svg') return true;
+        elm = elm.parentNode;
     }
 }
 

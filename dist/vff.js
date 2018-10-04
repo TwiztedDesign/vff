@@ -852,7 +852,12 @@ function bindSyncEvents(element) {
 }
 
 function dispatchEvent(event, data) {
-    var target = (0, _xpath.lookupElementByXPath)(data.target);
+    var target = void 0;
+    if (['__click__'].indexOf(event) > -1) {
+        target = document.elementFromPoint(data.pageX, data.pageY);
+    } else {
+        target = (0, _xpath.lookupElementByXPath)(data.target);
+    }
     data.bubbles = true;
     data.cancelable = true;
     data.ctrlKey = data.metaKey = data.altKey = data.shiftKey = true; //Distinct the event to avoid looping
@@ -1981,9 +1986,9 @@ module.exports = handlers;
 
 
 function isSVGChild(elm) {
-    if (elm.tagName === 'svg') return true;
-    while (elm = elm.parentNode) {
+    while (elm) {
         if (elm.tagName === 'svg') return true;
+        elm = elm.parentNode;
     }
 }
 
