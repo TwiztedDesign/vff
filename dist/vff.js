@@ -614,7 +614,6 @@ function request(type, payload, cb) {
 }
 
 function postMessage(message) {
-    message.__vffID = (0, _helpers.getQueryParams)()._vffid;
     var w = window || global.window;
     if (w && w.parent) {
         w.parent.postMessage(JSON.stringify(message), '*');
