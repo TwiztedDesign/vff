@@ -301,6 +301,5 @@ module.exports = {
     off             : off,
     defer           : defer,
     noop            : noop,
-    getQueryParams  : getQueryParams,
-    vffID           : getQueryParams()._vffid
+    getQueryParams  : getQueryParams
 };
