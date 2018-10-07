@@ -1,4 +1,4 @@
-import {uuid} from './helpers';
+import {uuid, vffID} from './helpers';
 let window = window || global.window;
 const REQUEST_TIMEOUT = 20000;
 
@@ -41,6 +41,7 @@ function request(type, payload, cb){
 
 
 function postMessage(message){
+    message.__vffID = vffID;
     let w = (window || global.window);
     if(w && w.parent){
         w.parent.postMessage(JSON.stringify(message), '*');

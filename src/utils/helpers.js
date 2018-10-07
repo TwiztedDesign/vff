@@ -268,7 +268,15 @@ function defer(){
         reject  : reject
     };
 }
+function getQueryParams(queryString){
 
+    let search = queryString || location.href.split("?")[1] || location.search.substring(1);
+    try{
+        return JSON.parse('{"' + search.replace(/&/g, '","').replace(/=/g,'":"') + '"}', (key, value) => { return key === "" ? value : decodeURIComponent(value); });
+    } catch (err){
+        return {};
+    }
+}
 function noop(){}
 
 
@@ -292,5 +300,7 @@ module.exports = {
     on              : on,
     off             : off,
     defer           : defer,
-    noop            : noop
+    noop            : noop,
+    getQueryParams  : getQueryParams,
+    vffID           : getQueryParams()._vffid
 };
