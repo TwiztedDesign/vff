@@ -14,6 +14,7 @@ module.exports = {
     "TRACK_EVENT"   : "vff-track-event",
     "RELOAD"        : "vff-reload",
     "VF_DATA"       : "vff-vf-data",
+    "VF_SETUP"      : "vff-vf-setup",
 
 
     "TOUCH"         : "taco-touch-element",
