@@ -85,6 +85,7 @@ The "vff" object also contains events that will be fired based on various condit
 | $on(**path**, **callback**, **options**)| trigger callback when data for the **path** in the template arrives<br>**path** - _string_ - dot delimited string that describes a path in the template<br>**callback** - _function(**data**)_ - data handler<br>**options** - _object(optional)_ - options object (described [here](#options))|
 | $before(**middleware**, **options**)| add a middleware function that will be triggered in the order of the addition when data for the template arrives<br>**middleware** - _function(**data**, **next**)_ - the middleware function ([read more](#middleware))<br>**options** - _object(optional)_ - options object (described [here](#options))|
 | $emit(**payload**) | Emits a message to every player with the same project<br>**payload** - _object_ - data to be sent     |
+| setup(**options**) | Sends global options to the videoflow platform (described [here](#setup))|
 
 
 ## options
@@ -93,6 +94,33 @@ The "vff" object also contains events that will be fired based on various condit
 | changeOnly         | _Boolean_ | *true*     | trigger callback only if dat is changed |
 
 
+## Setup
+The setup allows you to send options to videoflow platform in order to define property fields that relevant to your project.
+The options object looks the follow
+```javascript
+// Creating the options object
+var options = {
+    overrides: [
+        {
+            key: "Show In Home Screen",
+            visibility: true,
+            rename: "Show In Side Bar"
+        },
+        {
+            key: "Background",
+            visibility: false
+        }
+    ]
+};
+// Send setup options
+vff.setup(options);
+```
+### Overrides Options
+|        Property    | Type      |  Default   | Details                                                                                         |
+|--------------------|-----------|------------|-------------------------------------------------------------------------------------------------|
+| key         | _String_ | *empty*     | The field that you want to change. The key should be like the name in the UI |
+| visibility         | _String_ | *true*     | Show or hide the field |
+| rename         | _String_ | *key*     | Rename the field |
 
 ## Adding templates (JavaScript)
 ```javascript
