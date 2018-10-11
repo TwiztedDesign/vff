@@ -1,4 +1,5 @@
 import {send, request} from './utils/messenger.js';
+import {setup} from './core/vffSetup';
 import {READY} from './utils/events.js';
 import {vffData} from './core/vffData.js';
 import {start as startListener} from './utils/listener';
@@ -35,6 +36,7 @@ vff.onPages             = (cb) => {return vffData.onPages(cb);};
 vff.getQueryParams      = () => {return vffData.getQueryParams();};
 vff.send                = (type, payload) => { send(type, payload); };
 vff.request             = (type, payload, cb) => { request(type, payload, cb); };
+vff.setup               = (options) => {return setup(options);};
 vff.isMobile            = isMobile;
 vff.isController        = isController;
 vff.mode                = mode;
