@@ -67,32 +67,7 @@ After including the vff script in your html file, a "vff" object is set on the w
 | registerTemplate(**name**, **data**)| Registers a template in the VFF and returns a template object<br>**name** - _string_ - name of the template<br>**data** - _object_ - data of the template|
 | getTemplate(**name**)               | Returns a registered template by name<br>**name** - _string_ - name of the template to return|
 | getTemplates()                      | Returns an array of all the registered templates|
-
-
-# Templates
-Once the VFF lib is registered, it generates a global object that you can access from anywhere in your code. The global object "vff" contains all the functions and the properties you need to generate templates and control your overlay.
-The "vff" object also contains events that will be fired based on various conditions, such as a change in a data that arrives from an external source like a controller or an API call.
-
-
-## Methods
-|        Method      | Details                                                                                               |
-|--------------------|-------------------------------------------------------------------------------------------------------|
-| $element()         | Returns the DOM element of the template if exists                                                     |
-| $show()            | Set "visibility" property in the template to true                                                     |
-| $hide()            | Set "visibility" property in the template to false                                                    |
-| $toggle()          | Toggle "visibility" property in the template                                                          |
-| $on(**callback**, **options**)  | triggers callback when data for the template arrives<br>**callback** - _function(**data**)_ - data handler<br>**options** - _object(optional)_ - options object (described [here](#options))|
-| $on(**path**, **callback**, **options**)| trigger callback when data for the **path** in the template arrives<br>**path** - _string_ - dot delimited string that describes a path in the template<br>**callback** - _function(**data**)_ - data handler<br>**options** - _object(optional)_ - options object (described [here](#options))|
-| $before(**middleware**, **options**)| add a middleware function that will be triggered in the order of the addition when data for the template arrives<br>**middleware** - _function(**data**, **next**)_ - the middleware function ([read more](#middleware))<br>**options** - _object(optional)_ - options object (described [here](#options))|
-| $emit(**payload**) | Emits a message to every player with the same project<br>**payload** - _object_ - data to be sent     |
 | setup(**options**) | Sends global options to the videoflow platform (described [here](#setup))|
-
-
-## options
-|        Property    | Type      |  Default   | Details                                                                                         |
-|--------------------|-----------|------------|-------------------------------------------------------------------------------------------------|
-| changeOnly         | _Boolean_ | *true*     | trigger callback only if dat is changed |
-
 
 ## Setup
 The setup allows you to send options to videoflow platform in order to define property fields that relevant to your project.
@@ -115,12 +90,39 @@ var options = {
 // Send setup options
 vff.setup(options);
 ```
+
 ### Overrides Options
 |        Property    | Type      |  Default   | Details                                                                                         |
 |--------------------|-----------|------------|-------------------------------------------------------------------------------------------------|
 | key         | _String_ | *empty*     | The field that you want to change. The key should be like the name in the UI |
 | visibility         | _String_ | *true*     | Show or hide the field |
 | rename         | _String_ | *key*     | Rename the field |
+
+
+
+# Templates
+Once the VFF lib is registered, it generates a global object that you can access from anywhere in your code. The global object "vff" contains all the functions and the properties you need to generate templates and control your overlay.
+The "vff" object also contains events that will be fired based on various conditions, such as a change in a data that arrives from an external source like a controller or an API call.
+
+
+## Methods
+|        Method      | Details                                                                                               |
+|--------------------|-------------------------------------------------------------------------------------------------------|
+| $element()         | Returns the DOM element of the template if exists                                                     |
+| $show()            | Set "visibility" property in the template to true                                                     |
+| $hide()            | Set "visibility" property in the template to false                                                    |
+| $toggle()          | Toggle "visibility" property in the template                                                          |
+| $on(**callback**, **options**)  | triggers callback when data for the template arrives<br>**callback** - _function(**data**)_ - data handler<br>**options** - _object(optional)_ - options object (described [here](#options))|
+| $on(**path**, **callback**, **options**)| trigger callback when data for the **path** in the template arrives<br>**path** - _string_ - dot delimited string that describes a path in the template<br>**callback** - _function(**data**)_ - data handler<br>**options** - _object(optional)_ - options object (described [here](#options))|
+| $before(**middleware**, **options**)| add a middleware function that will be triggered in the order of the addition when data for the template arrives<br>**middleware** - _function(**data**, **next**)_ - the middleware function ([read more](#middleware))<br>**options** - _object(optional)_ - options object (described [here](#options))|
+| $emit(**payload**) | Emits a message to every player with the same project<br>**payload** - _object_ - data to be sent     |
+
+
+## options
+|        Property    | Type      |  Default   | Details                                                                                         |
+|--------------------|-----------|------------|-------------------------------------------------------------------------------------------------|
+| changeOnly         | _Boolean_ | *true*     | trigger callback only if dat is changed |
+
 
 ## Adding templates (JavaScript)
 ```javascript
