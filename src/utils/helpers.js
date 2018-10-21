@@ -175,6 +175,10 @@ function deepCompare () {
             return false;
         }
 
+        if (x instanceof Array && y instanceof Array && x.length !== y.length){
+             return false;
+        }
+
         // Check for infinitive linking loops
         if (leftChain.indexOf(x) > -1 || rightChain.indexOf(y) > -1) {
             return false;
