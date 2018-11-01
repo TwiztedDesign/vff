@@ -6307,6 +6307,9 @@ module.exports = {
 "use strict";
 
 
+HTMLElement.prototype.expose = function () {
+    return { text: 'innerText' };
+};
 HTMLHeadingElement.prototype.expose = function () {
     return { text: 'innerText', color: { path: 'style.color', ui: 'color' } };
 };
