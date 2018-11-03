@@ -2111,6 +2111,10 @@ var _vffData = __webpack_require__(2);
 
 function queryParams(data) {
     _vffData.vffData.addQueryParams(data);
+
+    if (data && data.cursor && data.cursor === '0') {
+        document.styleSheets[0].addRule('*', 'cursor: none !important');
+    }
 }
 
 module.exports = {
