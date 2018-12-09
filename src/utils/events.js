@@ -17,6 +17,7 @@ module.exports = {
     "VF_SETUP"      : "vff-vf-setup",
 
 
+    "INTERACTION"   : "vff-interaction",
     "TOUCH"         : "taco-touch-element",
     "MOUSE_MOVE"    : "taco-mouse-move",
     "BUBBLE_UP"     : "taco-bubble-up",

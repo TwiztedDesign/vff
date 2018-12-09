@@ -405,6 +405,7 @@ module.exports = {
     "VF_DATA": "vff-vf-data",
     "VF_SETUP": "vff-vf-setup",
 
+    "INTERACTION": "vff-interaction",
     "TOUCH": "taco-touch-element",
     "MOUSE_MOVE": "taco-mouse-move",
     "BUBBLE_UP": "taco-bubble-up",
@@ -818,6 +819,10 @@ module.exports = {
 
 var _xpath = __webpack_require__(21);
 
+var _messenger = __webpack_require__(3);
+
+var _events = __webpack_require__(1);
+
 var events = ['__mouseup__', '__mousedown__', '__mousemove__', '__mouseover__', '__mouseout__', '__mouseenter__', '__mouseleave__', '__click__', '__dblclick__', '__touchstart__', '__touchend__', '__touchmove__', '__drag__', '__dragstart__', '__dragend__', '__dragover__', '__dragenter__', '__dragleave__', '__dragexit__', '__drop__', '__wheel__'];
 
 function touchesToJson(touches) {
@@ -839,25 +844,25 @@ function touchesToJson(touches) {
 
 function sync(e) {
     if (e.ctrlKey && e.metaKey && e.altKey && e.shiftKey) return;
+    var msg = {};
+    msg["__" + e.type + "__"] = {
+        pageX: e.pageX,
+        pageY: e.pageY,
+        clientX: e.clientX,
+        clientY: e.clientY,
+        deltaX: e.deltaX,
+        deltaY: e.deltaY,
+        deltaZ: e.deltaZ,
+        deltaMode: e.deltaMode,
+        target: (0, _xpath.createXPathFromElement)(e.target),
+        touches: touchesToJson(e.touches),
+        targetTouches: touchesToJson(e.targetTouches),
+        changedTouches: touchesToJson(e.changedTouches)
+    };
     if (window.webrtc) {
-        var msg = {};
-        msg["__" + e.type + "__"] = {
-            pageX: e.pageX,
-            pageY: e.pageY,
-            clientX: e.clientX,
-            clientY: e.clientY,
-            deltaX: e.deltaX,
-            deltaY: e.deltaY,
-            deltaZ: e.deltaZ,
-            deltaMode: e.deltaMode,
-            target: (0, _xpath.createXPathFromElement)(e.target),
-            touches: touchesToJson(e.touches),
-            targetTouches: touchesToJson(e.targetTouches),
-            changedTouches: touchesToJson(e.changedTouches)
-        };
-
         window.webrtc.send(msg);
     }
+    (0, _messenger.send)(_events.INTERACTION, msg);
 }
 
 function bindSyncEvents(element) {
