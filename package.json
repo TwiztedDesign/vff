@@ -1,6 +1,6 @@
 {
   "name": "vff",
-  "version": "1.0.1-beta.12",
+  "version": "1.0.2",
   "description": "Html graphics for broadcast",
   "main": "dist/vff.js",
   "scripts": {
