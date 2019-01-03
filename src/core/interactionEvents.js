@@ -1,4 +1,6 @@
 import {createXPathFromElement, lookupElementByXPath} from '../utils/xpath';
+import {send} from '../utils/messenger';
+import {INTERACTION} from '../utils/events';
 
 
 const events = [
@@ -44,25 +46,27 @@ function touchesToJson(touches){
 
 function sync(e){
     if(e.ctrlKey && e.metaKey && e.altKey && e.shiftKey) return;
+    let msg = {};
+    msg["__" + e.type + "__"] = {
+        pageX: e.pageX,
+        pageY: e.pageY,
+        clientX: e.clientX,
+        clientY: e.clientY,
+        deltaX : e.deltaX,
+        deltaY : e.deltaY,
+        deltaZ : e.deltaZ,
+        deltaMode : e.deltaMode,
+        target: createXPathFromElement(e.target),
+        touches: touchesToJson(e.touches),
+        targetTouches: touchesToJson(e.targetTouches),
+        changedTouches: touchesToJson(e.changedTouches)
+    };
     if(window.webrtc) {
-        let msg = {};
-        msg["__" + e.type + "__"] = {
-            pageX: e.pageX,
-            pageY: e.pageY,
-            clientX: e.clientX,
-            clientY: e.clientY,
-            deltaX : e.deltaX,
-            deltaY : e.deltaY,
-            deltaZ : e.deltaZ,
-            deltaMode : e.deltaMode,
-            target: createXPathFromElement(e.target),
-            touches: touchesToJson(e.touches),
-            targetTouches: touchesToJson(e.targetTouches),
-            changedTouches: touchesToJson(e.changedTouches)
-        };
-
         window.webrtc.send(msg);
     }
+    send(INTERACTION, msg)
+
+
 }
 
 function bindSyncEvents(element){
