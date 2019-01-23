@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Basic VFF Test</title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+    <script src="vff.js"></script>
+    <!--<script src="https://rawgit.com/TwiztedDesign/vff/master/dist/vff.js"></script>-->
+    <script src="https://rawgit.com/TwiztedDesign/vff-videobox/master/dist/vff-ext.js"></script>
+    
+    <script src="script.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body ng-app="myApp" ng-controller="Ctrl">
+
+    <div id="header">
+        <vff-videobox style="position:absolute; width:300px; height: 300px;" vff-control="jumbo1" name="jumbo1" id="jumbo1"></vff-videobox>
+        <h1 id="clock1"></h1>
+        <h1 id="clock2"></h1>
+        <h1 id="clock3"></h1>
+        <h1 vff-control="title">This is a title</h1>
+        <h2 vff-control="subtitle">This is a subtitle</h2>
+        <h1 vff-bind="bind"></h1>
+        <img vff-control="image" src="cb1.png">
+        <input type="text" vff-control="group.free">
+
+    </div>
+
+</body>
+</html>

@@ -1,17 +1,21 @@
 import {join} from 'path';
 const WebpackShellPlugin = require('webpack-shell-plugin');
+const MinifyPlugin = require("babel-minify-webpack-plugin");
 
 const include = join(__dirname, 'src');
 
 module.exports =  {
-    entry               : './src/index.js',
+    entry               : {
+        "vff"           : "./src/index.js",
+        "vff.min"       : "./src/index.js",
+    },
     output              : {
-        filename        : "vff.js",
+        filename        : "[name].js",
         path            : join(__dirname, 'dist'),
         libraryTarget   : 'umd',
         library         : 'vff'
     },
-    devtool             : 'source-map',
+    devtool             : 'eval-source-map',
     module              : {
         rules         : [
             {
@@ -21,7 +25,7 @@ module.exports =  {
                         loader: 'babel-loader'
                     },
                     {
-                        loader: 'eslint-loader',
+                        loader: 'eslint-loader'
                     }],
                 include
             },
@@ -57,6 +61,9 @@ module.exports =  {
     plugins : [
         new WebpackShellPlugin({
             onBuildExit: 'node webpack.after.js'
+        }),
+        new MinifyPlugin({}, {
+            include: /vff\.min\.js$/,
         })
     ]
 };

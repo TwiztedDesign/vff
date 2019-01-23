@@ -61,10 +61,6 @@ app.controller("Ctrl", ['$scope',function($scope){
         console.log('Event received: ', e);
     }, {consolidate : true});
 
-    setTimeout(function(){
-        vff.emit({test: 3});
-
-    }, 3000);
 
 
 

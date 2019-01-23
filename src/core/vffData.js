@@ -1,81 +1,161 @@
-import {ADD, PAGES_UPDATE} from "../utils/events";
-import {docRef, broadcast, on, defer} from '../utils/helpers.js';
+import {ADD, PAGES_UPDATE, VFF_EVENT} from "../utils/events";
+import {docRef, broadcast, on, defer, queryOne, query, filter} from '../utils/helpers.js';
 import {send} from '../utils/messenger';
 import {REGISTER_TEMPLATE} from '../utils/docRefs';
-import VffTemplate from './vffTemplate';
+
+import {NAMESPACE_DELIMITER} from "../core/consts";
+import VFFControl from './vffControl';
+import VFFEvent from './vffEvent';
+
+const ADD_CONTROL_TIMEOUT = 3000;
+
+const DEFAULT_ON_OPTIONS = {
+    throttle : true,
+    changeOnly : true
+};
 
 class VffData {
     constructor(){
-        this._templates = {};
+        this._controls = [];
         this._pages = [];
         this._pagesDefer = defer();
+        this._registerControlTimeouts = {};
+        this._listeners = {};
+        this._timeouts = new WeakMap();
     }
 
-    updateCB(){
-        if(this._updateCB) {
-            this._updateCB();
-        } else if(window.angular){
-            let $body = window.angular.element(document.body);
-            let $injector = $body.injector();
-            if($injector){
-                $injector.get('$rootScope').$apply();
+    registerControl(name, value, options){
+
+        if(arguments.length < 2){
+            //TODO change ref
+            throw new Error('Missing Arguments, please refer to: ' + docRef(REGISTER_TEMPLATE));
+        }
+
+        let control = new VFFControl(name, value, options);
+        let existingControl = queryOne(this._controls, {_group : control.getGroup(), _name: control.getName});
+        if(existingControl){
+            existingControl._setValue(value);
+        } else {
+            this._controls.push(control);
+        }
+
+
+        clearTimeout(this._registerControlTimeouts[control.getGroup()]);
+        this._registerControlTimeouts[control.getGroup()] = setTimeout(() => {
+            let controls = filter(this._controls, c => {
+                return c.getGroup() === control.getGroup();
+            });
+
+            let data = {};
+            controls.forEach(control => {
+                Object.assign(data, control.getValueObject());
+            });
+
+            send(ADD,{
+                channel : control.getGroup(),
+                options : options,
+                data    : data
+            });
+
+        }, ADD_CONTROL_TIMEOUT);
+
+        return control;
+    }
+
+    registerControls(object, options){
+        for(let name in object){
+            if(object.hasOwnProperty(name)){
+                let value = object[name];
+                let opts = Object.assign({}, options);
+
+                if(typeof value === 'object' && value.ui){
+                    opts.ui = value.ui;
+                    value = value.value !== undefined? value.value : value.ui.value;
+                }
+
+                this.registerControl(name, value, opts);
             }
         }
     }
 
-    onUpdate(cb){
-        this._updateCB = cb;
+    updateControl(name, value, options) {
+        let control = this.getControl(name);
+        if (control) {
+            //TODO make better
+            if(options && options.timecode){
+                control.timecode = options.timecode;
+            }
+            return control._setValue(value);
+        }
+        return false;
     }
 
-    registerTemplate(name, data, element){
-        if(arguments.length < 2){
-            throw new Error('Missing Arguments, please refer to: ' + docRef(REGISTER_TEMPLATE));
-        }
-
-        data = data || {};
-        name = name.toLowerCase();
-
-        if(this._templates[name]){
-            this._templates[name]._update(data);
+    getControl(name){
+        let parts = name.split(NAMESPACE_DELIMITER);
+        if(parts.length > 1){
+            return queryOne(this._controls, {_name : parts[parts.length - 1], _group : parts.slice(0,-1).join(NAMESPACE_DELIMITER)});
         } else {
-            this._templates[name] = new VffTemplate(name, data, element);
+            return queryOne(this._controls, {_name : name});
         }
+    }
+    getControls(namespace){
+        if(!namespace){
+            return this._controls;
+        }
+        let parts = namespace.split(NAMESPACE_DELIMITER);
+        if(parts.length > 1){
+            return query(this._controls, {_name : parts[parts.length - 1], _group : parts.slice(0,-1).join(NAMESPACE_DELIMITER)});
+        } else {
+            let controls = query(this._controls, {_group : parts[0]});
+            if(!controls.length){
+                controls = query(this._controls, {_name : parts[0]});
+            }
+            return controls;
+        }
+    }
+    getControlsData(namespace){
+        let data = {};
+        let controls = this.getControls(namespace);
+        controls.forEach(control => {
+            let name = control.getNamespace().substr(namespace.length);
+            if(name.startsWith(NAMESPACE_DELIMITER)) name = name.substr(1);
+            if(name){
+                data[name] = control.getValue();
+            } else {
+                data = control.getValue();
+            }
 
-        send(ADD,{
-            channel : name,
-            options : this._templates[name]._options,
-            data    : data
         });
-
-        return this._templates[name];
+        return data;
     }
 
-    getTemplate(name){
-        return this._templates[name.toLowerCase()];
+    on(namespace, cb, options) {
+        options = Object.assign({}, DEFAULT_ON_OPTIONS, options || {});
+        //TODO handle no namespace
+        on(VFF_EVENT + namespace, event => {
+            if(!options.changeOnly || event.dataChanged){
+                this._runCallback(cb, options, new VFFEvent({
+                    timecode : event.timecode,
+                    changed : event.dataChanged,
+                    data: this.getControlsData(namespace)
+                }));
+            }
+        });
     }
-    getTemplates(){
-        return Object.values(this._templates);
+    before(){
+        //TODO
+    }
+    emit(){
+        //TODO
     }
 
-    show(template){
-        this.getTemplate(template).show();
-    }
-    hide(template){
-        this.getTemplate(template).hide();
-    }
-    toggle(template){
-        this.getTemplate(template).toggle();
-    }
-    clear(){
-        this._templates = {};
-    }
     addPages(pages){
         if(pages && pages.length){
             while (this._pages.length) { this._pages.pop(); }
             this._pages = this._pages.concat(pages);
             this._pagesDefer.resolve(pages);
             broadcast(PAGES_UPDATE, this._pages);
-            this.updateCB();
+            // this.updateCB();
         }
     }
     getPages(){
@@ -91,10 +171,31 @@ class VffData {
     }
     addQueryParams(params){
         this._queryParams = params;
-        this.updateCB();
+        // this.updateCB();
     }
     getQueryParams(){
         return this._queryParams;
+    }
+
+    _runCallback(callback, options, ...data){
+        if(options.consolidate || options.throttle){
+            clearTimeout(this._timeouts.get(callback));
+            this._timeouts.set(callback, setTimeout(() => {
+                callback(...data);
+            },(typeof options.throttle === 'number')? options.throttle : 50));
+        } else {
+            callback(...data);
+        }
+    }
+    _runMiddleware(functions, data){
+        let self = this;
+        return functions.reduce((prev, curr) => {
+            return prev.then((data) => {
+                let d = defer();
+                self._runCallback(curr.fn, curr.options, data, d.resolve);
+                return d.promise;
+            });
+        }, Promise.resolve(data));
     }
 }
 

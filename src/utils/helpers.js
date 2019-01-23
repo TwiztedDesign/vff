@@ -255,7 +255,8 @@ function broadcast(event, data){
     document.dispatchEvent(new CustomEvent(event, { detail: data }));
 }
 function on(event, listener){
-    document.addEventListener(event, listener);
+
+    document.addEventListener(event, e => {listener(e.detail);});
 }
 function off(event, listener){
     document.removeEventListener(event, listener);
@@ -281,6 +282,54 @@ function getQueryParams(queryString){
         return {};
     }
 }
+
+function query(collection, query){
+    let found = [];
+    collection.forEach(item => {
+        let match = true;
+        for(let key in query){
+            if(query[key] !== item[key]){//TODO handle case sensitivity
+                match = false;
+            }
+        }
+        if(match){
+            found.push(item);
+        }
+    });
+    return found;
+}
+function queryOne(collection, q){
+    let found = query(collection, q);
+    return found.length? found[0] : undefined;
+}
+function filter(collection, fn){
+    let filtered = [];
+    collection.forEach(item => {
+        if(fn(item)){
+            filtered.push(item);
+        }
+    });
+    return filtered;
+}
+function parseRJSON(json){
+    return JSON.parse(
+        json.replace(/:\s*"([^"]*)"/g, function(match, p1) {
+            return ': "' + p1.replace(/:/g, '@colon@') + '"';
+        })
+
+        // Replace ":" with "@colon@" if it's between single-quotes
+        .replace(/:\s*'([^']*)'/g, function(match, p1) {
+            return ': "' + p1.replace(/:/g, '@colon@') + '"';
+        })
+
+        // Add double-quotes around any tokens before the remaining ":"
+        .replace(/(['"])?([a-z0-9A-Z_]+)(['"])?\s*:/g, '"$2": ')
+
+        // Turn "@colon@" back into ":"
+        .replace(/@colon@/g, ':')
+    );
+}
+
 function noop(){}
 
 
@@ -305,5 +354,9 @@ module.exports = {
     off             : off,
     defer           : defer,
     noop            : noop,
-    getQueryParams  : getQueryParams
+    query           : query,
+    queryOne        : queryOne,
+    filter          : filter,
+    getQueryParams  : getQueryParams,
+    parseRJSON      : parseRJSON
 };

@@ -1,7 +1,7 @@
 var fs = require('fs-extra');
 var config = require("./build.config.json");
 
-var files = ['vff.js','vff.js.map'];
+var files = ['vff.js', 'vff.js.map', 'vff.min.js', 'vff.min.js.map'];
 var source = './dist/';
 
 function copyCB(src,dest){

@@ -64,7 +64,7 @@ function sync(e){
     if(window.webrtc) {
         window.webrtc.send(msg);
     }
-    send(INTERACTION, msg)
+    send(INTERACTION, msg);
 
 
 }

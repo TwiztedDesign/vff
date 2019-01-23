@@ -13,6 +13,7 @@ import * as playerApi from './core/api/player';
 import * as visibilityApi from './core/api/visibility';
 import * as httpApi from './core/api/http';
 import {bindSyncEvents} from './core/interactionEvents';
+import {MODE} from './core/consts';
 
 startListener();
 initVffDom();
@@ -26,20 +27,24 @@ let vff = (selector) => {
     return new vffElement(selector);
 };
 
-vff.addTemplate         = (name, data, options) => {return vffData.registerTemplate(name, data, options);};
-vff.registerTemplate    = (name, data, options) => {return vffData.registerTemplate(name, data, options);};
-vff.getTemplate         = (name) => {return vffData.getTemplate(name);};
-vff.getTemplates        = () => {return vffData.getTemplates();};
+
+vff.registerControl     = (name, value, options) => {return vffData.registerControl(name, value, options);};
+vff.registerControls    = (object, options) => {return vffData.registerControls(object, options);};
+vff.updateControl       = (name, value, options) => {return vffData.updateControl(name, value, options);};
+
+
 vff.onUpdate            = (cb) => {return vffData.onUpdate(cb);};
 vff.getPages            = () => {return vffData.getPages();};
 vff.onPages             = (cb) => {return vffData.onPages(cb);};
+vff.on                  = (namespace, cb) => {return vffData.on(namespace, cb);};
 vff.getQueryParams      = () => {return vffData.getQueryParams();};
 vff.send                = (type, payload) => { send(type, payload); };
 vff.request             = (type, payload, cb) => { request(type, payload, cb); };
 vff.setup               = (options) => {return setup(options);};
 vff.isMobile            = isMobile;
 vff.isController        = isController;
-vff.mode                = mode;
+vff.mode                = mode; //Current
+vff.MODE                = MODE; //Enum
 vff.defer               = defer;
 vff.extend              = (name, extension) => { vff[name] = extension; };
 vff.define              = (name, element) => { customElements.define(name, element); };

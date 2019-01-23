@@ -1,30 +1,23 @@
-import {setByPath, defer} from '../../utils/helpers.js';
+import {broadcast} from '../../utils/helpers.js';
 import {vffData} from '../vffData.js';
-import {EXPOSE_DELIMITER} from '../consts';
-import {VFF_EVENT} from '../../utils/events';
 import {isInteractionEvent, dispatchEvent} from '../interactionEvents';
+import {VFF_EVENT} from '../../utils/events';
+import {NAMESPACE_DELIMITER} from '../consts';
+
 
 function update(data){
-    
-    let promises = [];
+    let timecode, changed = false;
     for(let templateName in data){
-        let template = vffData.getTemplate(templateName);
-        if(template){
-            let deferred = defer();
-            template._runMiddleware(data[templateName]).then((result) => {
-                vffData.registerTemplate(templateName, result);
-                for(let key in result){
-                    updateDom(template, key, result[key], result.__timecode__);
-                }
-                vffData.updateCB();
-                deferred.resolve();
-            });
-            promises.push(deferred.promise);
+        for(let key in data[templateName]) {
+            if(key !== '__timecode__'){
+                if(!timecode) timecode = data[templateName].__timecode__;
+                changed = vffData.updateControl(`${templateName}${NAMESPACE_DELIMITER}${key}`, data[templateName][key], {timecode}) || changed;
+            }
+            broadcast(`${VFF_EVENT}${templateName}${NAMESPACE_DELIMITER}${key}`, { dataChanged: changed ,timecode});
         }
+        broadcast(VFF_EVENT + templateName, {dataChanged: changed ,timecode});
     }
-
-    document.dispatchEvent(new CustomEvent(VFF_EVENT, { detail: data }));
-    return Promise.all(promises);
+    broadcast(VFF_EVENT, {dataChanged: changed, timecode});
 }
 
 function updateInteraction(data){
@@ -35,26 +28,7 @@ function updateInteraction(data){
     }
 }
 
-function updateDom(template, control, value, timecode){
-    let dom = template.$element(control.split(EXPOSE_DELIMITER)[0]);
-    if(dom){
-        if(timecode !== undefined){
-            setByPath(dom, "__timecode__", timecode);
-        }
-        setByPath(dom, control.split(EXPOSE_DELIMITER)[1], value);
-    }
-}
-
 module.exports = {
     update : update,
     updateInteraction : updateInteraction
 };
-
-
-/** to update angular *****
-
-    let $body = angular.element(document.body);
-    let $rootScope =  $body.injector().get('$rootScope');
-    $rootScope.$apply();
-
- ************************/

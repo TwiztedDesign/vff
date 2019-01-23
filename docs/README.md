@@ -25,6 +25,109 @@ Add the following code in your HTML header
 <script src="https://rawgit.com/TwiztedDesign/vff/master/dist/vff.js"></script>
 ```
 
+## Create your first control
+A control is a connection between an element in the overlay and Videoflow's controller.
+The control can be created by simply adding the attribute ```vff-control="name"```
+```html
+<div id="header">
+    <h1 vff-control="title">This is a title</h1>
+    <h2 vff-control="subtitle">This is a subtitle</h2>
+</div>
+```
+
+************* Screenshot ****************
+
+## Publish your content
+In order to use your newly created overlay, you need to host it in a publicly available accessible location.
+The easyest way to do so is by using VFF-CLI
+
+
+# VFF Global
+
+After including the vff script in your html file, a "vff" object is set on the window object.
+
+## Methods
+|       Method     | Details                                                                                             |
+|------------------|-----------------------------------------------------------------------------------------------------|
+| registerControl(**name**, **data**, **options**)       | Registers a control in the VFF and returns a control object<br>**name** - _string_ - name of the control<br>**value** - _Any_ - value of the control<br>**options** - _object_ - refer to the options object|
+| registerControls(**controls**, **options**)            | Registers multiple controls in the VFF<br>**controls** - _object_ - an object representing multiple controls where the key is the name and the value is the value of the control<br>**options** - _object_ - refer to the options object|
+| updateControl(**name**, **value**, **options**)   | Updates the value of a specific control<br>**name** - _string_ - name of the control to update<br>**value** - _Any_ - value to be updated<br>**options** - _object_ - refer to the options object|
+| on(**namespace**, **callback**, **options**)       | trigger callback when data for any of the controls is the **namespace** arrives<br>**namespace** - _string_ - dot delimited string that describes a controls in the same namespace<br>**callback** - _function(**data**)_ - data handler<br>**options** - _object(optional)_ - options object (described [here](#options))|
+| setup(**options**)                                | Sends global options to the videoflow platform (described [here](#setup))|
+
+## Setup
+The setup allows you to send options to videoflow platform in order to define property fields that relevant to your project.
+The options object looks the follow
+```javascript
+// Creating the options object
+var options = {
+    overrides: [
+        {
+            key: "Show In Home Screen",
+            visibility: true,
+            rename: "Show In Side Bar"
+        },
+        {
+            key: "Background",
+            visibility: false
+        }
+    ]
+};
+// Send setup options
+vff.setup(options);
+```
+
+### Overrides Options
+|        Property    | Type      |  Default   | Details                                                                                         |
+|--------------------|-----------|------------|-------------------------------------------------------------------------------------------------|
+| key                | _String_  | *empty*    | The field that you want to change. The key should be like the name in the UI |
+| visibility         | _String_  | *true*     | Show or hide the field |
+| rename             | _String_  | *key*      | Rename the field |
+
+
+# Controls
+Once the VFF lib is registered, it generates a global object that you can access from anywhere in your code. The global object "vff" contains all the functions and the properties you need to generate controls and control your overlay.
+The "vff" object also contains events that will be fired based on various conditions, such as a change in a data that arrives from an external source like a controller or an API call.
+
+
+## Methods
+|        Method      | Details                                                                                               |
+|--------------------|-------------------------------------------------------------------------------------------------------|
+| on(**callback**, **options**)  | triggers callback when data for the control arrives<br>**callback** - _function(**data**)_ - data handler<br>**options** - _object(optional)_ - options object (described [here](#options))|
+| before(**middleware**, **options**)| add a middleware function that will be triggered in the order of the addition when data for the control arrives<br>**middleware** - _function(**data**, **next**)_ - the middleware function ([read more](#middleware))<br>**options** - _object(optional)_ - options object (described [here](#options))|
+| emit(**payload**) | Emits a message to every player with the same project<br>**payload** - _object_ - data to be sent     |
+
+## options
+|        Property    | Type      |  Default   | Details                                                                                         |
+|--------------------|-----------|------------|-------------------------------------------------------------------------------------------------|
+| changeOnly         | _Boolean_ | *true*     | trigger callback only if data is changed |
+
+
+## Adding controls (JavaScript)
+```javascript
+let title = vff.registerControl("header.title", 'This is a title');
+let subtitle = vff.registerControl("subtitle", 'This is a subtitle', {group : "header"});
+```
+The above code will generate the same result as the code we used in the "Getting Started" example in the HTML file.
+The function "registerControl" will return a control object that will contain functions for events and additional data. Note that when registering the control via js, you can specify any name you want for the control,
+the first parameter is the name of the control as it would be displayed in the controller (title) and the second parameter is the value of the control.
+
+
+------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------
+# 1.0.2 Documentation - deprecated
+
 ## Create your first template
 A template is a group of properties that are related to the same logical object. For example a template can be a "Lower Third" or a "Side Panel". You can add as many templates as needed and structure them in any way you see fit.
 ```html
@@ -32,7 +135,7 @@ A template is a group of properties that are related to the same logical object.
 <div vff-template="lowerThird">
     <!-- Register each property of the template by using the "vff-name" attribute -->
     <h1 vff-name="title">This is a title</h1>
-    <h2 vff-name="subTitle">This is a subtitle</h1>
+    <h2 vff-name="subTitle">This is a subtitle</h2>
 </div>
 ```
 
@@ -41,7 +144,7 @@ Note that spaces are not allowed, but Videoflow will separate the names based on
 While adding templates and properties can be easily done in the HTML, for a more complex control over your content is recommended to add the templates and their properties via JavaScript.
 
 ## Publish your content
-In order to use your newly created overlay, you need to host it in a publicly available accessible location, for example Netlify. Once you project has been published, you can add it as an overlay by pusing the url of your
+In order to use your newly created overlay, you need to host it in a publicly available accessible location, for example Netlify. Once you project has been published, you can add it as an overlay by pasting the url of your
 project to the "Overlay" filed of you project. Here is the full basic core:
 ```html
 <html>
