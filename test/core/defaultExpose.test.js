@@ -19,7 +19,7 @@ describe('Default expose', () => {
         });
         it('img should expose inner src', () => {
             let element = document.createElement("img");
-            expect(element.expose()).toHaveProperty('source', 'src');
+            expect(element.expose()).toHaveProperty('src', {path : 'src', attribute : true});
         });
 
     });
