@@ -34,7 +34,7 @@ class VffData {
         let control = new VFFControl(name, value, options);
         let existingControl = queryOne(this._controls, {_group : control.getGroup(), _name: control.getName});
         if(existingControl){
-            existingControl._setValue(value);
+            existingControl.updateValue(value);
         } else {
             this._controls.push(control);
         }

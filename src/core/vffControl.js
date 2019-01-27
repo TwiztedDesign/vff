@@ -106,6 +106,7 @@ export default class VFFControl {
         this._runListeners(valueChanged);
 
         send(USER_UPDATE, {[this.getGroup()] : this.getValueObject()});
+        return valueChanged;
     }
 
 
