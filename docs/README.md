@@ -22,7 +22,7 @@ you need for your overlay, but in addition you'll need to add the VFF lib. A bas
 Add the following code in your HTML header
 
 ```html
-<script src="https://rawgit.com/TwiztedDesign/vff/master/dist/vff.js"></script>
+<script src="https://unpkg.com/vff@1"></script>
 ```
 
 ## Create your first control

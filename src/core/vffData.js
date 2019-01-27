@@ -32,7 +32,7 @@ class VffData {
         }
 
         let control = new VFFControl(name, value, options);
-        let existingControl = queryOne(this._controls, {_group : control.getGroup(), _name: control.getName});
+        let existingControl = queryOne(this._controls, {_group : control.getGroup(), _name: control.getName()});
         if(existingControl){
             existingControl.updateValue(value);
         } else {
@@ -91,6 +91,10 @@ class VffData {
     }
 
     getControl(name){
+        if(!name){
+            //TODO correct ref
+            throw new Error('Missing Arguments, please refer to: ' + docRef(REGISTER_TEMPLATE));
+        }
         let parts = name.split(NAMESPACE_DELIMITER);
         if(parts.length > 1){
             return queryOne(this._controls, {_name : parts[parts.length - 1], _group : parts.slice(0,-1).join(NAMESPACE_DELIMITER)});

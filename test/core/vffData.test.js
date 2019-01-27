@@ -27,9 +27,9 @@ describe('vff Data', () => {
             expect(control).toBeDefined();
         });
         it('Should add a control', () => {
-            expect(vffData._controls().length).toBe(0);
-            vffData.registerControl('test', data);
-            expect(vffData._controls().length).toBe(1)
+            expect(vffData._controls.length).toBe(0);
+            vffData.registerControl(controlName, controlValue);
+            expect(vffData._controls.length).toBe(1)
         });
         it('Should update the value of an existing control', () => {
             let control = vffData.registerControl(controlName, controlValue);
@@ -38,6 +38,7 @@ describe('vff Data', () => {
             vffData.registerControl(controlName, newValue);
             expect(control.getValue()).toBe(newValue);
             expect(vffData._controls.length).toBe(1);
+
         });
         xit('Should emit an event', () => {
             vffData.registerControl(controlName, controlValue);
@@ -51,69 +52,104 @@ describe('vff Data', () => {
 
     });
 
-    describe('getTemplates', () => {
-        it('should return all templates', () => {
-            let template1 = vffData.registerTemplate('test1', data);
-            let template2 = vffData.registerTemplate('test2', data);
-            let templates = vffData.getTemplates();
-            expect(templates).toEqual(expect.arrayContaining([template1, template2]));
-            expect(vffData.getTemplates().length).toBe(2);
-        })
-    });
-
-    describe('getTemplate', () => {
-        it('should return a template by name', () => {
-            let template = vffData.registerTemplate('test', data);
-            expect(vffData.getTemplate('test')).toEqual(template);
+    describe('registerControls', () => {
+        it('should create controls from object', () => {
+            vffData.registerControls({
+                title : 'hello',
+                subtitle : 'goodbye'
+            });
+            expect(vffData.getControls().length).toBe(2);
         });
-    });
+        it('should create controls with the correct ui', () => {
+            let value = "option 1";
+            let ui = {
+                type : 'dropdown',
+                options : ['option 1', 'option 2', 'option 3']
+            };
 
-    describe('show', () => {
-        it('Should set the visibility property value to TRUE in the given template', () => {
-            let template = vffData.registerTemplate('test', {visibility : false});
-            expect(template.visibility).toBeFalsy();
-            vffData.show('test');
-            expect(template.visibility).toBeTruthy();
+            vffData.registerControls({
+                dropdown : {value, ui},
+                subtitle : 'goodbye'
+            });
+            expect(vffData.getControls().length).toBe(2);
+            expect(vffData.getControl('subtitle').getValue()).toBe('goodbye');
 
-        });
-        it('Should NOT affect the visibility property value in the given template if visibility does not exists' , () => {
-            let template = vffData.registerTemplate('test', {"some prop" : "some value"});
-            expect(template.visibility).toBeUndefined();
-            vffData.show('test');
-            expect(template.visibility).toBeUndefined();
-        });
-    });
-    describe('hide', () => {
-        it('Should set the visibility property value to FALSE in the given template', () => {
-            let template = vffData.registerTemplate('test', {visibility : true});
-            expect(template.visibility).toBeTruthy();
-            vffData.hide('test');
-            expect(template.visibility).toBeFalsy();
+            let control = vffData.getControl('dropdown');
+            expect(control.getValue()).toBe(value);
+            expect(control.getOptions().ui).toBe(ui);
+
 
         });
-        it('Should NOT affect the visibility property value in the given template if visibility does not exists' , () => {
-            let template = vffData.registerTemplate('test', {"some prop" : "some value"});
-            expect(template.visibility).toBeUndefined();
-            vffData.hide('test');
-            expect(template.visibility).toBeUndefined();
-        });
     });
-    describe('toggle', () => {
-        it('Should toggle the visibility property value in the given template', () => {
-            let template = vffData.registerTemplate('test', {visibility : true});
-            vffData.toggle('test');
-            expect(template.visibility).toBeFalsy();
-            vffData.toggle('test');
-            expect(template.visibility).toBeTruthy();
+
+
+    describe('getControls', () => {
+
+       it('should return all controls when called without arguments', ()=> {
+           vffData.registerControl('control 1', controlValue);
+           vffData.registerControl('control 2', controlValue);
+           vffData.registerControl('control 3', controlValue);
+           expect(vffData.getControls().length).toBe(3);
+       });
+       it('should return all controls when called with empty string', ()=> {
+           vffData.registerControl('control 1', controlValue);
+           vffData.registerControl('control 2', controlValue);
+           vffData.registerControl('control 3', controlValue);
+           expect(vffData.getControls('').length).toBe(3);
+       });
+       it('should return all namespace controls', ()=> {
+           vffData.registerControl('group1.control 1', controlValue);
+           vffData.registerControl('group1.control 2', controlValue);
+           vffData.registerControl('group2.control 3', controlValue);
+           expect(vffData.getControls('group1').length).toBe(2);
+           expect(vffData.getControls('group2').length).toBe(1);
+       });
+        it('should return all control by name when no namespace found', ()=> {
+            vffData.registerControl('group1.control 1', controlValue);
+            vffData.registerControl('group1.control 2', controlValue);
+            vffData.registerControl('group2.control 1', controlValue);
+            expect(vffData.getControls('control 1').length).toBe(2);
 
         });
-        it('Should NOT affect the visibility property value in the given template if visibility does not exists' , () => {
-            let template = vffData.registerTemplate('test', {"some prop" : "some value"});
-            expect(template.visibility).toBeUndefined();
-            vffData.toggle('test');
-            expect(template.visibility).toBeUndefined();
+       it('should return list with one control when called with specific control name', ()=> {
+           vffData.registerControl('group1.control 1', controlValue);
+           vffData.registerControl('group1.control 2', controlValue);
+           vffData.registerControl('group2.control 3', controlValue);
+           expect(vffData.getControls('group1.control 1').length).toBe(1);
+       });
+    });
+
+    describe('getControl', () => {
+        it('should throw an error when called without arguments', ()=> {
+            vffData.registerControl('control 1', controlValue);
+            vffData.registerControl('control 2', controlValue);
+            vffData.registerControl('control 3', controlValue);
+
+            expect(vffData.getControl).toThrowError(/Missing Arguments/);
+        });
+        it('should return undefined when called with group name only', ()=> {
+            vffData.registerControl('group1.control 1', controlValue);
+            vffData.registerControl('group1.control 2', controlValue);
+            vffData.registerControl('group2.control 3', controlValue);
+
+            expect(vffData.getControl('group1')).toBeUndefined();
+        });
+        it('should return control when called with specific control name', ()=> {
+            let c = vffData.registerControl('group1.control 1', controlValue);
+            vffData.registerControl('group1.control 2', controlValue);
+            vffData.registerControl('group2.control 3', controlValue);
+
+            expect(vffData.getControl('group1.control 1')).toBe(c);
+        });
+        it('should return first control found when search by name without group', ()=> {
+            let c1 = vffData.registerControl('group1.control 1', controlValue);
+            let c2 = vffData.registerControl('group1.control 2', controlValue);
+            let c3 = vffData.registerControl('group2.control 1', controlValue);
+
+            expect(vffData.getControl('control 1')).toBe(c1);
         });
     });
+
     describe('onUpdate', () => {
         it('Should set the CB function', () => {
             let updateFunc = () => {};
