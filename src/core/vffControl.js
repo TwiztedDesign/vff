@@ -38,7 +38,12 @@ export default class VFFControl {
         this._middleware = [];
         this._timeouts = new WeakMap();
 
-        this._setValue(value);
+
+        if(value && value.value){
+            value = value.value;
+        }
+        this._value = value;
+        this._updateBoundElements();
     }
 
     getGroup(){ return this._options.group; }
