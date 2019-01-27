@@ -1,5 +1,5 @@
 import {defer, setByPath, deepCompare} from "../utils/helpers";
-import {EXPOSE_DELIMITER, NAMESPACE_DELIMITER, ATTRIBUTE} from "./consts";
+import {EXPOSE_DELIMITER, NAMESPACE_DELIMITER, ATTRIBUTE, DEFAULT_GROUP_NAME} from "./consts";
 import {send} from "../utils/messenger";
 import {OUTGOING_EVENT, USER_UPDATE} from "../utils/events";
 import {vffData} from "./vffData";
@@ -7,7 +7,7 @@ import VFFEvent from "./vffEvent";
 
 
 const DEFAULT_OPTIONS = {
-    group   : 'untitled template',
+    group   : DEFAULT_GROUP_NAME,
     global  : false,
     bindTo  : undefined
 };
