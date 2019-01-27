@@ -6,18 +6,34 @@ import {NAMESPACE_DELIMITER} from '../consts';
 
 
 function update(data){
-    let timecode, changed = false;
-    for(let templateName in data){
-        for(let key in data[templateName]) {
-            if(key !== '__timecode__'){
-                if(!timecode) timecode = data[templateName].__timecode__;
-                changed = vffData.updateControl(`${templateName}${NAMESPACE_DELIMITER}${key}`, data[templateName][key], {timecode}) || changed;
+    let timecode, globalChange = false, promises = [], templateChange = {};
+    return new Promise((resolve, reject) => {
+        for(let templateName in data){
+            for(let key in data[templateName]) {
+                if(key !== '__timecode__'){
+                    if(!timecode) timecode = data[templateName].__timecode__;
+                    promises.push(new Promise((resolve, reject) => {
+                        let controlName = `${templateName}${NAMESPACE_DELIMITER}${key}`;
+
+                        vffData.updateControl(controlName, data[templateName][key], {timecode}).then(controlChange => {
+                            templateChange[templateName] = controlChange || templateChange[templateName];
+                            globalChange = controlChange || globalChange;
+                            broadcast(controlName, { dataChanged: controlChange ,timecode});
+                            resolve();
+                        }, reject);
+                    }));
+                }
             }
-            broadcast(`${VFF_EVENT}${templateName}${NAMESPACE_DELIMITER}${key}`, { dataChanged: changed ,timecode});
         }
-        broadcast(VFF_EVENT + templateName, {dataChanged: changed ,timecode});
-    }
-    broadcast(VFF_EVENT, {dataChanged: changed, timecode});
+
+        Promise.all(promises).then(()=>{
+            for(let templateName in data){
+                broadcast(VFF_EVENT + templateName, {dataChanged: templateChange[templateName] ,timecode});
+            }
+            broadcast(VFF_EVENT, {dataChanged: globalChange, timecode});
+            resolve();
+        }, reject);
+    });
 }
 
 function updateInteraction(data){

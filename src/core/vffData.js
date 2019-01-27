@@ -87,7 +87,7 @@ class VffData {
             }
             return control._setValue(value);
         }
-        return false;
+        return Promise.resolve(false);
     }
 
     getControl(name){
@@ -175,6 +175,12 @@ class VffData {
     }
     getQueryParams(){
         return this._queryParams;
+    }
+    clear(){
+        this._controls = [];
+        this._registerControlTimeouts = {};
+        this._listeners = {};
+        this._timeouts = new WeakMap();
     }
 
     _runCallback(callback, options, ...data){

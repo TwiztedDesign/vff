@@ -15,7 +15,11 @@
 <body ng-app="myApp" ng-controller="Ctrl">
 
     <div id="header">
-        <vff-videobox style="position:absolute; width:300px; height: 300px;" vff-control="jumbo1" name="jumbo1" id="jumbo1"></vff-videobox>
+
+        <h1 vff-bind="header.title"></h1>
+        <h1 vff-bind="header.sub"></h1>
+
+        <vff-videobox class="videobox" signaling-server="www.google.com" style="position:absolute; width:300px; height: 300px;" vff-control="jumbo1" name="jumbo1" id="jumbo1"></vff-videobox>
         <h1 id="clock1"></h1>
         <h1 id="clock2"></h1>
         <h1 id="clock3"></h1>

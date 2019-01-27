@@ -31,6 +31,7 @@ let vff = (selector) => {
 vff.registerControl     = (name, value, options) => {return vffData.registerControl(name, value, options);};
 vff.registerControls    = (object, options) => {return vffData.registerControls(object, options);};
 vff.updateControl       = (name, value, options) => {return vffData.updateControl(name, value, options);};
+vff.getControl          = (name) => {return vffData.getControl(name);};
 
 
 vff.onUpdate            = (cb) => {return vffData.onUpdate(cb);};

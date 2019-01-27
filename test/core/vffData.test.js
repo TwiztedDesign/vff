@@ -4,7 +4,7 @@ import {ADD} from "../../src/utils/events";
 import {docRef} from "../../src/utils/helpers";
 import {REGISTER_TEMPLATE} from "../../src/utils/docRefs";
 
-let data = {visibility: false};
+let controlName = 'testControl', controlValue = 'hello';
 let send = jest.spyOn(messenger, 'send');
 
 describe('vff Data', () => {
@@ -14,42 +14,33 @@ describe('vff Data', () => {
 
     describe('clear', () => {
         it('Should clear all the data', () => {
-            vffData.registerTemplate('test', data);
-            expect(vffData.getTemplate('test')).toBeDefined();
-            expect(vffData.getTemplates().length).toBe(1);
+            vffData.registerControl(controlName, controlValue);
+            expect(vffData._controls.length).toBe(1);
             vffData.clear();
-            expect(vffData.getTemplate('test')).toBeUndefined();
-            expect(vffData.getTemplates().length).toBe(0);
+            expect(vffData._controls.length).toBe(0);
         });
     });
 
-    describe('registerTemplate', () => {
-        it('Should return a template object', () => {
-            var template = vffData.registerTemplate('test', data);
-            expect(template).toBeDefined();
+    describe('registerControl', () => {
+        it('Should return a control object', () => {
+            let control = vffData.registerControl(controlName, controlValue);
+            expect(control).toBeDefined();
         });
-        it('Should add a template', () => {
-            expect(vffData.getTemplates().length).toBe(0);
-            vffData.registerTemplate('test', data);
-            expect(vffData.getTemplates().length).toBe(1)
+        it('Should add a control', () => {
+            expect(vffData._controls().length).toBe(0);
+            vffData.registerControl('test', data);
+            expect(vffData._controls().length).toBe(1)
         });
-        it('Should update or add the data to an already existing template', () => {
-            let template = vffData.registerTemplate('test', data);
-            expect(template.newProp).toBeUndefined();
-            vffData.registerTemplate('test', {newProp : 'some value'});
-            expect(template.newProp).toBeDefined();
-            expect(vffData.getTemplates().length).toBe(1);
-
+        it('Should update the value of an existing control', () => {
+            let control = vffData.registerControl(controlName, controlValue);
+            let newValue = 'new value';
+            expect(control.getValue()).toBe(controlValue);
+            vffData.registerControl(controlName, newValue);
+            expect(control.getValue()).toBe(newValue);
+            expect(vffData._controls.length).toBe(1);
         });
-        it('Should not affect or add to the data of an already existing template when passed empty data', () => {
-            let template = vffData.registerTemplate('test', data);
-            expect(template.visibility).toBe(false);
-            vffData.registerTemplate('test', {});
-            expect(template.visibility).toBe(false);
-            expect(vffData.getTemplates().length).toBe(1);
-        });
-        it('Should emit an event', () => {
-            vffData.registerTemplate('test', data);
+        xit('Should emit an event', () => {
+            vffData.registerControl(controlName, controlValue);
             expect(send).toHaveBeenCalledTimes(1);
             expect(send).toHaveBeenCalledWith(ADD, {
                 channel : 'test',
@@ -57,29 +48,7 @@ describe('vff Data', () => {
                 data    : data
             });
         });
-        it('Should emit an event with options', () => {
-            vffData.registerTemplate('test', data, {someOption : 'opt1'});
-            expect(send).toHaveBeenCalledTimes(1);
-            expect(send).toHaveBeenCalledWith(ADD, {
-                channel : 'test',
-                options : expect.objectContaining({someOption: 'opt1'}),
-                data    : data
-            });
-        });
-        it('Should emit an event with overridden options', () => {
-            vffData.registerTemplate('test', data, {updateOn : 'control'});
-            expect(send).toHaveBeenCalledTimes(1);
-            expect(send).toHaveBeenCalledWith(ADD, {
-                channel : 'test',
-                options : expect.objectContaining({updateOn: 'control'}),
-                data    : data
-            });
-        });
-        it('Should throw an error triggered with missing arguments, without data', () => {
-            expect(() => {
-                vffData.registerTemplate('test');
-            }).toThrow(new Error('Missing Arguments, please refer to: ' + docRef(REGISTER_TEMPLATE)));
-        });
+
     });
 
     describe('getTemplates', () => {

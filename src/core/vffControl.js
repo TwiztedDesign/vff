@@ -84,12 +84,16 @@ export default class VFFControl {
             value = value.value;
         }
         let valueChanged = !deepCompare(this._value,value);
-        this._runMiddleware(this._middleware, value).then(value => {
-            this._value = value;
-            this._updateBoundElements();
-            this._runListeners(valueChanged);
+        return new Promise((resolve, reject) => {
+            this._runMiddleware(this._middleware, value).then(value => {
+                this._value = value;
+                this._updateBoundElements();
+                this._runListeners(valueChanged);
+                resolve(valueChanged);
+            }, reject);
         });
-        return valueChanged;
+
+
     }
 
     updateValue(value){
