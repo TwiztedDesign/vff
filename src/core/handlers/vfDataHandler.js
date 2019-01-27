@@ -1,5 +1,6 @@
 import {updateInteraction} from './updateHandler';
 import WebRTC from '../webrtc/webrtc';
+import {vffData} from '../vffData.js';
 
 function handleVFData(data) {
     if(data.settings.sync && !window.webrtc) {
@@ -10,6 +11,11 @@ function handleVFData(data) {
             }
         });
     }
+    if(data.mode){
+        window.vff.mode = data.mode;
+    }
+
+    vffData.onReady();
 
 }
 

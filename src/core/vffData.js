@@ -21,6 +21,7 @@ class VffData {
         this._pagesDefer = defer();
         this._registerControlTimeouts = {};
         this._listeners = {};
+        this._readyCallbacks = [];
         this._timeouts = new WeakMap();
     }
 
@@ -78,7 +79,7 @@ class VffData {
         }
     }
 
-    updateControl(name, value, options) {
+    _updateControl(name, value, options) {
         let control = this.getControl(name);
         if (control) {
             //TODO make better
@@ -88,6 +89,13 @@ class VffData {
             return control._setValue(value);
         }
         return Promise.resolve(false);
+    }
+
+    updateControl(name, value) {
+        let control = this.getControl(name);
+        if (control) {
+            return control.updateValue(value);
+        }
     }
 
     getControl(name){
@@ -207,6 +215,14 @@ class VffData {
             });
         }, Promise.resolve(data));
     }
+
+    ready(cb){
+        this._readyCallbacks.push(cb);
+    }
+    onReady(){
+        this._readyCallbacks.forEach(cb => {cb();});
+    }
+
 }
 
 

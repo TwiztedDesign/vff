@@ -7,7 +7,7 @@ import {init as initVffDom} from './core/initDOM';
 import vffElement from './core/vffElement';
 import './core/defaultExpose';
 import "./components/components.js";
-import {isMobile, isController, mode, extend, defer, uuid} from './utils/helpers';
+import {isMobile, isController, extend, defer, uuid} from './utils/helpers';
 import * as eventsApi from './core/api/events';
 import * as playerApi from './core/api/player';
 import * as visibilityApi from './core/api/visibility';
@@ -32,6 +32,7 @@ vff.registerControl     = (name, value, options) => {return vffData.registerCont
 vff.registerControls    = (object, options) => {return vffData.registerControls(object, options);};
 vff.updateControl       = (name, value, options) => {return vffData.updateControl(name, value, options);};
 vff.getControl          = (name) => {return vffData.getControl(name);};
+vff.ready               = (cb) => {return vffData.ready(cb);};
 
 
 vff.onUpdate            = (cb) => {return vffData.onUpdate(cb);};
@@ -43,8 +44,8 @@ vff.send                = (type, payload) => { send(type, payload); };
 vff.request             = (type, payload, cb) => { request(type, payload, cb); };
 vff.setup               = (options) => {return setup(options);};
 vff.isMobile            = isMobile;
-vff.isController        = isController;
-vff.mode                = mode; //Current
+vff.isController        = () => {return vff.mode === MODE.PREVIEW || vff.mode === MODE.PROGRAM};
+vff.mode                = MODE.NORMAL;
 vff.MODE                = MODE; //Enum
 vff.defer               = defer;
 vff.extend              = (name, extension) => { vff[name] = extension; };

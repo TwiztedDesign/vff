@@ -110,18 +110,18 @@ function deepExtend(destination, source) {
 }
 
 
-function modeCheck(){
-    //"controller_preview" "controller_program" "editor" "player_external" "player_internal"
-    let mode = 'normal';
-
-    try{
-        let frame = window.frameElement.ownerDocument.defaultView.frameElement;
-        mode = frame.getAttribute('vff-mode') || mode;
-    } catch (err){
-        // not in iframe
-    }
-    return mode;
-}
+// function modeCheck(){
+//     //"controller_preview" "controller_program" "editor" "player_external" "player_internal"
+//     let mode = 'normal';
+//
+//     try{
+//         let frame = window.frameElement.ownerDocument.defaultView.frameElement;
+//         mode = frame.getAttribute('vff-mode') || mode;
+//     } catch (err){
+//         // not in iframe
+//     }
+//     return mode;
+// }
 function docRef(anchor){
     return 'https://www.videoflow.io/documentation/api/vff?id=' + anchor;
 }
@@ -347,7 +347,7 @@ module.exports = {
     deepCompare     : deepCompare,
     isMobile        : mobilecheck(),
     isController    : controllerCheck(),
-    mode            : modeCheck(),
+    // mode            : modeCheck(),
     docRef          : docRef,
     broadcast       : broadcast,
     on              : on,

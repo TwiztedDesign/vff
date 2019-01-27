@@ -34,6 +34,11 @@ document.querySelector('.videobox').signalingServer = 'https://www.google.com';
 
 
 
+    console.log('Before ready', vff.mode, vff.isController());
+
+    vff.ready(() => {
+        console.log('Ready', vff.mode, vff.isController());
+    });
 
 
     let events = 0;
@@ -58,9 +63,7 @@ document.querySelector('.videobox').signalingServer = 'https://www.google.com';
     }, {throttle : false});
 
 
-vff.registerControl("bind", "bounded value");
-
-
+    vff.registerControl("bind", "bounded value");
 
 }]);
 

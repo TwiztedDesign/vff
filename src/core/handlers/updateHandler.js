@@ -15,7 +15,7 @@ function update(data){
                     promises.push(new Promise((resolve, reject) => {
                         let controlName = `${templateName}${NAMESPACE_DELIMITER}${key}`;
 
-                        vffData.updateControl(controlName, data[templateName][key], {timecode}).then(controlChange => {
+                        vffData._updateControl(controlName, data[templateName][key], {timecode}).then(controlChange => {
                             templateChange[templateName] = controlChange || templateChange[templateName];
                             globalChange = controlChange || globalChange;
                             broadcast(controlName, { dataChanged: controlChange ,timecode});
