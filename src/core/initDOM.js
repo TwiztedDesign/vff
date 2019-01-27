@@ -26,7 +26,7 @@ function initDOM() {
         if(control.options && typeof control.options === 'function'){
             options = Object.assign({}, control.options(), options);
         }
-        options.element = control;
+        // options.element = control;
 /*********************************************************************************************/
 
         let exposed = control.expose? control.expose() : {};
@@ -44,8 +44,7 @@ function initDOM() {
 
                 vffData.registerControl(name + EXPOSE_DELIMITER + prop,
                     attribute? control.getAttribute(path) : getByPath(control, path),
-                    {bindTo : path, ui, attribute});
-
+                    Object.assign({bindTo : path, ui, attribute},options));
             }
         }
         if(control instanceof HTMLTextAreaElement || control instanceof HTMLInputElement){
