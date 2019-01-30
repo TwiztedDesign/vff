@@ -1,6 +1,7 @@
 import {join} from 'path';
 const WebpackShellPlugin = require('webpack-shell-plugin');
 const MinifyPlugin = require("babel-minify-webpack-plugin");
+const webpack = require('webpack');
 
 const include = join(__dirname, 'src');
 
@@ -15,7 +16,7 @@ module.exports =  {
         libraryTarget   : 'umd',
         library         : 'vff'
     },
-    devtool             : 'eval-source-map',
+    devtool             : false,
     module              : {
         rules         : [
             {
@@ -64,6 +65,9 @@ module.exports =  {
         }),
         new MinifyPlugin({}, {
             include: /vff\.min\.js$/,
+        }),
+        new webpack.SourceMapDevToolPlugin({
+            filename: '[name].js.map',
         })
     ]
 };
