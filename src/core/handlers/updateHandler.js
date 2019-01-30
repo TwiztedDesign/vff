@@ -2,15 +2,15 @@ import {broadcast} from '../../utils/helpers.js';
 import {vffData} from '../vffData.js';
 import {isInteractionEvent, dispatchEvent} from '../interactionEvents';
 import {VFF_EVENT} from '../../utils/events';
-import {NAMESPACE_DELIMITER} from '../consts';
+import {NAMESPACE_DELIMITER, TIMECODE} from '../consts';
 
 
-function update(data){
+async function update(data){
     let timecode, globalChange = false, promises = [], templateChange = {};
     return new Promise((resolve, reject) => {
         for(let templateName in data){
             for(let key in data[templateName]) {
-                if(key !== '__timecode__'){
+                if(key !== TIMECODE){
                     if(!timecode) timecode = data[templateName].__timecode__;
                     promises.push(new Promise((resolve, reject) => {
                         let controlName = `${templateName}${NAMESPACE_DELIMITER}${key}`;

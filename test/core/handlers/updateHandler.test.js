@@ -1,65 +1,70 @@
 import {vffData} from '../../../src/core/vffData.js';
-import {_init} from '../../../src/core/initDOM';
 const updateHandler  = require('../../../src/core/handlers/updateHandler.js');
 const helpers = require('../../../src/utils/helpers.js');
-
+const interactionEvents = require('../../../src/core/interactionEvents');
+const {NAMESPACE_DELIMITER, TIME_CODE} = require('../../../src/core/consts');
 
 /******************************* global spies ********************************/
 
-const updateCB = jest.spyOn(vffData, 'updateCB');
-const setByPath = jest.spyOn(helpers, 'setByPath');
-const data = {prop : "value"};
-let template;
+const broadcastSpy = jest.spyOn(helpers, 'broadcast');
 const templateName = 'test';
+const controlName = `control`;
+const controlData = "value";
+let control = {};
 /****************************************************************************/
 
 describe('Update Handler', () => {
     beforeEach(() => {
         document.body.innerHTML = '';
         vffData.clear();
-        template = vffData.registerTemplate(templateName, data);
+        control = vffData.registerControl(`${templateName}${NAMESPACE_DELIMITER}${controlName}`, controlData);
     });
 
     describe('Update', () => {
-        it('Should update the data in a given template as passed in the data obj', (done) => {
-            updateHandler.update({'test': {prop: 'some other value'}}).then(() => {
-                expect(template.prop).toBe('some other value');
-                updateHandler.update({'TeSt': {prop: 'some third value'}}).then(() => {
-                    expect(template.prop).toBe('some third value');
-                    expect(updateCB).toHaveBeenCalledTimes(2);
-                    done();
-                });
-            });
-        });
-        it('Should add the passed property with value to the DOM element object', () => {
-            let headerElement = document.createElement('h1');
-            headerElement.setAttribute("vff-template", 'dom-test');
-            headerElement.setAttribute("vff-name", 'vff-title');
-            document.body.appendChild(headerElement);
-            _init();
+        it('Should update the data in a given template as passed in the data obj', async () => {
+            //Arrange
+            let newValue = 'new value';
+            let payload = {
+                [templateName]:{
+                    [controlName]: newValue,
+                    [TIME_CODE] : Date.now()
+                }
+            };
 
+            //Act
+            await updateHandler.update(payload);
 
-            expect(vffData.getTemplates().length).toBe(2);
-            expect(vffData.getTemplate('dom-test')).toBeDefined();
-
-            // updateHandler.update({'dom-test': {'vff-title title': 'test title'}});
-            //
-            // expect(vffData.getTemplate('dom-test').getElement().title).toBe('test title');
-
-            // vffData.registerTemplate('dom-test', {'vff-title': 'title'});
-            // let testElement = document.querySelector('[vff-template="dom-test" i] [vff-name="vff-title" i], [vff-template="dom-test" i][vff-name="vff-title" i]');
-            // updateHandler.update({'dom-test': {'vff-title title': 'test title'}});
-            // expect(testElement.title).toBe('test title');
-
-            // expect(setByPath).toHaveBeenCalledWith(testElement, 'title', 'test title');
-        });
-        it('should handle nested objects', (done) => {
-            updateHandler.update({'test' : {prop: { prop1 : 'some other value'}}}).then(() => {
-                expect(template.prop.prop1).toBe('some other value');
-                done();
-            });
-
+            //Assert
+            expect(control.getValue()).toBe(newValue);
+            //Update 3 times for each level, the control, template, and global
+            expect(broadcastSpy).toHaveBeenCalledTimes(3);
         });
 
+        it('Should update all the interaction', async () => {
+            //Arrange
+            const isInteractionEventSpy = jest.spyOn(interactionEvents, 'isInteractionEvent');
+            const dispatchEventSpy = jest.spyOn(interactionEvents, 'dispatchEvent');
+            isInteractionEventSpy.mockReturnValueOnce(templateName);
+            let newValue = 'new value';
+            let templateName2 = templateName + '1';
+            let payload = {
+                [templateName]:{
+                    [controlName]: newValue,
+                    [TIME_CODE] : Date.now()
+                },
+                [templateName2]:{
+                [controlName]: newValue,
+                    [TIME_CODE] : Date.now()
+                }
+            };
+
+            //Act
+            updateHandler.updateInteraction(payload);
+
+            //Assert
+            //Running on the templates
+            expect(isInteractionEventSpy).toHaveBeenCalledTimes(2);
+            expect(dispatchEventSpy).toHaveBeenCalledTimes(1);
+        });
     });
 });

@@ -2,6 +2,7 @@ module.exports = {
     EXPOSE_DELIMITER    : " ",
     NAMESPACE_DELIMITER : ".",
     DEFAULT_GROUP_NAME  : "untitled template",
+    TIMECODE           : "__timecode__",
     UI                  : {
         MULTISELECT     : 'multiselect',
         DROPDOWN        : 'dropdown',

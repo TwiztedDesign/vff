@@ -42,9 +42,11 @@ module.exports = {
     },
 
     lookupElementByXPath : (path) => {
-        let evaluator = new XPathEvaluator();
-        let result = evaluator.evaluate(path, document.documentElement, null,XPathResult.FIRST_ORDERED_NODE_TYPE, null);
-        return  result.singleNodeValue;
+        if(path) {
+            let evaluator = new XPathEvaluator();
+            let result = evaluator.evaluate(path, document.documentElement, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+            return result.singleNodeValue;
+        }
     },
     getElementByXpath : (path) => {
         return document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
