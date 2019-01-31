@@ -1,19 +1,19 @@
+import {vffData} from "../../../src/core/vffData";
 const queryParamsHandler  = require('../../../src/core/handlers/queryParamsHandler.js');
-
-/******************************* global spies ********************************/
-
-const queryParams = jest.spyOn(queryParamsHandler, 'queryParams');
-
-/****************************************************************************/
-
 describe('Query Params Handler', () => {
 
     describe('Query params', () => {
         it('Should Add the passed query params object to vff data', () => {
+            //Arrange
+            const addQueryParamsSpy = jest.spyOn(vffData, 'addQueryParams');
+            let queryParamsMock = {};
 
-            queryParamsHandler.queryParams({inspect: '1'});
-            expect(queryParams).toHaveBeenCalledWith({inspect: '1'});
+            //Act
+            queryParamsHandler.queryParams(queryParamsMock);
 
+            //Assert
+            expect(addQueryParamsSpy).toHaveBeenCalledWith(queryParamsMock);
+            expect(addQueryParamsSpy).toHaveBeenCalledTimes(1);
         });
     });
 });
