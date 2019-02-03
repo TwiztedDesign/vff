@@ -25,7 +25,7 @@ class VffElement{
             }
         }
     }
-    onChange(){
+    on(){
         let prop = arguments.length > 1? arguments[0] : null;
         let cb   = arguments.length > 1? arguments[1] : arguments[0];
         let event = prop? "vff-change-" + prop : 'vff-change';
