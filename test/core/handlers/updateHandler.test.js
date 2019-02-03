@@ -21,7 +21,7 @@ describe('Update Handler', () => {
     });
 
     describe('Update', () => {
-        it('Should update the data in a given template as passed in the data obj', async () => {
+        it('Should update the data in a given template as passed in the data obj', () => {
             //Arrange
             let newValue = 'new value';
             let payload = {
@@ -32,15 +32,15 @@ describe('Update Handler', () => {
             };
 
             //Act
-            await updateHandler.update(payload);
-
-            //Assert
-            expect(control.getValue()).toBe(newValue);
-            //Update 3 times for each level, the control, template, and global
-            expect(broadcastSpy).toHaveBeenCalledTimes(3);
+            updateHandler.update(payload).then(() => {
+                //Assert
+                expect(control.getValue()).toBe(newValue);
+                //Update 3 times for each level, the control, template, and global
+                expect(broadcastSpy).toHaveBeenCalledTimes(3);
+            });
         });
 
-        it('Should update all the interaction', async () => {
+        it('Should update all the interaction',  () => {
             //Arrange
             const isInteractionEventSpy = jest.spyOn(interactionEvents, 'isInteractionEvent');
             const dispatchEventSpy = jest.spyOn(interactionEvents, 'dispatchEvent');
@@ -59,12 +59,12 @@ describe('Update Handler', () => {
             };
 
             //Act
-            updateHandler.updateInteraction(payload);
-
-            //Assert
-            //Running on the templates
-            expect(isInteractionEventSpy).toHaveBeenCalledTimes(2);
-            expect(dispatchEventSpy).toHaveBeenCalledTimes(1);
+            updateHandler.updateInteraction(payload).then(()=>{
+                //Assert
+                //Running on the templates
+                expect(isInteractionEventSpy).toHaveBeenCalledTimes(2);
+                expect(dispatchEventSpy).toHaveBeenCalledTimes(1);
+            });
         });
     });
 });

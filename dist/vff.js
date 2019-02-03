@@ -1663,63 +1663,6 @@ module.exports = handlers;
 "use strict";
 
 
-var update = function () {
-    var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(data) {
-        var timecode, globalChange, promises, templateChange;
-        return regeneratorRuntime.wrap(function _callee$(_context) {
-            while (1) {
-                switch (_context.prev = _context.next) {
-                    case 0:
-                        timecode = void 0, globalChange = false, promises = [], templateChange = {};
-                        return _context.abrupt('return', new Promise(function (resolve, reject) {
-                            var _loop = function _loop(templateName) {
-                                var _loop2 = function _loop2(key) {
-                                    if (key !== _consts.TIMECODE) {
-                                        if (!timecode) timecode = data[templateName].__timecode__;
-                                        promises.push(new Promise(function (resolve, reject) {
-                                            var controlName = '' + templateName + _consts.NAMESPACE_DELIMITER + key;
-
-                                            _vffData.vffData._updateControl(controlName, data[templateName][key], { timecode: timecode }).then(function (controlChange) {
-                                                templateChange[templateName] = controlChange || templateChange[templateName];
-                                                globalChange = controlChange || globalChange;
-                                                (0, _helpers.broadcast)(controlName, { dataChanged: controlChange, timecode: timecode });
-                                                resolve();
-                                            }, reject);
-                                        }));
-                                    }
-                                };
-
-                                for (var key in data[templateName]) {
-                                    _loop2(key);
-                                }
-                            };
-
-                            for (var templateName in data) {
-                                _loop(templateName);
-                            }
-
-                            Promise.all(promises).then(function () {
-                                for (var templateName in data) {
-                                    (0, _helpers.broadcast)(_events.VFF_EVENT + templateName, { dataChanged: templateChange[templateName], timecode: timecode });
-                                }
-                                (0, _helpers.broadcast)(_events.VFF_EVENT, { dataChanged: globalChange, timecode: timecode });
-                                resolve();
-                            }, reject);
-                        }));
-
-                    case 2:
-                    case 'end':
-                        return _context.stop();
-                }
-            }
-        }, _callee, this);
-    }));
-
-    return function update(_x) {
-        return _ref.apply(this, arguments);
-    };
-}();
-
 var _helpers = __webpack_require__(0);
 
 var _vffData = __webpack_require__(2);
@@ -1730,7 +1673,47 @@ var _events = __webpack_require__(1);
 
 var _consts = __webpack_require__(4);
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+function update(data) {
+    var timecode = void 0,
+        globalChange = false,
+        promises = [],
+        templateChange = {};
+    return new Promise(function (resolve, reject) {
+        var _loop = function _loop(templateName) {
+            var _loop2 = function _loop2(key) {
+                if (key !== _consts.TIMECODE) {
+                    if (!timecode) timecode = data[templateName].__timecode__;
+                    promises.push(new Promise(function (resolve, reject) {
+                        var controlName = '' + templateName + _consts.NAMESPACE_DELIMITER + key;
+
+                        _vffData.vffData._updateControl(controlName, data[templateName][key], { timecode: timecode }).then(function (controlChange) {
+                            templateChange[templateName] = controlChange || templateChange[templateName];
+                            globalChange = controlChange || globalChange;
+                            (0, _helpers.broadcast)(controlName, { dataChanged: controlChange, timecode: timecode });
+                            resolve();
+                        }, reject);
+                    }));
+                }
+            };
+
+            for (var key in data[templateName]) {
+                _loop2(key);
+            }
+        };
+
+        for (var templateName in data) {
+            _loop(templateName);
+        }
+
+        Promise.all(promises).then(function () {
+            for (var templateName in data) {
+                (0, _helpers.broadcast)(_events.VFF_EVENT + templateName, { dataChanged: templateChange[templateName], timecode: timecode });
+            }
+            (0, _helpers.broadcast)(_events.VFF_EVENT, { dataChanged: globalChange, timecode: timecode });
+            resolve();
+        }, reject);
+    });
+}
 
 function updateInteraction(data) {
     for (var event in data) {

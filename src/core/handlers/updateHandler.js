@@ -5,7 +5,7 @@ import {VFF_EVENT} from '../../utils/events';
 import {NAMESPACE_DELIMITER, TIMECODE} from '../consts';
 
 
-async function update(data){
+function update(data){
     let timecode, globalChange = false, promises = [], templateChange = {};
     return new Promise((resolve, reject) => {
         for(let templateName in data){
