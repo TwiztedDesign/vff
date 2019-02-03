@@ -9,7 +9,8 @@ import VFFEvent from "./vffEvent";
 const DEFAULT_OPTIONS = {
     group   : DEFAULT_GROUP_NAME,
     global  : false,
-    bindTo  : undefined
+    bindTo  : undefined,
+    updateOn: 'control'
 };
 
 const DEFAULT_ON_OPTIONS = {
