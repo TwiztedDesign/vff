@@ -70,7 +70,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 8);
+/******/ 	return __webpack_require__(__webpack_require__.s = 7);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -489,15 +489,15 @@ var _helpers = __webpack_require__(0);
 
 var _messenger = __webpack_require__(3);
 
-var _docRefs = __webpack_require__(11);
+var _docRefs = __webpack_require__(10);
 
 var _consts = __webpack_require__(4);
 
-var _vffControl = __webpack_require__(12);
+var _vffControl = __webpack_require__(11);
 
 var _vffControl2 = _interopRequireDefault(_vffControl);
 
-var _vffEvent = __webpack_require__(6);
+var _vffEvent = __webpack_require__(5);
 
 var _vffEvent2 = _interopRequireDefault(_vffEvent);
 
@@ -829,7 +829,7 @@ module.exports = {
     send: sendMessage,
     request: request
 };
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(8)))
 
 /***/ }),
 /* 4 */
@@ -862,8 +862,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 5 */,
-/* 6 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -885,13 +884,13 @@ var VFFEvent = function VFFEvent(data) {
 exports.default = VFFEvent;
 
 /***/ }),
-/* 7 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _xpath = __webpack_require__(16);
+var _xpath = __webpack_require__(15);
 
 var _messenger = __webpack_require__(3);
 
@@ -1004,7 +1003,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 8 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1012,43 +1011,43 @@ module.exports = {
 
 var _messenger = __webpack_require__(3);
 
-var _vffSetup = __webpack_require__(10);
+var _vffSetup = __webpack_require__(9);
 
 var _events = __webpack_require__(1);
 
 var _vffData = __webpack_require__(2);
 
-var _listener = __webpack_require__(13);
+var _listener = __webpack_require__(12);
 
-var _initDOM = __webpack_require__(21);
+var _initDOM = __webpack_require__(20);
 
-var _vffElement = __webpack_require__(22);
+var _vffElement = __webpack_require__(21);
 
 var _vffElement2 = _interopRequireDefault(_vffElement);
 
-__webpack_require__(24);
+__webpack_require__(23);
 
-__webpack_require__(25);
+__webpack_require__(24);
 
 var _helpers = __webpack_require__(0);
 
-var _events2 = __webpack_require__(42);
+var _events2 = __webpack_require__(35);
 
 var eventsApi = _interopRequireWildcard(_events2);
 
-var _player = __webpack_require__(43);
+var _player = __webpack_require__(36);
 
 var playerApi = _interopRequireWildcard(_player);
 
-var _visibility = __webpack_require__(44);
+var _visibility = __webpack_require__(37);
 
 var visibilityApi = _interopRequireWildcard(_visibility);
 
-var _http = __webpack_require__(45);
+var _http = __webpack_require__(38);
 
 var httpApi = _interopRequireWildcard(_http);
 
-var _interactionEvents = __webpack_require__(7);
+var _interactionEvents = __webpack_require__(6);
 
 var _consts = __webpack_require__(4);
 
@@ -1134,7 +1133,7 @@ vff.extend('http', httpApi);
 module.exports = vff;
 
 /***/ }),
-/* 9 */
+/* 8 */
 /***/ (function(module, exports) {
 
 var g;
@@ -1161,7 +1160,7 @@ module.exports = g;
 
 
 /***/ }),
-/* 10 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1182,7 +1181,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 11 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1193,7 +1192,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 12 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1217,7 +1216,7 @@ var _events = __webpack_require__(1);
 
 var _vffData = __webpack_require__(2);
 
-var _vffEvent = __webpack_require__(6);
+var _vffEvent = __webpack_require__(5);
 
 var _vffEvent2 = _interopRequireDefault(_vffEvent);
 
@@ -1454,13 +1453,13 @@ var VFFControl = function () {
 exports.default = VFFControl;
 
 /***/ }),
-/* 13 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _handlers = __webpack_require__(14);
+var _handlers = __webpack_require__(13);
 
 var handlers = _interopRequireWildcard(_handlers);
 
@@ -1494,21 +1493,21 @@ module.exports = {
 };
 
 /***/ }),
-/* 14 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _updateHandler = __webpack_require__(15);
+var _updateHandler = __webpack_require__(14);
 
-var _pagesHandler = __webpack_require__(17);
+var _pagesHandler = __webpack_require__(16);
 
-var _queryParamsHandler = __webpack_require__(18);
+var _queryParamsHandler = __webpack_require__(17);
 
-var _reloadHandler = __webpack_require__(19);
+var _reloadHandler = __webpack_require__(18);
 
-var _vfDataHandler = __webpack_require__(20);
+var _vfDataHandler = __webpack_require__(19);
 
 var events = __webpack_require__(1);
 
@@ -1523,63 +1522,80 @@ handlers[events.VF_DATA] = _vfDataHandler.handleVFData;
 module.exports = handlers;
 
 /***/ }),
-/* 15 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+var update = function () {
+    var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(data) {
+        var timecode, globalChange, promises, templateChange;
+        return regeneratorRuntime.wrap(function _callee$(_context) {
+            while (1) {
+                switch (_context.prev = _context.next) {
+                    case 0:
+                        timecode = void 0, globalChange = false, promises = [], templateChange = {};
+                        return _context.abrupt('return', new Promise(function (resolve, reject) {
+                            var _loop = function _loop(templateName) {
+                                var _loop2 = function _loop2(key) {
+                                    if (key !== _consts.TIMECODE) {
+                                        if (!timecode) timecode = data[templateName].__timecode__;
+                                        promises.push(new Promise(function (resolve, reject) {
+                                            var controlName = '' + templateName + _consts.NAMESPACE_DELIMITER + key;
+
+                                            _vffData.vffData._updateControl(controlName, data[templateName][key], { timecode: timecode }).then(function (controlChange) {
+                                                templateChange[templateName] = controlChange || templateChange[templateName];
+                                                globalChange = controlChange || globalChange;
+                                                (0, _helpers.broadcast)(controlName, { dataChanged: controlChange, timecode: timecode });
+                                                resolve();
+                                            }, reject);
+                                        }));
+                                    }
+                                };
+
+                                for (var key in data[templateName]) {
+                                    _loop2(key);
+                                }
+                            };
+
+                            for (var templateName in data) {
+                                _loop(templateName);
+                            }
+
+                            Promise.all(promises).then(function () {
+                                for (var templateName in data) {
+                                    (0, _helpers.broadcast)(_events.VFF_EVENT + templateName, { dataChanged: templateChange[templateName], timecode: timecode });
+                                }
+                                (0, _helpers.broadcast)(_events.VFF_EVENT, { dataChanged: globalChange, timecode: timecode });
+                                resolve();
+                            }, reject);
+                        }));
+
+                    case 2:
+                    case 'end':
+                        return _context.stop();
+                }
+            }
+        }, _callee, this);
+    }));
+
+    return function update(_x) {
+        return _ref.apply(this, arguments);
+    };
+}();
+
 var _helpers = __webpack_require__(0);
 
 var _vffData = __webpack_require__(2);
 
-var _interactionEvents = __webpack_require__(7);
+var _interactionEvents = __webpack_require__(6);
 
 var _events = __webpack_require__(1);
 
 var _consts = __webpack_require__(4);
 
-function update(data) {
-    var timecode = void 0,
-        globalChange = false,
-        promises = [],
-        templateChange = {};
-    return new Promise(function (resolve, reject) {
-        var _loop = function _loop(templateName) {
-            var _loop2 = function _loop2(key) {
-                if (key !== _consts.TIMECODE) {
-                    if (!timecode) timecode = data[templateName].__timecode__;
-                    promises.push(new Promise(function (resolve, reject) {
-                        var controlName = '' + templateName + _consts.NAMESPACE_DELIMITER + key;
-
-                        _vffData.vffData._updateControl(controlName, data[templateName][key], { timecode: timecode }).then(function (controlChange) {
-                            templateChange[templateName] = controlChange || templateChange[templateName];
-                            globalChange = controlChange || globalChange;
-                            (0, _helpers.broadcast)(controlName, { dataChanged: controlChange, timecode: timecode });
-                            resolve();
-                        }, reject);
-                    }));
-                }
-            };
-
-            for (var key in data[templateName]) {
-                _loop2(key);
-            }
-        };
-
-        for (var templateName in data) {
-            _loop(templateName);
-        }
-
-        Promise.all(promises).then(function () {
-            for (var templateName in data) {
-                (0, _helpers.broadcast)(_events.VFF_EVENT + templateName, { dataChanged: templateChange[templateName], timecode: timecode });
-            }
-            (0, _helpers.broadcast)(_events.VFF_EVENT, { dataChanged: globalChange, timecode: timecode });
-            resolve();
-        }, reject);
-    });
-}
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 function updateInteraction(data) {
     for (var event in data) {
@@ -1595,7 +1611,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 16 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1660,7 +1676,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 17 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1677,7 +1693,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 18 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1694,7 +1710,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 19 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1709,7 +1725,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 20 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1740,7 +1756,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 21 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1844,7 +1860,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 22 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1856,7 +1872,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _htmlAccessorObserver = __webpack_require__(23);
+var _htmlAccessorObserver = __webpack_require__(22);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -1927,7 +1943,7 @@ var VffElement = function () {
 exports.default = VffElement;
 
 /***/ }),
-/* 23 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1998,7 +2014,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 24 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2018,36 +2034,29 @@ HTMLImageElement.prototype.expose = function () {
 };
 
 /***/ }),
-/* 25 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+__webpack_require__(25);
+
 __webpack_require__(26);
 
-__webpack_require__(27);
-
-var _emoji = __webpack_require__(28);
+var _emoji = __webpack_require__(27);
 
 var _emoji2 = _interopRequireDefault(_emoji);
 
-var _dragArea = __webpack_require__(29);
+var _dragArea = __webpack_require__(28);
 
 var _dragArea2 = _interopRequireDefault(_dragArea);
 
-var _telestratorElement = __webpack_require__(30);
+var _telestratorElement = __webpack_require__(29);
 
 var _telestratorElement2 = _interopRequireDefault(_telestratorElement);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-// import Clock from "./clocks/clock-simple";
-// import SystemClock from "./clocks/system-clock";
-// import Countdown from "./clocks/countdown";
-// import Stopwatch from "./clocks/stopwatch";
-// import BasicClock from "./clocks/basic-clock";
-
 
 function define(name, element) {
     customElements.define(name, element);
@@ -2056,19 +2065,9 @@ function define(name, element) {
 define('drag-area', _dragArea2.default);
 define('my-element', _emoji2.default);
 define('telestrator-element', _telestratorElement2.default);
-// define('clock-element', Clock);
-// define('system-clock', SystemClock);
-// define('countdown-clock', Countdown);
-// define('stopwatch-clock', Stopwatch);
-// define('basic-clock', BasicClock);
-
-
-// function isDefined(name) {
-//     return document.createElement(name).constructor !== HTMLElement;
-// }
 
 /***/ }),
-/* 26 */
+/* 25 */
 /***/ (function(module, exports) {
 
 (function(){
@@ -2111,7 +2110,7 @@ define('telestrator-element', _telestratorElement2.default);
 
 
 /***/ }),
-/* 27 */
+/* 26 */
 /***/ (function(module, exports) {
 
 /* eslint-disable */
@@ -2135,7 +2134,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 /* eslint-enable */
 
 /***/ }),
-/* 28 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2229,7 +2228,7 @@ var MyElement = function (_HTMLElement) {
 exports.default = MyElement;
 
 /***/ }),
-/* 29 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2410,7 +2409,7 @@ var DragArea = function (_HTMLElement) {
 exports.default = DragArea;
 
 /***/ }),
-/* 30 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2422,7 +2421,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-__webpack_require__(31);
+__webpack_require__(30);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -2614,11 +2613,11 @@ var Telestrator = function (_HTMLElement) {
 exports.default = Telestrator;
 
 /***/ }),
-/* 31 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
-var content = __webpack_require__(32);
+var content = __webpack_require__(31);
 
 if(typeof content === 'string') content = [[module.i, content, '']];
 
@@ -2632,7 +2631,7 @@ var options = {"hmr":true}
 options.transform = transform
 options.insertInto = undefined;
 
-var update = __webpack_require__(34)(content, options);
+var update = __webpack_require__(33)(content, options);
 
 if(content.locals) module.exports = content.locals;
 
@@ -2664,10 +2663,10 @@ if(false) {
 }
 
 /***/ }),
-/* 32 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(33)(false);
+exports = module.exports = __webpack_require__(32)(false);
 // imports
 
 
@@ -2678,7 +2677,7 @@ exports.push([module.i, "telestrator-element #telestrator-canvas {\n  position: 
 
 
 /***/ }),
-/* 33 */
+/* 32 */
 /***/ (function(module, exports) {
 
 /*
@@ -2760,7 +2759,7 @@ function toComment(sourceMap) {
 
 
 /***/ }),
-/* 34 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -2826,7 +2825,7 @@ var singleton = null;
 var	singletonCounter = 0;
 var	stylesInsertedAtTop = [];
 
-var	fixUrls = __webpack_require__(35);
+var	fixUrls = __webpack_require__(34);
 
 module.exports = function(list, options) {
 	if (typeof DEBUG !== "undefined" && DEBUG) {
@@ -3142,7 +3141,7 @@ function updateLink (link, options, obj) {
 
 
 /***/ }),
-/* 35 */
+/* 34 */
 /***/ (function(module, exports) {
 
 
@@ -3237,13 +3236,7 @@ module.exports = function (css) {
 
 
 /***/ }),
-/* 36 */,
-/* 37 */,
-/* 38 */,
-/* 39 */,
-/* 40 */,
-/* 41 */,
-/* 42 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3329,7 +3322,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 43 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3356,7 +3349,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 44 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3377,7 +3370,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 45 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
