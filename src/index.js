@@ -10,7 +10,6 @@ import "./components/components.js";
 import {isMobile, extend, defer, uuid} from './utils/helpers';
 import * as eventsApi from './core/api/events';
 import * as playerApi from './core/api/player';
-import * as visibilityApi from './core/api/visibility';
 import * as httpApi from './core/api/http';
 import {bindSyncEvents} from './core/interactionEvents';
 import {MODE} from './core/consts';
@@ -54,7 +53,6 @@ vff.uuid                = uuid();
 vff.sync                = (element) => { bindSyncEvents(element); };
 
 extend(vff, playerApi);
-extend(vff, visibilityApi);
 extend(vff, eventsApi);
 
 

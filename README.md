@@ -78,9 +78,6 @@ The "vff" object also contains events that will be fired based on various condit
 |        Method      | Details                                                                                               |
 |--------------------|-------------------------------------------------------------------------------------------------------|
 | $element()         | Returns the DOM element of the template if exists                                                     |
-| $show()            | Set "visibility" property in the template to true                                                     |
-| $hide()            | Set "visibility" property in the template to false                                                    |
-| $toggle()          | Toggle "visibility" property in the template                                                          |
 | $on(**callback**, **options**)  | triggers callback when data for the template arrives<br>**callback** - _function(**data**)_ - data handler<br>**options** - _object(optional)_ - options object (described [here](#options))|
 | $on(**path**, **callback**, **options**)| trigger callback when data for the **path** in the template arrives<br>**path** - _string_ - dot delimited string that describes a path in the template<br>**callback** - _function(**data**)_ - data handler<br>**options** - _object(optional)_ - options object (described [here](#options))|
 | $emit(**payload**) | Emits a message to every player with the same project<br>**payload** - _object_ - data to be sent     |
@@ -333,41 +330,6 @@ Go to page
 
 * target - ***string*** - target page name
 * timecode - ***int*** - ***optional*** - target time if the target page is video
-
-
-
-# Visibility
-
-## show
-```javascript
-template.show();
-// OR
-vff.show('templateName');
-
-```
-Set "visibility" property in the template to true
-
-* template - _string_ - the name of the template
-
-## hide
-```javascript
-template.hide();
-// OR
-vff.hide('templateName');
-```
-Set "visibility" property in the template to false
-
-* template - _string_ - the name of the template
-
-## toggle
-```javascript
-template.toggle();
-// OR
-vff.toggle('templateName');
-```
-Toggle "visibility" property in the template
-
-* template - _string_ - the name of the template
 
 
 # Globals
