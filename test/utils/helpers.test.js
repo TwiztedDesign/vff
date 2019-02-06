@@ -329,4 +329,51 @@ describe('Helpers', () => {
         });
     });
 
+    describe('deepExtend', () => {
+        it('should work', () => {
+            let extendedObject = {};
+
+            let emptyObj = {};
+            extendedObject = helpers.deepExtend(emptyObj);
+            expect(extendedObject).toEqual(emptyObj);
+
+            let emptystr = '';
+            extendedObject = helpers.deepExtend(emptystr);
+            expect(extendedObject).toEqual(emptystr);
+
+            let str = '123';
+            extendedObject = helpers.deepExtend(str);
+            expect(extendedObject).toEqual(str);
+
+            let primitiveNumber = 4;
+            extendedObject = helpers.deepExtend(primitiveNumber);
+            expect(extendedObject).toEqual(primitiveNumber);
+
+            let simpleObj = {
+                'a':1,
+                'b':2
+            };
+            extendedObject = helpers.deepExtend(simpleObj);
+            expect(extendedObject).toEqual(simpleObj);
+
+            let complexObj = {
+                'a':1,
+                'b': {
+                    c:3
+                }
+            };
+            extendedObject = helpers.deepExtend(complexObj);
+            expect(extendedObject).toEqual(complexObj);
+
+            let ObjWithArray = {
+                'a':1,
+                'b': {
+                    c:[1,2,3]
+                }
+            };
+            extendedObject = helpers.deepExtend(ObjWithArray);
+            expect(extendedObject).toEqual(ObjWithArray);
+
+        });
+    });
 });
