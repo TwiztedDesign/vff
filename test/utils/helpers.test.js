@@ -1,5 +1,4 @@
 const helpers = require('../../src/utils/helpers.js');
-
 let obj;
 
 describe('Helpers', () => {
@@ -188,6 +187,7 @@ describe('Helpers', () => {
     });
     describe('deepCompare', () => {
         it('should work', () => {
+            let obj = {};
             expect(helpers.deepCompare({},{})).toBeTruthy();
             expect(helpers.deepCompare({a:1}, {a:1})).toBeTruthy();
             expect(helpers.deepCompare({a:[1,2]}, {a:[1,2]})).toBeTruthy();
@@ -200,12 +200,20 @@ describe('Helpers', () => {
             expect(helpers.deepCompare({a:1, _b : 2},{a:1})).toBeTruthy();
             expect(helpers.deepCompare({a:[1,2]},{a:[1,3]})).toBeFalsy();
             expect(helpers.deepCompare({a:{b:[1,2]}},{a:{b:[1,2]}})).toBeTruthy();
+            expect(helpers.deepCompare(obj,obj)).toBeTruthy();
+            expect(helpers.deepCompare(()=>{console.log('x')},()=>{console.log('x')})).toBeTruthy();
+            expect(helpers.deepCompare(()=>{console.log('x')},()=>{console.log('y')})).toBeFalsy();
+            expect(helpers.deepCompare(undefined,undefined)).toBeTruthy();
+            expect(helpers.deepCompare(Number.NaN,Number.NaN)).toBeTruthy();
+            expect(helpers.deepCompare(Number.NaN,5)).toBeFalsy();
+            expect(helpers.deepCompare([1,2],[1])).toBeFalsy();
+
         });
     });
     describe('noop', () => {
         it('should noop', () => {
             expect(helpers.noop()).toBeUndefined();
-        })
+        });
     });
     describe('defer', () => {
         it('should return a defer object with promise, resolve and reject', function () {
@@ -232,5 +240,93 @@ describe('Helpers', () => {
         });
     });
 
+    function serialize( obj ) {
+        return Object.keys(obj).reduce(function(a,k){a.push(k+'='+encodeURIComponent(obj[k]));return a},[]).join('&');
+    }
+
+    describe('Get query params', () => {
+        it('Should return all the query params as object - sending query string', () => {
+            //Arrange
+            let queryObject = {'name':'text','otherName':'anotherText'};
+            let queryString = serialize(queryObject);
+
+            //Act
+            let queryParamsObject = helpers.getQueryParams(queryString);
+
+            //Assert
+            expect(queryParamsObject).toBeDefined();
+            expect(queryParamsObject).toEqual(queryObject);
+        });
+
+        it('Should return all the query params as object - from url', () => {
+            //Arrange
+            let queryObject = {'name':'text','otherName':'anotherText'};
+            let queryString = serialize(queryObject);
+            window.history.pushState({}, 'Test Title', `/test?${queryString}`);
+
+            //Act
+            let queryParamsObject = helpers.getQueryParams();
+
+            //Assert
+            expect(queryParamsObject).toBeDefined();
+            expect(queryParamsObject).toEqual(queryObject);
+        });
+
+        it('Failed on parsing - Should return empty object', () => {
+            //Arrange
+            let queryObject = {'name??':'te&xt','othe?rName':'anotherText'};
+            let queryString = serialize(queryObject);
+            window.history.pushState({}, 'Test Title', `/test?${queryString}`);
+
+            //Act
+            let queryParamsObject = helpers.getQueryParams();
+
+            //Assert
+            expect(queryParamsObject).toBeDefined();
+            expect(queryParamsObject).toEqual({});
+        });
+    });
+
+    describe('filter', () => {
+        it('Should return new array with filtered items', () => {
+            //Arrange
+            let array = [1,2,3,4,5,6,7,8,9,10];
+            let filterFunc = (val) => {
+                return val % 2 === 0;
+            };
+            //Act
+            let filteredArray = helpers.filter(array,filterFunc);
+
+            //Assert
+            expect(array).not.toEqual(filteredArray);
+            filteredArray.forEach(val => {
+                if(!filterFunc(val)){
+                    expect(false).toBeTruthy();
+                }
+            });
+        });
+
+        it('Using object instead of array - Should throw exception', () => {
+            //Arrange
+            let emptyObj = {};
+            let filterFunc = (val) => {
+                return val % 2 === 0;
+            };
+
+            expect(()=>{
+                //Act
+                let filteredArray = helpers.filter(emptyObj,filterFunc);
+            }).toThrowError();
+        });
+
+        it('Using object instead of function - Should throw exception', () => {
+            //Arrange
+            let array = [1,2,3,4,5,6,7,8,9,10];
+            expect(()=>{
+                //Act
+                let filteredArray = helpers.filter(array,{});
+            }).toThrowError();
+        });
+    });
 
 });
