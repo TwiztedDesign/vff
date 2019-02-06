@@ -175,11 +175,6 @@ describe('Helpers', () => {
             expect(lhs.a).toBe(2);
         });
     });
-    describe('mode check', () => {
-        it('should return "normal" as default value', () => {
-            expect(helpers.mode).toBe('normal');
-        });
-    });
     describe('docRef', () => {
         it('should return a link with an appropriate anchor', () => {
            expect(helpers.docRef('anchor')).toBe('https://www.videoflow.io/documentation/api/vff?id=anchor');
