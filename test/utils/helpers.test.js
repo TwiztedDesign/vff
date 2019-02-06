@@ -334,26 +334,14 @@ describe('Helpers', () => {
             let extendedObject = {};
 
             let emptyObj = {};
-            extendedObject = helpers.deepExtend(emptyObj);
+            helpers.deepExtend(extendedObject, emptyObj);
             expect(extendedObject).toEqual(emptyObj);
-
-            let emptystr = '';
-            extendedObject = helpers.deepExtend(emptystr);
-            expect(extendedObject).toEqual(emptystr);
-
-            let str = '123';
-            extendedObject = helpers.deepExtend(str);
-            expect(extendedObject).toEqual(str);
-
-            let primitiveNumber = 4;
-            extendedObject = helpers.deepExtend(primitiveNumber);
-            expect(extendedObject).toEqual(primitiveNumber);
-
+            
             let simpleObj = {
                 'a':1,
                 'b':2
             };
-            extendedObject = helpers.deepExtend(simpleObj);
+            helpers.deepExtend(extendedObject, simpleObj);
             expect(extendedObject).toEqual(simpleObj);
 
             let complexObj = {
@@ -362,7 +350,7 @@ describe('Helpers', () => {
                     c:3
                 }
             };
-            extendedObject = helpers.deepExtend(complexObj);
+            helpers.deepExtend(extendedObject, complexObj);
             expect(extendedObject).toEqual(complexObj);
 
             let ObjWithArray = {
@@ -371,7 +359,7 @@ describe('Helpers', () => {
                     c:[1,2,3]
                 }
             };
-            extendedObject = helpers.deepExtend(ObjWithArray);
+            helpers.deepExtend(extendedObject, ObjWithArray);
             expect(extendedObject).toEqual(ObjWithArray);
 
         });
