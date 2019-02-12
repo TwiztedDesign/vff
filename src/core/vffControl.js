@@ -32,7 +32,7 @@ export default class VFFControl {
 
         this._name = name;
         this._options = Object.assign({}, DEFAULT_OPTIONS, options || {});
-        if(group) this._options.group = group;
+        if(group && this._options.group === DEFAULT_OPTIONS.group) this._options.group = group;
         this._group = this._options.group; //for querying purposes
 
         this._listeners = [];
@@ -153,7 +153,8 @@ export default class VFFControl {
     }
 
     _bindSelector(){
-        let group = this.getGroup() === DEFAULT_OPTIONS.group? '' : (this.getGroup() + NAMESPACE_DELIMITER);
+        // let group = this.getGroup() === DEFAULT_OPTIONS.group? '' : (this.getGroup() + NAMESPACE_DELIMITER);
+        let group = this.getGroup() + NAMESPACE_DELIMITER;
         let name = `${this.getName().split(EXPOSE_DELIMITER)[0]}`;
         return `[${ATTRIBUTE.BIND}="${group}${name}"]`;
     }

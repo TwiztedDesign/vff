@@ -2949,7 +2949,7 @@ var VFFControl = function () {
 
         this._name = name;
         this._options = Object.assign({}, DEFAULT_OPTIONS, options || {});
-        if (group) this._options.group = group;
+        if (group && this._options.group === DEFAULT_OPTIONS.group) this._options.group = group;
         this._group = this._options.group; //for querying purposes
 
         this._listeners = [];
@@ -3108,7 +3108,8 @@ var VFFControl = function () {
     }, {
         key: "_bindSelector",
         value: function _bindSelector() {
-            var group = this.getGroup() === DEFAULT_OPTIONS.group ? '' : this.getGroup() + _consts.NAMESPACE_DELIMITER;
+            // let group = this.getGroup() === DEFAULT_OPTIONS.group? '' : (this.getGroup() + NAMESPACE_DELIMITER);
+            var group = this.getGroup() + _consts.NAMESPACE_DELIMITER;
             var name = "" + this.getName().split(_consts.EXPOSE_DELIMITER)[0];
             return "[" + _consts.ATTRIBUTE.BIND + "=\"" + group + name + "\"]";
         }
@@ -4954,7 +4955,6 @@ function initDOM() {
     controls.forEach(function (control) {
 
         var name = control.getAttribute(_consts.ATTRIBUTE.CONTROL);
-        control.setAttribute(_consts.ATTRIBUTE.BIND, name);
 
         /*********************************************************************************************/
         //TODO handle options
@@ -4987,7 +4987,10 @@ function initDOM() {
                     attribute = exposed[prop].attribute;
                 }
 
-                _vffData.vffData.registerControl(name + _consts.EXPOSE_DELIMITER + prop, attribute ? control.getAttribute(path) : (0, _helpers.getByPath)(control, path), Object.assign({ bindTo: path, ui: ui, attribute: attribute }, options));
+                var ctrl = _vffData.vffData.registerControl(name + _consts.EXPOSE_DELIMITER + prop, attribute ? control.getAttribute(path) : (0, _helpers.getByPath)(control, path), Object.assign({ bindTo: path, ui: ui, attribute: attribute }, options));
+
+                var bindName = name.indexOf('.') > -1 ? name.split('.')[1] : name;
+                control.setAttribute(_consts.ATTRIBUTE.BIND, ctrl.getGroup() + '.' + bindName);
             }
         }
         if (control instanceof HTMLTextAreaElement || control instanceof HTMLInputElement) {

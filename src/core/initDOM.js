@@ -10,7 +10,6 @@ function initDOM() {
     controls.forEach(control => {
 
         let name = control.getAttribute(ATTRIBUTE.CONTROL);
-        control.setAttribute(ATTRIBUTE.BIND, name);
 
 /*********************************************************************************************/
         //TODO handle options
@@ -42,9 +41,12 @@ function initDOM() {
                     attribute = exposed[prop].attribute;
                 }
 
-                vffData.registerControl(name + EXPOSE_DELIMITER + prop,
+                let ctrl = vffData.registerControl(name + EXPOSE_DELIMITER + prop,
                     attribute? control.getAttribute(path) : getByPath(control, path),
                     Object.assign({bindTo : path, ui, attribute},options));
+
+                let bindName = name.indexOf('.') > -1 ? name.split('.')[1] : name;
+                control.setAttribute(ATTRIBUTE.BIND, ctrl.getGroup() + '.' + bindName);
             }
         }
         if(control instanceof HTMLTextAreaElement || control instanceof HTMLInputElement){

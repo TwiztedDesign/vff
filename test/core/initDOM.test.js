@@ -4,11 +4,44 @@ import '../../src/core/defaultExpose';
 import {htmlToElement} from '../testHelpers';
 import {EXPOSE_DELIMITER,ATTRIBUTE } from  '../../src/core/consts';
 import {parseRJSON} from "../../src/utils/helpers";
+
+
+function checkDOM(vffControl, controlSelector, vffBind){
+
+    let element = htmlToElement(`<h2 ${vffControl}></h2>`);
+    document.body.appendChild(element);
+
+    _init();
+
+    let control = vffData.getControl(`${controlSelector} text`);
+    expect(control).toBeDefined();
+    expect(element.getAttribute('vff-bind')).toBe(`${vffBind}`);
+    let elements = document.querySelectorAll(control._bindSelector());
+    expect(elements.length).toBe(1);
+}
+
+
 describe('Init DOM', () => {
 
     beforeEach(() => {
         document.body.innerHTML = '';
         vffData.clear();
+    });
+
+    describe('check dom', () => {
+        it('check dom1',() => { checkDOM('vff-control="name"', 'name', 'untitled template.name'); });
+        it('check dom2',() => { checkDOM('vff-control="group.name"', 'group.name', 'group.name'); });
+        it('check dom3',() => { checkDOM('vff-control', '', 'untitled template.'); });
+        it('check dom4',() => { checkDOM('vff-control=""', '', 'untitled template.'); });
+
+        it('check dom5',() => { checkDOM('vff-control="group."', '', 'group.'); });
+        it('check dom6',() => { checkDOM('vff-control="."', '', 'untitled template.'); });
+        it('check dom7',() => { checkDOM('vff-control=".name"', 'name', 'untitled template.name'); });
+
+        it('check dom9',() => { checkDOM('vff-control="name" vff-options={"group":"group"}', 'group.name', 'group.name'); });
+        it('check dom10',() => { checkDOM('vff-control="" vff-options={"group":"group"}', 'group.', 'group.'); });
+        it('check dom11',() => { checkDOM('vff-control vff-options={"group":"group"}', 'group.', 'group.'); });
+        it('check dom12',() => { checkDOM('vff-control="group.name" vff-options={"group":"group2"}', 'group2.name', 'group2.name'); });
     });
 
     it('vff-control attribute - The control was created', () => {
