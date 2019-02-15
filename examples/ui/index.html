@@ -14,20 +14,24 @@
 </head>
 <body ng-app="myApp" ng-controller="Ctrl">
 
+
     <div id="header">
 
-        <h1 vff-bind="header.title"></h1>
-        <h1 vff-bind="header.sub"></h1>
+        <div vff-control="div" vff-expose="{text : 'innerText', color : 'style.color', opacity : {path : 'style.opacity', ui : {type : 'radio', options : [0,0.3,0.6,1]}}}"></div>
+        <!--<div vff-control="div" vff-expose="innerText"></div>-->
 
-        <vff-videobox class="videobox" signaling-server="www.google.com" style="position:absolute; width:300px; height: 300px;" vff-control="jumbo1" name="jumbo1" id="jumbo1"></vff-videobox>
-        <h1 id="clock1"></h1>
-        <h1 id="clock2"></h1>
-        <h1 id="clock3"></h1>
-        <h1 vff-control="title">This is a title</h1>
-        <h2 vff-control="subtitle">This is a subtitle</h2>
-        <h1 vff-bind="bind"></h1>
-        <img vff-control="image" src="cb1.png">
-        <input type="text" vff-control="group.free">
+        <!--<h1 vff-bind="header.title"></h1>-->
+        <!--<h1 vff-bind="header.sub"></h1>-->
+
+        <!--<vff-videobox class="videobox" signaling-server="www.google.com" style="position:absolute; width:300px; height: 300px;" vff-control="jumbo1" name="jumbo1" id="jumbo1"></vff-videobox>-->
+        <!--<h1 id="clock1"></h1>-->
+        <!--<h1 id="clock2"></h1>-->
+        <!--<h1 id="clock3"></h1>-->
+        <!--<h1 vff-control="title">This is a title</h1>-->
+        <!--<h2 vff-control="subtitle">This is a subtitle</h2>-->
+        <!--<h1 vff-bind="bind"></h1>-->
+        <!--<img vff-control="image" src="cb1.png">-->
+        <!--<input type="text" vff-control="group.free">-->
 
     </div>
 

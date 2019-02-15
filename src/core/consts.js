@@ -12,7 +12,8 @@ module.exports = {
     ATTRIBUTE           : {
         CONTROL         : "vff-control",
         BIND            : "vff-bind",
-        OPTIONS         : "vff-options"
+        OPTIONS         : "vff-options",
+        EXPOSE          : "vff-expose"
     },
     MODE                : {
         NORMAL          : "normal",

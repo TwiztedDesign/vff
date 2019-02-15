@@ -1180,7 +1180,8 @@ module.exports = {
     ATTRIBUTE: {
         CONTROL: "vff-control",
         BIND: "vff-bind",
-        OPTIONS: "vff-options"
+        OPTIONS: "vff-options",
+        EXPOSE: "vff-expose"
     },
     MODE: {
         NORMAL: "normal",
@@ -4939,6 +4940,10 @@ var _typeof2 = __webpack_require__(12);
 
 var _typeof3 = _interopRequireDefault(_typeof2);
 
+var _defineProperty2 = __webpack_require__(92);
+
+var _defineProperty3 = _interopRequireDefault(_defineProperty2);
+
 var _helpers = __webpack_require__(3);
 
 var _vffData = __webpack_require__(10);
@@ -4972,8 +4977,21 @@ function initDOM() {
         }
         // options.element = control;
         /*********************************************************************************************/
+        var exposedAttr = control.getAttribute(_consts.ATTRIBUTE.EXPOSE);
+        if (exposedAttr) {
+            try {
+                exposedAttr = (0, _helpers.parseRJSON)(exposedAttr);
+            } catch (err) {
+                if (!exposedAttr.match("{|}")) {
+                    exposedAttr = (0, _defineProperty3.default)({}, exposedAttr, exposedAttr);
+                } else {
+                    exposedAttr = null;
+                }
+            }
+        }
+        /*********************************************************************************************/
 
-        var exposed = control.expose ? control.expose() : {};
+        var exposed = exposedAttr ? exposedAttr : control.expose ? control.expose() : {};
 
         for (var prop in exposed) {
             if (exposed.hasOwnProperty(prop)) {

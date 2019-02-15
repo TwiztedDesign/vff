@@ -27,8 +27,22 @@ function initDOM() {
         }
         // options.element = control;
 /*********************************************************************************************/
+        let exposedAttr = control.getAttribute(ATTRIBUTE.EXPOSE);
+        if(exposedAttr){
+            try {
+                exposedAttr = parseRJSON(exposedAttr);
+            } catch (err){
+                if(!exposedAttr.match("{|}")){
+                    exposedAttr = {[exposedAttr] : exposedAttr};
+                } else {
+                    exposedAttr = null;
+                }
+            }
+        }
+/*********************************************************************************************/
 
-        let exposed = control.expose? control.expose() : {};
+
+        let exposed = exposedAttr? exposedAttr : (control.expose? control.expose() : {});
 
         for (let prop in exposed) {
             if (exposed.hasOwnProperty(prop)) {
