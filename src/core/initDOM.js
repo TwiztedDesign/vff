@@ -48,15 +48,16 @@ function initDOM() {
             if (exposed.hasOwnProperty(prop)) {
 
 
-                let path = exposed[prop], ui, attribute;
+                let path = exposed[prop], ui, attribute, value;
                 if(typeof exposed[prop] === 'object'){
                     path = exposed[prop].path;
                     ui = exposed[prop].ui;
                     attribute = exposed[prop].attribute;
+                    value = exposed[prop].value;
                 }
 
                 let ctrl = vffData.registerControl(name + EXPOSE_DELIMITER + prop,
-                    attribute? control.getAttribute(path) : getByPath(control, path),
+                    value? value : (attribute? control.getAttribute(path) : getByPath(control, path)),
                     Object.assign({bindTo : path, ui, attribute},options));
 
                 let bindName = name.indexOf('.') > -1 ? name.split('.')[1] : name;

@@ -313,9 +313,13 @@ function filter(collection, fn){
 }
 function parseRJSON(json){
     return JSON.parse(
+
         json.replace(/:\s*"([^"]*)"/g, function(match, p1) {
             return ': "' + p1.replace(/:/g, '@colon@') + '"';
         })
+
+        // Replace all single quotes with double quotes - this is correct only because this function is used only to parse html attributes
+        .replace(/'/g,'"')
 
         // Replace ":" with "@colon@" if it's between single-quotes
         .replace(/:\s*'([^']*)'/g, function(match, p1) {

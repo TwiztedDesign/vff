@@ -1,69 +1,72 @@
 let app = angular.module("myApp", []);
 
 
-app.controller("Ctrl", ['$scope',function($scope){
+app.controller("Ctrl", [function(){
 
-document.querySelector('.videobox').signalingServer = 'https://www.google.com';
+    // Text
+    vff.registerControl('js.text', 'lorem ipsum');
 
-    let c = vff.registerControl("header.title", "text")
-        // .before((text, next) => {
-        //     // next(text.toUpperCase());
-        // })
-        .on(event => {
-           console.log('Direct(title) : ', event.data);
-        });
+    // Number
+    vff.registerControl('js.number', 1);
 
-    vff.on('', event =>{
-        console.log('Global : ', event.data);
+    // Boolean
+    vff.registerControl('js.boolean', true);
+
+    // Dropdown
+    vff.registerControl('js.drowpdown', 'two', {
+        ui : {
+            type: 'dropdown',
+            options : ['one', 'two', 'three']
+        }
     });
-    vff.on('header', event =>{
-        console.log('Namespace : ', event.data);
-    });
-    vff.on('header.title', event =>{
-        console.log('Control : ', event.data);
-    });
-
-
-    vff.registerControl('header.sub','subtitle')
-    // .before((text, next) => {
-    //     next(text.toUpperCase());
-    // })
-    .on(event => {
-        console.log('Direct(sub) : ', event.data);
+    vff.registerControl('js.drowpdownObject', 3, {
+        ui : {
+            type: 'dropdown',
+            options :{'one': 1, 'two': 2, 'three': 3}
+        }
     });
 
-
-
-    console.log('Before ready', vff.mode, vff.isController());
-
-    vff.ready(() => {
-        console.log('Ready', vff.mode, vff.isController());
+    // Radio
+    vff.registerControl('js.radio', 'two', {
+        ui : {
+            type: 'radio',
+            options : ['one', 'two', 'three']
+        }
+    });
+    vff.registerControl('js.radioObject', 1, {
+        ui : {
+            type: 'radio',
+            options : {'one': 1, 'two': 2, 'three': 3}
+        }
     });
 
 
-    let events = 0;
-    let nba1 = vff.registerControl("nba1.clock", '');
-    nba1.before((data, next) => {
-        next(Math.max(data, nba1.getValue()));
-    }).on(event => {
-        let timecode = event.data;
-        document.querySelector('#clock1').innerText = new Date(+timecode).toLocaleTimeString();
-        events++;
-        // console.log(events);
-    },{throttle : false});
-    vff.registerControl("nba2.clock", '').on(event => {
-        let timecode = event.data;
-        let date = new Date(+timecode);
-        document.querySelector('#clock2').innerText = date.toLocaleTimeString() + " " + date.getMilliseconds();
-    }, {throttle : false});
-    vff.registerControl("nba3.clock", '').on(event => {
-        let timecode = event.data;
-        let date = new Date(+timecode);
-        document.querySelector('#clock3').innerText = date.toLocaleTimeString() + " " + date.getMilliseconds();
-    }, {throttle : false});
+    // Multiselect
+    vff.registerControl('js.multiselect', ['one', 'two'], {
+        ui : {
+            type: 'multiselect',
+            options : ['one', 'two', 'three','four', 'five']
+        }
+    });
 
 
-    vff.registerControl("bind", "bounded value");
+    vff.registerControl('js.multiselectAdvanced', ["1","3","5"], { //TODO doesn't work with numbers
+        ui : {
+            type: 'multiselect',
+            config: {
+                search : true,
+                itemsInView : 5
+            },
+            options : {1 : 'one', 2 : 'two', 3 : 'three', 4 : 'four', 5 : 'five'} //TODO this should be label:value and not value:label
+        }
+    });
+
+    // Pulse
+    vff.registerControl('js.pulse', true, {
+        ui : {
+            type: 'pulse',
+            label : 'Push button'
+        }});
 
 }]);
 

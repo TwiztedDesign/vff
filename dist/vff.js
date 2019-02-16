@@ -434,6 +434,9 @@ function parseRJSON(json) {
         return ': "' + p1.replace(/:/g, '@colon@') + '"';
     })
 
+    // Replace all single quotes with double quotes - this is correct only because this function is used only to parse html attributes
+    .replace(/'/g, '"')
+
     // Replace ":" with "@colon@" if it's between single-quotes
     .replace(/:\s*'([^']*)'/g, function (match, p1) {
         return ': "' + p1.replace(/:/g, '@colon@') + '"';
@@ -4998,14 +5001,16 @@ function initDOM() {
 
                 var path = exposed[prop],
                     ui = void 0,
-                    attribute = void 0;
+                    attribute = void 0,
+                    value = void 0;
                 if ((0, _typeof3.default)(exposed[prop]) === 'object') {
                     path = exposed[prop].path;
                     ui = exposed[prop].ui;
                     attribute = exposed[prop].attribute;
+                    value = exposed[prop].value;
                 }
 
-                var ctrl = _vffData.vffData.registerControl(name + _consts.EXPOSE_DELIMITER + prop, attribute ? control.getAttribute(path) : (0, _helpers.getByPath)(control, path), Object.assign({ bindTo: path, ui: ui, attribute: attribute }, options));
+                var ctrl = _vffData.vffData.registerControl(name + _consts.EXPOSE_DELIMITER + prop, value ? value : attribute ? control.getAttribute(path) : (0, _helpers.getByPath)(control, path), Object.assign({ bindTo: path, ui: ui, attribute: attribute }, options));
 
                 var bindName = name.indexOf('.') > -1 ? name.split('.')[1] : name;
                 control.setAttribute(_consts.ATTRIBUTE.BIND, ctrl.getGroup() + '.' + bindName);

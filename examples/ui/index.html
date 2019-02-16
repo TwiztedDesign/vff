@@ -5,35 +5,34 @@
     <title>Basic VFF Test</title>
 
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+    <!--<script src="https://unpkg.com/vff@latest/dist/vff.js"></script>-->
     <script src="vff.js"></script>
-    <!--<script src="https://rawgit.com/TwiztedDesign/vff/master/dist/vff.js"></script>-->
-    <script src="https://rawgit.com/TwiztedDesign/vff-videobox/master/dist/vff-ext.js"></script>
-    
+
     <script src="script.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body ng-app="myApp" ng-controller="Ctrl">
 
 
-    <div id="header">
+    <div vff-control="dom.ex1" vff-expose="innerText">Lorem ipsum</div>
+    <div vff-control="dom.ex2" vff-expose="{
+        text : 'innerText',
+        side : {
+            path : 'style.float',
+            value : 'left',
+            ui : {
+                type : 'radio',
+                options : ['left', 'right']
+            }
+        }
+    }">Lorem ipsum</div>
 
-        <div vff-control="div" vff-expose="{text : 'innerText', color : 'style.color', opacity : {path : 'style.opacity', ui : {type : 'radio', options : [0,0.3,0.6,1]}}}"></div>
-        <!--<div vff-control="div" vff-expose="innerText"></div>-->
 
-        <!--<h1 vff-bind="header.title"></h1>-->
-        <!--<h1 vff-bind="header.sub"></h1>-->
 
-        <!--<vff-videobox class="videobox" signaling-server="www.google.com" style="position:absolute; width:300px; height: 300px;" vff-control="jumbo1" name="jumbo1" id="jumbo1"></vff-videobox>-->
-        <!--<h1 id="clock1"></h1>-->
-        <!--<h1 id="clock2"></h1>-->
-        <!--<h1 id="clock3"></h1>-->
-        <!--<h1 vff-control="title">This is a title</h1>-->
-        <!--<h2 vff-control="subtitle">This is a subtitle</h2>-->
-        <!--<h1 vff-bind="bind"></h1>-->
-        <!--<img vff-control="image" src="cb1.png">-->
-        <!--<input type="text" vff-control="group.free">-->
 
-    </div>
+
+
+
 
 </body>
 </html>
