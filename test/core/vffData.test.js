@@ -1,11 +1,8 @@
 import {vffData} from '../../src/core/vffData.js';
 const messenger = require('../../src/utils/messenger.js');
 import {ADD} from "../../src/utils/events";
-import {docRef} from "../../src/utils/helpers";
-import {REGISTER_TEMPLATE} from "../../src/utils/docRefs";
 
 let controlName = 'testControl', controlValue = 'hello';
-let send = jest.spyOn(messenger, 'send');
 
 describe('vff Data', () => {
     beforeEach(() => {
@@ -22,6 +19,23 @@ describe('vff Data', () => {
     });
 
     describe('registerControl', () => {
+        it('Should emit an event without options', (done) => {
+            //Arrange
+            let sendSpy = jest.spyOn(messenger, 'send');
+
+            //Act
+            let control = vffData.registerControl(controlName, controlValue);
+
+            //Assert
+            setTimeout(()=>{
+                expect(sendSpy).toHaveBeenCalledWith(ADD, {
+                    channel : control.getGroup(),
+                    options : undefined,
+                    data    : {[controlName] : controlValue}
+                });
+                done();
+            },3500);
+        });
         it('Should return a control object', () => {
             let control = vffData.registerControl(controlName, controlValue);
             expect(control).toBeDefined();
@@ -40,14 +54,10 @@ describe('vff Data', () => {
             expect(vffData._controls.length).toBe(1);
 
         });
-        xit('Should emit an event', () => {
-            vffData.registerControl(controlName, controlValue);
-            expect(send).toHaveBeenCalledTimes(1);
-            expect(send).toHaveBeenCalledWith(ADD, {
-                channel : 'test',
-                options : expect.anything(),
-                data    : data
-            });
+        it('Should throw an exception of missing arguments', () =>{
+            expect(()=>{
+                vffData.registerControl(controlName);
+            }).toThrowError();
         });
 
     });
@@ -81,7 +91,6 @@ describe('vff Data', () => {
 
         });
     });
-
 
     describe('getControls', () => {
 
