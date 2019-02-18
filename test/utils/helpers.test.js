@@ -359,4 +359,25 @@ describe('Helpers', () => {
 
         });
     });
+
+    describe('parseRJSON', () => {
+        it('should work', () => {
+            let expectedObject = {
+                'a' : '1',
+                'b' : 2,
+                'c' : {
+                    'd': [1,2,3], // Currently not supported in array
+                    'e': 4,
+                    'f': 5
+                },
+                'g' : 6,
+                'h.1' : 7,
+                'H' : 8,
+                'i$' : 9,
+                'J@' : 10,
+                'j j j ' : 11
+            };
+            expect(helpers.parseRJSON(JSON.stringify(expectedObject))).toEqual(expectedObject);
+        });
+    });
 });
