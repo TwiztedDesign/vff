@@ -62,6 +62,21 @@ describe('vff Data', () => {
 
     });
 
+    describe('updateControl', () => {
+        it('should return control with updated value', () => {
+            //Arrange
+            let control = vffData.registerControl(controlName, controlValue);
+            let newValue = 'test123';
+
+            //Act
+            let updated = vffData.updateControl(control.getName(), newValue);
+
+            //Assert
+            expect(updated).toBeTruthy();
+            expect(control.getValue()).toEqual(newValue);
+        });
+    });
+
     describe('registerControls', () => {
         it('should create controls from object', () => {
             vffData.registerControls({
