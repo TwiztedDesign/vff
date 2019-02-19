@@ -4,32 +4,36 @@
     <meta charset="UTF-8">
     <title>Basic VFF Test</title>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
-    <script src="vff.js"></script>
-    <!--<script src="https://rawgit.com/TwiztedDesign/vff/master/dist/vff.js"></script>-->
-    <script src="https://rawgit.com/TwiztedDesign/vff-videobox/master/dist/vff-ext.js"></script>
-    
+    <script src="https://unpkg.com/vff@latest/dist/vff.js"></script>
+    <!--<script src="vff.js"></script>-->
+
     <script src="script.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
-<body ng-app="myApp" ng-controller="Ctrl">
+<body>
 
-    <div id="header">
 
-        <h1 vff-bind="header.title"></h1>
-        <h1 vff-bind="header.sub"></h1>
+    <div vff-control="dom.ex1" vff-expose="innerText">Lorem ipsum</div>
 
-        <vff-videobox class="videobox" signaling-server="www.google.com" style="position:absolute; width:300px; height: 300px;" vff-control="jumbo1" name="jumbo1" id="jumbo1"></vff-videobox>
-        <h1 id="clock1"></h1>
-        <h1 id="clock2"></h1>
-        <h1 id="clock3"></h1>
-        <h1 vff-control="title">This is a title</h1>
-        <h2 vff-control="subtitle">This is a subtitle</h2>
-        <h1 vff-bind="bind"></h1>
-        <img vff-control="image" src="cb1.png">
-        <input type="text" vff-control="group.free">
 
-    </div>
+    <div vff-control="dom.ex2" vff-expose="{
+        text : 'innerText',
+        side : {
+            path : 'style.float',
+            value : 'left',
+            ui : {
+                type : 'radio',
+                options : ['left', 'right']
+            }
+        }
+    }">Lorem ipsum</div>
+
+
+
+
+
+
+
 
 </body>
 </html>

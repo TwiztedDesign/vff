@@ -172,6 +172,15 @@ describe('vff Data', () => {
 
             expect(vffData.getControl('control 1')).toBe(c1);
         });
+        it('should ignore case', () => {
+            let c = vffData.registerControl('Group.Control', controlValue);
+            expect(vffData.getControl('control')).toBe(c);
+            expect(vffData.getControl('Control')).toBe(c);
+            expect(vffData.getControl('Group.control')).toBe(c);
+            expect(vffData.getControl('Group.Control')).toBe(c);
+            expect(vffData.getControl('group.control')).toBe(c);
+            expect(vffData.getControl('group.Control')).toBe(c);
+        });
     });
 
     describe('onUpdate', () => {

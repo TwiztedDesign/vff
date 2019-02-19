@@ -1,8 +1,6 @@
 import {getByPath, parseRJSON} from '../utils/helpers';
 import {vffData} from './vffData';
 import {EXPOSE_DELIMITER, ATTRIBUTE} from './consts';
-// import {bindSyncEvents} from './interactionEvents';
-
 
 
 function initDOM() {
@@ -10,7 +8,6 @@ function initDOM() {
     controls.forEach(control => {
 
         let name = control.getAttribute(ATTRIBUTE.CONTROL);
-        control.setAttribute(ATTRIBUTE.BIND, name);
 
 /*********************************************************************************************/
         //TODO handle options
@@ -28,23 +25,41 @@ function initDOM() {
         }
         // options.element = control;
 /*********************************************************************************************/
+        let exposedAttr = control.getAttribute(ATTRIBUTE.EXPOSE);
+        if(exposedAttr){
+            try {
+                exposedAttr = parseRJSON(exposedAttr);
+            } catch (err){
+                if(!exposedAttr.match("{|}")){
+                    exposedAttr = {[exposedAttr] : exposedAttr};
+                } else {
+                    exposedAttr = null;
+                }
+            }
+        }
+/*********************************************************************************************/
 
-        let exposed = control.expose? control.expose() : {};
+
+        let exposed = exposedAttr? exposedAttr : (control.expose? control.expose() : {});
 
         for (let prop in exposed) {
             if (exposed.hasOwnProperty(prop)) {
 
 
-                let path = exposed[prop], ui, attribute;
+                let path = exposed[prop], ui, attribute, value;
                 if(typeof exposed[prop] === 'object'){
                     path = exposed[prop].path;
                     ui = exposed[prop].ui;
                     attribute = exposed[prop].attribute;
+                    value = exposed[prop].value;
                 }
 
-                vffData.registerControl(name + EXPOSE_DELIMITER + prop,
-                    attribute? control.getAttribute(path) : getByPath(control, path),
+                let ctrl = vffData.registerControl(name + EXPOSE_DELIMITER + prop,
+                    value? value : (attribute? control.getAttribute(path) : getByPath(control, path)),
                     Object.assign({bindTo : path, ui, attribute},options));
+
+                let bindName = name.indexOf('.') > -1 ? name.split('.')[1] : name;
+                control.setAttribute(ATTRIBUTE.BIND, ctrl.getGroup() + '.' + bindName);
             }
         }
         if(control instanceof HTMLTextAreaElement || control instanceof HTMLInputElement){
@@ -64,24 +79,6 @@ function initDOM() {
         }
     });
 }
-
-// function closest(element, selector){
-//
-//     while (element) {
-//         if (element.matches(selector)) {
-//             return element;
-//         }
-//         element = element.parentElement;
-//     }
-//
-// }
-//
-// function initSync(){
-//     let elements = document.querySelectorAll('[vff-sync]');
-//     elements.forEach((element) => {
-//         bindSyncEvents(element);
-//     });
-// }
 
 
 module.exports = {
