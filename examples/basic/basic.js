@@ -52,14 +52,7 @@ app.controller("Ctrl", ['$scope',function($scope){
             // console.log("some value changed: ", prop, val, path);
         });
 
-        console.log("mobile: ", vff.isMobile);
-        console.log("controller: ", vff.isController);
     };
-
-
-    vff.onEvent('test',function(e){
-        console.log('Event received: ', e);
-    }, {consolidate : true});
 
 
 

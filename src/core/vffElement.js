@@ -1,4 +1,4 @@
-import {observe} from '../observer/htmlAccessorObserver';
+import {observe} from '../core/htmlAccessorObserver';
 
 
 class VffElement{

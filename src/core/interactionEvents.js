@@ -61,9 +61,6 @@ function sync(e){
         targetTouches: touchesToJson(e.targetTouches),
         changedTouches: touchesToJson(e.changedTouches)
     };
-    if(window.webrtc) {
-        window.webrtc.send(msg);
-    }
     send(INTERACTION, msg);
 
 

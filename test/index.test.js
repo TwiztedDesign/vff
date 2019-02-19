@@ -16,6 +16,8 @@ import {vffData} from '../src/core/vffData.js';
 //
 // });
 
+import '../src/index';
+
 
 test('dummy test', () => {
    expect(true).toBe(true);

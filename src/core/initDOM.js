@@ -1,8 +1,6 @@
 import {getByPath, parseRJSON} from '../utils/helpers';
 import {vffData} from './vffData';
 import {EXPOSE_DELIMITER, ATTRIBUTE} from './consts';
-// import {bindSyncEvents} from './interactionEvents';
-
 
 
 function initDOM() {
@@ -81,24 +79,6 @@ function initDOM() {
         }
     });
 }
-
-// function closest(element, selector){
-//
-//     while (element) {
-//         if (element.matches(selector)) {
-//             return element;
-//         }
-//         element = element.parentElement;
-//     }
-//
-// }
-//
-// function initSync(){
-//     let elements = document.querySelectorAll('[vff-sync]');
-//     elements.forEach((element) => {
-//         bindSyncEvents(element);
-//     });
-// }
 
 
 module.exports = {
