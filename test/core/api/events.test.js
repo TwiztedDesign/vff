@@ -31,5 +31,34 @@ describe("Events Api", () =>{
             expect(send).toHaveBeenCalledTimes(1);
             expect(send).toHaveBeenCalledWith(TRACK_EVENT, {name: eventName, data: eventObjectData, query: undefined});
         });
+
+        it("Should send track event with undefined data", () => {
+            //Arrange
+            const send = jest.spyOn(messenger, 'send');
+            const eventName = 'test';
+            const eventUndefinedData = undefined;
+
+            //Act
+            eventsApi.track(eventName, eventUndefinedData);
+
+            //Assert
+            expect(send).toHaveBeenCalledTimes(1);
+            expect(send).toHaveBeenCalledWith(TRACK_EVENT, {name: eventName, data: eventUndefinedData, query: undefined});
+        });
+
+        it("Should send track event with undefined data and undefined name", () => {
+            //Arrange
+            const send = jest.spyOn(messenger, 'send');
+            const eventName = undefined;
+            const eventUndefinedData = undefined;
+
+            //Act
+            eventsApi.track(eventName, eventUndefinedData);
+
+            //Assert
+            expect(send).toHaveBeenCalledTimes(1);
+            expect(send).toHaveBeenCalledWith(TRACK_EVENT, {name: eventName, data: eventUndefinedData, query: undefined});
+        });
+
     });
 });
