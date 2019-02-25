@@ -283,14 +283,29 @@ function getQueryParams(queryString){
     }
 }
 
-function query(collection, query){
+
+const queryDefaultOptions = {
+    insensitive : false
+};
+function lower(str){
+    if(str && str.toLowerCase){
+        return str.toLowerCase();
+    }
+    return str;
+}
+
+function query(collection, query, options){
+    options = Object.assign({}, queryDefaultOptions, options || {});
     let found = [];
-    collection.forEach(item => {
+    collection.forEach(function(item) {
         let match = true;
         for(let key in query){
-            if(query[key] !== item[key]){//TODO handle case sensitivity
+            if(options.insensitive && lower(query[key]) !== lower(item[findKey(item, key)])){
+                match = false;
+            } else if(!options.insensitive && query[key] !== item[key]){
                 match = false;
             }
+
         }
         if(match){
             found.push(item);
@@ -298,8 +313,8 @@ function query(collection, query){
     });
     return found;
 }
-function queryOne(collection, q){
-    let found = query(collection, q);
+function queryOne(collection, q, options){
+    let found = query(collection, q, options);
     return found.length? found[0] : undefined;
 }
 function filter(collection, fn){

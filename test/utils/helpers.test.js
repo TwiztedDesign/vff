@@ -360,6 +360,8 @@ describe('Helpers', () => {
         });
     });
 
+
+
     describe('parseRJSON', () => {
         it('should work', () => {
             let expectedObject = {
@@ -371,7 +373,7 @@ describe('Helpers', () => {
                     'f': 5
                 },
                 'g' : 6,
-                'h.1' : 7,
+                'h1' : 7,
                 'H' : 8,
                 'i$' : 9,
                 'J@' : 10,
@@ -380,4 +382,20 @@ describe('Helpers', () => {
             expect(helpers.parseRJSON(JSON.stringify(expectedObject))).toEqual(expectedObject);
         });
     });
+
+    describe('query', () => {
+        let collection = [
+            {prop1 : "hello1", Prop2 : 'World', "prop 3" : 1},
+            {prop1 : "hello2", Prop2 : 'World', "prop 3" : 2},
+            {prop1 : "hello3", Prop2 : 'World', "prop 3" : 2},
+        ];
+        it('should find elements in array', () => {
+            expect(helpers.query(collection, {prop1: 'hello1'}).length).toBe(1);
+            expect(helpers.query(collection, {Prop2: 'World'}).length).toBe(3);
+            expect(helpers.query(collection, {prop2: 'world'}).length).toBe(0);
+            expect(helpers.query(collection, {Prop2: 'world'}, {insensitive : true}).length).toBe(3);
+            expect(helpers.query(collection, {prop2: 'world'}, {insensitive : true}).length).toBe(3);
+            expect(helpers.query(collection, {"Prop 3": 2}, {insensitive : true}).length).toBe(2);
+        })
+    })
 });

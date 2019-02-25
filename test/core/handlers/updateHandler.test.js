@@ -2,7 +2,7 @@ import {vffData} from '../../../src/core/vffData.js';
 const updateHandler  = require('../../../src/core/handlers/updateHandler.js');
 const helpers = require('../../../src/utils/helpers.js');
 const interactionEvents = require('../../../src/core/interactionEvents');
-const {NAMESPACE_DELIMITER, TIME_CODE: TIMECODE} = require('../../../src/core/consts');
+const {NAMESPACE_DELIMITER, TIMECODE} = require('../../../src/core/consts');
 
 /******************************* global spies ********************************/
 
@@ -12,6 +12,7 @@ const controlName = `control`;
 const controlData = "value";
 let control = {};
 /****************************************************************************/
+
 
 describe('Update Handler', () => {
     beforeEach(() => {

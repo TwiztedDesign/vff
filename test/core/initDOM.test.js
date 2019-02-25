@@ -65,8 +65,6 @@ describe('Init DOM', () => {
             //Verify bindTo path
             expect(control.getOptions().bindTo).toBe(element.expose()[elementExposedKey].path || element.expose()[elementExposedKey]);
 
-            //Verify vff-bind exists on element
-            expect(element.getAttribute(ATTRIBUTE.BIND)).toBe(controlName);
         }
     });
 
@@ -130,8 +128,7 @@ describe('Init DOM', () => {
             //Verify bindTo path
             expect(control.getOptions().bindTo).toBe(element1.expose()[elementExposedKey].path || element1.expose()[elementExposedKey]);
 
-            //Verify vff-bind exists on element
-            expect(element1.getAttribute(ATTRIBUTE.BIND)).toBe(controlName1);
+
         }
 
         //Control2
@@ -144,8 +141,6 @@ describe('Init DOM', () => {
             //Verify bindTo path
             expect(control.getOptions().bindTo).toBe(element2.expose()[elementExposedKey].path || element2.expose()[elementExposedKey]);
 
-            //Verify vff-bind exists on element
-            expect(element2.getAttribute(ATTRIBUTE.BIND)).toBe(controlName2);
         }
     });
 
@@ -169,8 +164,6 @@ describe('Init DOM', () => {
         //Verify there is event listener on keyup
         expect(addEventListenerSpy).toHaveBeenCalledWith('keyup', expect.any(Function));
 
-        //Verify vff-bind exists on element
-        expect(element.getAttribute(ATTRIBUTE.BIND)).toBe(controlName);
     });
 
     it('vff-control attribute on HTMLTextAreaElement - The control was created', () => {
@@ -193,7 +186,5 @@ describe('Init DOM', () => {
         //Verify there is event listener on keyup
         expect(addEventListenerSpy).toHaveBeenCalledWith('keyup', expect.any(Function));
 
-        //Verify vff-bind exists on element
-        expect(element.getAttribute(ATTRIBUTE.BIND)).toBe(controlName);
     });
 });

@@ -33,7 +33,7 @@ class VffData {
         }
 
         let control = new VFFControl(name, value, options);
-        let existingControl = queryOne(this._controls, {_group : control.getGroup(), _name: control.getName()});
+        let existingControl = queryOne(this._controls, {_group : control.getGroup(), _name: control.getName()}, {insensitive : true});
         if(existingControl){
             existingControl.updateValue(value);
         } else {
@@ -105,9 +105,9 @@ class VffData {
         }
         let parts = name.split(NAMESPACE_DELIMITER);
         if(parts.length > 1){
-            return queryOne(this._controls, {_name : parts[parts.length - 1], _group : parts.slice(0,-1).join(NAMESPACE_DELIMITER)});
+            return queryOne(this._controls, {_name : parts[parts.length - 1], _group : parts.slice(0,-1).join(NAMESPACE_DELIMITER)}, {insensitive : true});
         } else {
-            return queryOne(this._controls, {_name : name});
+            return queryOne(this._controls, {_name : name}, {insensitive : true});
         }
     }
     getControls(namespace){
@@ -116,11 +116,11 @@ class VffData {
         }
         let parts = namespace.split(NAMESPACE_DELIMITER);
         if(parts.length > 1){
-            return query(this._controls, {_name : parts[parts.length - 1], _group : parts.slice(0,-1).join(NAMESPACE_DELIMITER)});
+            return query(this._controls, {_name : parts[parts.length - 1], _group : parts.slice(0,-1).join(NAMESPACE_DELIMITER)}, {insensitive : true});
         } else {
-            let controls = query(this._controls, {_group : parts[0]});
+            let controls = query(this._controls, {_group : parts[0]}, {insensitive : true});
             if(!controls.length){
-                controls = query(this._controls, {_name : parts[0]});
+                controls = query(this._controls, {_name : parts[0]}, {insensitive : true});
             }
             return controls;
         }
