@@ -4,6 +4,7 @@ function get(url, callback) {
     let deferred = defer();
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function() {
+        //TODO handle reject on callback
         if (xmlHttp.readyState == 4) {
             if(xmlHttp.status == 200){
                 if(callback){
@@ -13,7 +14,6 @@ function get(url, callback) {
             } else {
                 deferred.reject(xmlHttp.status);
             }
-
         }
     };
     xmlHttp.open("GET", url, true); // true for asynchronous
