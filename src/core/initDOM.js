@@ -63,7 +63,9 @@ function initDOM() {
             }
         }
         if(control instanceof HTMLTextAreaElement || control instanceof HTMLInputElement){
-            vffData.registerControl(name, control.value);
+            let ctrl = vffData.registerControl(name, control.value);
+            let bindName = name.indexOf('.') > -1 ? name.split('.')[1] : name;
+            control.setAttribute(ATTRIBUTE.BIND, ctrl.getGroup() + '.' + bindName);
         }
 
     });

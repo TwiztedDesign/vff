@@ -5,12 +5,15 @@
     <title>VFF Example</title>
 
     <script src="https://unpkg.com/vff@latest/dist/vff.js"></script>
+    <script src="vff.js"></script>
 
 </head>
     <body ng-app="myApp" ng-controller="Ctrl">
 
         <div vff-control="header.title" vff-expose="{text : 'innerText', color : 'style.color', side : {path : 'style.float', value : 'left', ui : {type : 'radio', options : ['left', 'right']}}, size : {path : 'style.font-size' , value : '300px', ui : {type : 'radio', options : ['100px','200px','300px']}}}"></div>
         <div vff-control="header.subtitle" vff-expose="{text : 'innerText', color : 'style.color', side : {path : 'style.float', value : 'right', ui : {type : 'radio', options : ['left', 'right']}}, size : {path : 'style.font-size' , value : '100px', ui : {type : 'radio', options : {small : '100px', medium : '200px', large : '300px'}}}}"></div>
+
+        <input vff-control="freetext" type="text">
 
     </body>
 </html>

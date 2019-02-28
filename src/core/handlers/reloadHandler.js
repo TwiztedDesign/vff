@@ -1,7 +1,8 @@
 
 
-function reload() {
-    window.location.reload();
+function reload(w) {
+    (w || window).location.reload();
+
 }
 
 module.exports = {

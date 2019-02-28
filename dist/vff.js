@@ -433,13 +433,25 @@ function getQueryParams(queryString) {
     }
 }
 
-function query(collection, query) {
+var queryDefaultOptions = {
+    insensitive: false
+};
+function lower(str) {
+    if (str && str.toLowerCase) {
+        return str.toLowerCase();
+    }
+    return str;
+}
+
+function query(collection, query, options) {
+    options = Object.assign({}, queryDefaultOptions, options || {});
     var found = [];
     collection.forEach(function (item) {
         var match = true;
         for (var key in query) {
-            if (query[key] !== item[key]) {
-                //TODO handle case sensitivity
+            if (options.insensitive && lower(query[key]) !== lower(item[findKey(item, key)])) {
+                match = false;
+            } else if (!options.insensitive && query[key] !== item[key]) {
                 match = false;
             }
         }
@@ -449,8 +461,8 @@ function query(collection, query) {
     });
     return found;
 }
-function queryOne(collection, q) {
-    var found = query(collection, q);
+function queryOne(collection, q, options) {
+    var found = query(collection, q, options);
     return found.length ? found[0] : undefined;
 }
 function filter(collection, fn) {
@@ -629,7 +641,7 @@ var VffData = function () {
             }
 
             var control = new _vffControl2.default(name, value, options);
-            var existingControl = (0, _helpers.queryOne)(this._controls, { _group: control.getGroup(), _name: control.getName() });
+            var existingControl = (0, _helpers.queryOne)(this._controls, { _group: control.getGroup(), _name: control.getName() }, { insensitive: true });
             if (existingControl) {
                 existingControl.updateValue(value);
             } else {
@@ -703,9 +715,9 @@ var VffData = function () {
             }
             var parts = name.split(_consts.NAMESPACE_DELIMITER);
             if (parts.length > 1) {
-                return (0, _helpers.queryOne)(this._controls, { _name: parts[parts.length - 1], _group: parts.slice(0, -1).join(_consts.NAMESPACE_DELIMITER) });
+                return (0, _helpers.queryOne)(this._controls, { _name: parts[parts.length - 1], _group: parts.slice(0, -1).join(_consts.NAMESPACE_DELIMITER) }, { insensitive: true });
             } else {
-                return (0, _helpers.queryOne)(this._controls, { _name: name });
+                return (0, _helpers.queryOne)(this._controls, { _name: name }, { insensitive: true });
             }
         }
     }, {
@@ -716,11 +728,11 @@ var VffData = function () {
             }
             var parts = namespace.split(_consts.NAMESPACE_DELIMITER);
             if (parts.length > 1) {
-                return (0, _helpers.query)(this._controls, { _name: parts[parts.length - 1], _group: parts.slice(0, -1).join(_consts.NAMESPACE_DELIMITER) });
+                return (0, _helpers.query)(this._controls, { _name: parts[parts.length - 1], _group: parts.slice(0, -1).join(_consts.NAMESPACE_DELIMITER) }, { insensitive: true });
             } else {
-                var controls = (0, _helpers.query)(this._controls, { _group: parts[0] });
+                var controls = (0, _helpers.query)(this._controls, { _group: parts[0] }, { insensitive: true });
                 if (!controls.length) {
-                    controls = (0, _helpers.query)(this._controls, { _name: parts[0] });
+                    controls = (0, _helpers.query)(this._controls, { _name: parts[0] }, { insensitive: true });
                 }
                 return controls;
             }
@@ -4830,8 +4842,8 @@ module.exports = {
 "use strict";
 
 
-function reload() {
-    window.location.reload();
+function reload(w) {
+    (w || window).location.reload();
 }
 
 module.exports = {
@@ -4940,7 +4952,9 @@ function initDOM() {
             }
         }
         if (control instanceof HTMLTextAreaElement || control instanceof HTMLInputElement) {
-            _vffData.vffData.registerControl(name, control.value);
+            var _ctrl = _vffData.vffData.registerControl(name, control.value);
+            var _bindName = name.indexOf('.') > -1 ? name.split('.')[1] : name;
+            control.setAttribute(_consts.ATTRIBUTE.BIND, _ctrl.getGroup() + '.' + _bindName);
         }
     });
     var binds = document.querySelectorAll('[' + _consts.ATTRIBUTE.BIND + ']');
