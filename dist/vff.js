@@ -207,6 +207,10 @@ function setByPath(obj, path, value) {
     }
 }
 
+function isFunction(functionToCheck) {
+    return !!functionToCheck && {}.toString.call(functionToCheck) === '[object Function]';
+}
+
 function camelize(str) {
     return str.replace(/\s(.)/g, function ($1) {
         return $1.toUpperCase();
@@ -520,7 +524,8 @@ module.exports = {
     queryOne: queryOne,
     filter: filter,
     getQueryParams: getQueryParams,
-    parseRJSON: parseRJSON
+    parseRJSON: parseRJSON,
+    isFunction: isFunction
 };
 
 /***/ }),
@@ -643,7 +648,7 @@ var VffData = function () {
             var control = new _vffControl2.default(name, value, options);
             var existingControl = (0, _helpers.queryOne)(this._controls, { _group: control.getGroup(), _name: control.getName() }, { insensitive: true });
             if (existingControl) {
-                existingControl.updateValue(value);
+                existingControl.updateValue(value, options);
             } else {
                 this._controls.push(control);
             }
@@ -700,10 +705,10 @@ var VffData = function () {
         }
     }, {
         key: 'updateControl',
-        value: function updateControl(name, value) {
+        value: function updateControl(name, value, options) {
             var control = this.getControl(name);
             if (control) {
-                return control.updateValue(value);
+                return control.updateValue(value, options);
             }
         }
     }, {
@@ -758,8 +763,10 @@ var VffData = function () {
         value: function on(namespace, cb, options) {
             var _this2 = this;
 
+            if ((0, _helpers.isFunction)(namespace)) {
+                options = cb;cb = namespace;namespace = '';
+            }
             options = Object.assign({}, DEFAULT_ON_OPTIONS, options || {});
-            //TODO handle no namespace
             (0, _helpers.on)(_events.VFF_EVENT + namespace, function (event) {
                 if (!options.changeOnly || event.dataChanged) {
                     _this2._runCallback(cb, options, new _vffEvent2.default({
@@ -3037,11 +3044,14 @@ var VFFControl = function () {
     }, {
         key: "updateValue",
         value: function updateValue(value) {
+            var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
             if (value && value.value) {
                 value = value.value;
             }
             var valueChanged = !(0, _helpers.deepCompare)(this._value, value);
-            this._value = value;
+            if (value !== null && value !== undefined) this._value = value;
+            Object.assign(this._options, options);
             this._updateBoundElements();
             this._runListeners(valueChanged);
 
@@ -3233,7 +3243,7 @@ var update = function () {
                                             _vffData.vffData._updateControl(controlName, data[templateName][key], { timecode: timecode }).then(function (controlChange) {
                                                 templateChange[templateName] = controlChange || templateChange[templateName];
                                                 globalChange = controlChange || globalChange;
-                                                (0, _helpers.broadcast)(controlName, { dataChanged: controlChange, timecode: timecode });
+                                                (0, _helpers.broadcast)(_events.VFF_EVENT + controlName, { dataChanged: controlChange, timecode: timecode });
                                                 resolve();
                                             }, reject);
                                         }));
@@ -5293,6 +5303,7 @@ function get(url, callback) {
     var deferred = (0, _helpers.defer)();
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function () {
+        //TODO handle reject on callback
         if (xmlHttp.readyState == 4) {
             if (xmlHttp.status == 200) {
                 if (callback) {

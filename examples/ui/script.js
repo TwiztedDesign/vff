@@ -9,18 +9,19 @@ vff.registerControl('js.number', 1);
 vff.registerControl('js.boolean', true);
 
 // Dropdown
-vff.registerControl('js.drowpdown', 'two', {
+vff.registerControl('js.dropdown', 'two', {
     ui : {
         type: 'dropdown',
         options : ['one', 'two', 'three']
     }
 });
-vff.registerControl('js.drowpdownObject', 3, {
+
+vff.registerControl('js.dropdownObject', 3, {
     ui : {
         type: 'dropdown',
         options :{'one': 1, 'two': 2, 'three': 3}
     }
-});
+}).on(update);
 
 // Radio
 vff.registerControl('js.radio', 'two', {
@@ -46,14 +47,14 @@ vff.registerControl('js.multiselect', ['one', 'two'], {
 });
 
 
-vff.registerControl('js.multiselectAdvanced', ["1","3","5"], { //TODO doesn't work with numbers
+vff.registerControl('js.multiselectAdvanced', [1,3], {
     ui : {
         type: 'multiselect',
         config: {
             search : true,
             itemsInView : 5
         },
-        options : {1 : 'one', 2 : 'two', 3 : 'three', 4 : 'four', 5 : 'five'} //TODO this should be label:value and not value:label
+        options : {'one' : 1, 'two' : 2,'three' : 3,'four' : 4,'five' : 5}
     }
 });
 
@@ -63,3 +64,19 @@ vff.registerControl('js.pulse', true, {
         type: 'pulse',
         label : 'Push button'
     }});
+
+vff.registerControl('js.vector2', '10;20', {
+    ui : {
+        type : 'vector2'
+    }
+});
+vff.registerControl('js.vector3', '10;20;30', {
+    ui : {
+        type : 'vector3'
+    }
+});
+
+
+vff.on(event => {
+    console.log(event.data);
+});

@@ -18,7 +18,7 @@ async function update(data){
                         vffData._updateControl(controlName, data[templateName][key], {timecode}).then(controlChange => {
                             templateChange[templateName] = controlChange || templateChange[templateName];
                             globalChange = controlChange || globalChange;
-                            broadcast(controlName, { dataChanged: controlChange ,timecode});
+                            broadcast(VFF_EVENT + controlName, { dataChanged: controlChange ,timecode});
                             resolve();
                         }, reject);
                     }));

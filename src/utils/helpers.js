@@ -51,6 +51,10 @@ function setByPath(obj, path, value){
     }
 }
 
+function isFunction(functionToCheck) {
+    return !!functionToCheck && {}.toString.call(functionToCheck) === '[object Function]';
+}
+
 function camelize(str) {
     return str
         .replace(/\s(.)/g, function($1) { return $1.toUpperCase(); })
@@ -377,5 +381,6 @@ module.exports = {
     queryOne        : queryOne,
     filter          : filter,
     getQueryParams  : getQueryParams,
-    parseRJSON      : parseRJSON
+    parseRJSON      : parseRJSON,
+    isFunction      : isFunction
 };

@@ -1,5 +1,5 @@
 import {ADD, PAGES_UPDATE, VFF_EVENT} from "../utils/events";
-import {docRef, broadcast, on, defer, queryOne, query, filter} from '../utils/helpers.js';
+import {docRef, broadcast, on, defer, queryOne, query, filter, isFunction} from '../utils/helpers.js';
 import {send} from '../utils/messenger';
 import {REGISTER_TEMPLATE} from '../utils/docRefs';
 
@@ -35,7 +35,7 @@ class VffData {
         let control = new VFFControl(name, value, options);
         let existingControl = queryOne(this._controls, {_group : control.getGroup(), _name: control.getName()}, {insensitive : true});
         if(existingControl){
-            existingControl.updateValue(value);
+            existingControl.updateValue(value, options);
         } else {
             this._controls.push(control);
         }
@@ -91,10 +91,10 @@ class VffData {
         return Promise.resolve(false);
     }
 
-    updateControl(name, value) {
+    updateControl(name, value, options) {
         let control = this.getControl(name);
         if (control) {
-            return control.updateValue(value);
+            return control.updateValue(value, options);
         }
     }
 
@@ -141,9 +141,13 @@ class VffData {
         return data;
     }
 
+
+
     on(namespace, cb, options) {
+        if(isFunction(namespace)){
+            options = cb; cb = namespace; namespace = '';
+        }
         options = Object.assign({}, DEFAULT_ON_OPTIONS, options || {});
-        //TODO handle no namespace
         on(VFF_EVENT + namespace, event => {
             if(!options.changeOnly || event.dataChanged){
                 this._runCallback(cb, options, new VFFEvent({

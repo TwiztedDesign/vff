@@ -102,12 +102,13 @@ export default class VFFControl {
 
     }
 
-    updateValue(value){
+    updateValue(value, options = {}){
         if(value && value.value){
             value = value.value;
         }
         let valueChanged = !deepCompare(this._value,value);
-        this._value = value;
+        if(value !== null && value !== undefined) this._value = value;
+        Object.assign(this._options, options);
         this._updateBoundElements();
         this._runListeners(valueChanged);
 

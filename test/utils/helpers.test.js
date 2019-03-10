@@ -397,5 +397,17 @@ describe('Helpers', () => {
             expect(helpers.query(collection, {prop2: 'world'}, {insensitive : true}).length).toBe(3);
             expect(helpers.query(collection, {"Prop 3": 2}, {insensitive : true}).length).toBe(2);
         })
-    })
+    });
+
+    describe('isFunction', () => {
+        it('should return trun only for function', () => {
+            expect(helpers.isFunction(()=>{})).toBe(true);
+            expect(helpers.isFunction({})).toBe(false);
+            expect(helpers.isFunction()).toBe(false);
+            expect(helpers.isFunction("")).toBe(false);
+            expect(helpers.isFunction("not a function")).toBe(false);
+            expect(helpers.isFunction(1)).toBe(false);
+            expect(helpers.isFunction("1")).toBe(false);
+        });
+    });
 });
