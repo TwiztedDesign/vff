@@ -1,7 +1,8 @@
 import {ADD, PAGES_UPDATE, VFF_EVENT} from "../utils/events";
-import {docRef, broadcast, on, defer, queryOne, query, filter, isFunction} from '../utils/helpers.js';
+import {docRef, broadcast, on, defer, queryOne, query, filter, isFunction, isObject, findKey} from '../utils/helpers.js';
 import {send} from '../utils/messenger';
 import {REGISTER_TEMPLATE} from '../utils/docRefs';
+import {DEFAULT_GROUP_NAME} from "./consts";
 
 import {NAMESPACE_DELIMITER} from "../core/consts";
 import VFFControl from './vffControl';
@@ -23,8 +24,18 @@ class VffData {
         this._listeners = {};
         this._readyCallbacks = [];
         this._timeouts = new WeakMap();
+        this._eventQueue = {};
+        this._nameMap = {};
     }
 
+
+    _addToNameMap(name){
+        this._nameMap[name] = name;
+        this._nameMap[name.toLowerCase()] = name;
+    }
+    _getFromNameMap(name){
+        return this._nameMap[name] || name;
+    }
     registerControl(name, value, options){
 
         if(arguments.length < 2){
@@ -37,6 +48,7 @@ class VffData {
         if(existingControl){
             existingControl.updateValue(value, options);
         } else {
+            this._addToNameMap(control.getGroup());
             this._controls.push(control);
         }
 
@@ -63,11 +75,14 @@ class VffData {
         return control;
     }
 
-    registerControls(object, options){
+    registerControls(namespace, object, options){
+        if(isObject(namespace)){
+            options = object || {}, object = namespace, namespace = options.group || DEFAULT_GROUP_NAME; }
         for(let name in object){
             if(object.hasOwnProperty(name)){
                 let value = object[name];
                 let opts = Object.assign({}, options);
+                opts.group = opts.group || namespace;
 
                 if(typeof value === 'object' && value.ui){
                     opts.ui = value.ui;
@@ -77,6 +92,19 @@ class VffData {
                 this.registerControl(name, value, opts);
             }
         }
+        return {
+
+            on : (() => {
+                let group = namespace;
+                return (namespace , cb, options) => {
+                    if(isFunction(namespace)){
+                        options = cb; cb = namespace; namespace = '';
+                    }
+                    let ns = namespace? group + '.' + namespace : group;
+                    this.on(ns, cb, options);
+                };
+            })()
+        };
     }
 
     _updateControl(name, value, options) {
@@ -88,7 +116,7 @@ class VffData {
             }
             return control._setValue(value);
         }
-        return Promise.resolve(false);
+        return Promise.resolve(true);
     }
 
     updateControl(name, value, options) {
@@ -125,7 +153,7 @@ class VffData {
             return controls;
         }
     }
-    getControlsData(namespace){
+    getControlsData(namespace, fallback){
         let data = {};
         let controls = this.getControls(namespace);
         controls.forEach(control => {
@@ -138,9 +166,25 @@ class VffData {
             }
 
         });
+
+        if(namespace){
+            if(namespace.indexOf(NAMESPACE_DELIMITER) > -1){
+                return controls.length? data : fallback;
+            } else {
+                return Object.assign({}, fallback, data);
+            }
+        } else {
+            for(let group in fallback){
+                for( let control in fallback[group]){
+                    let key = findKey(data, group + NAMESPACE_DELIMITER + control);
+                    if(!key){
+                        data[this._getFromNameMap(group) + NAMESPACE_DELIMITER + control] = fallback[group][control];
+                    }
+                }
+            }
+        }
         return data;
     }
-
 
 
     on(namespace, cb, options) {
@@ -148,12 +192,13 @@ class VffData {
             options = cb; cb = namespace; namespace = '';
         }
         options = Object.assign({}, DEFAULT_ON_OPTIONS, options || {});
-        on(VFF_EVENT + namespace, event => {
+        on(VFF_EVENT + namespace.toLowerCase(), event => {
             if(!options.changeOnly || event.dataChanged){
                 this._runCallback(cb, options, new VFFEvent({
                     timecode : event.timecode,
                     changed : event.dataChanged,
-                    data: this.getControlsData(namespace)
+                    data: this.getControlsData(namespace, event.data),
+                    namespace
                 }));
             }
         });
@@ -197,13 +242,45 @@ class VffData {
         this._registerControlTimeouts = {};
         this._listeners = {};
         this._timeouts = new WeakMap();
+        this._eventQueue = {};
     }
+
 
     _runCallback(callback, options, ...data){
         if(options.consolidate || options.throttle){
             clearTimeout(this._timeouts.get(callback));
+            //todo add data to queue
+            data.forEach(event => {
+                let queue = this._eventQueue[event.namespace] || [];
+                queue.push(event);
+                this._eventQueue[event.namespace] = queue;
+            });
+
             this._timeouts.set(callback, setTimeout(() => {
-                callback(...data);
+
+                function rec(events, agg){
+                    if(!events.length){
+                        return agg;
+                    }
+                    let event = events.shift();
+                    if(isObject(event.data) && isObject(agg)){
+                        Object.assign(agg, event.data);
+                    } else {
+                        agg = event.data;
+                    }
+                    return rec(events, agg);
+                }
+
+                data.forEach(event => {
+                    if(!isObject(event.data)){
+                        this._eventQueue[event.namespace] = [];
+                    } else {
+                        let events = this._eventQueue[event.namespace];
+                        let agg = rec(events, {});
+                        event.data = Object.assign(agg, event.data);
+                    }
+                    callback(event);
+                });
             },(typeof options.throttle === 'number')? options.throttle : 50));
         } else {
             callback(...data);

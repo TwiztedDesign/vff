@@ -382,5 +382,6 @@ module.exports = {
     filter          : filter,
     getQueryParams  : getQueryParams,
     parseRJSON      : parseRJSON,
-    isFunction      : isFunction
+    isFunction      : isFunction,
+    isObject        : isObject
 };

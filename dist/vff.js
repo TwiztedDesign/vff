@@ -150,7 +150,7 @@ module.exports = {
 "use strict";
 
 
-var _typeof2 = __webpack_require__(15);
+var _typeof2 = __webpack_require__(16);
 
 var _typeof3 = _interopRequireDefault(_typeof2);
 
@@ -525,7 +525,8 @@ module.exports = {
     filter: filter,
     getQueryParams: getQueryParams,
     parseRJSON: parseRJSON,
-    isFunction: isFunction
+    isFunction: isFunction,
+    isObject: isObject
 };
 
 /***/ }),
@@ -583,7 +584,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.vffData = undefined;
 
-var _typeof2 = __webpack_require__(15);
+var _typeof2 = __webpack_require__(16);
 
 var _typeof3 = _interopRequireDefault(_typeof2);
 
@@ -603,7 +604,9 @@ var _messenger = __webpack_require__(9);
 
 var _docRefs = __webpack_require__(89);
 
-var _consts = __webpack_require__(19);
+var _consts = __webpack_require__(15);
+
+var _consts2 = __webpack_require__(15);
 
 var _vffControl = __webpack_require__(90);
 
@@ -633,9 +636,22 @@ var VffData = function () {
         this._listeners = {};
         this._readyCallbacks = [];
         this._timeouts = new WeakMap();
+        this._eventQueue = {};
+        this._nameMap = {};
     }
 
     (0, _createClass3.default)(VffData, [{
+        key: '_addToNameMap',
+        value: function _addToNameMap(name) {
+            this._nameMap[name] = name;
+            this._nameMap[name.toLowerCase()] = name;
+        }
+    }, {
+        key: '_getFromNameMap',
+        value: function _getFromNameMap(name) {
+            return this._nameMap[name] || name;
+        }
+    }, {
         key: 'registerControl',
         value: function registerControl(name, value, options) {
             var _this = this;
@@ -650,6 +666,7 @@ var VffData = function () {
             if (existingControl) {
                 existingControl.updateValue(value, options);
             } else {
+                this._addToNameMap(control.getGroup());
                 this._controls.push(control);
             }
 
@@ -675,11 +692,17 @@ var VffData = function () {
         }
     }, {
         key: 'registerControls',
-        value: function registerControls(object, options) {
+        value: function registerControls(namespace, object, options) {
+            var _this2 = this;
+
+            if ((0, _helpers.isObject)(namespace)) {
+                options = object || {}, object = namespace, namespace = options.group || _consts.DEFAULT_GROUP_NAME;
+            }
             for (var name in object) {
                 if (object.hasOwnProperty(name)) {
                     var value = object[name];
                     var opts = Object.assign({}, options);
+                    opts.group = opts.group || namespace;
 
                     if ((typeof value === 'undefined' ? 'undefined' : (0, _typeof3.default)(value)) === 'object' && value.ui) {
                         opts.ui = value.ui;
@@ -689,6 +712,19 @@ var VffData = function () {
                     this.registerControl(name, value, opts);
                 }
             }
+            return {
+
+                on: function () {
+                    var group = namespace;
+                    return function (namespace, cb, options) {
+                        if ((0, _helpers.isFunction)(namespace)) {
+                            options = cb;cb = namespace;namespace = '';
+                        }
+                        var ns = namespace ? group + '.' + namespace : group;
+                        _this2.on(ns, cb, options);
+                    };
+                }()
+            };
         }
     }, {
         key: '_updateControl',
@@ -701,7 +737,7 @@ var VffData = function () {
                 }
                 return control._setValue(value);
             }
-            return Promise.resolve(false);
+            return Promise.resolve(true);
         }
     }, {
         key: 'updateControl',
@@ -718,9 +754,9 @@ var VffData = function () {
                 //TODO correct ref
                 throw new Error('Missing Arguments, please refer to: ' + (0, _helpers.docRef)(_docRefs.REGISTER_TEMPLATE));
             }
-            var parts = name.split(_consts.NAMESPACE_DELIMITER);
+            var parts = name.split(_consts2.NAMESPACE_DELIMITER);
             if (parts.length > 1) {
-                return (0, _helpers.queryOne)(this._controls, { _name: parts[parts.length - 1], _group: parts.slice(0, -1).join(_consts.NAMESPACE_DELIMITER) }, { insensitive: true });
+                return (0, _helpers.queryOne)(this._controls, { _name: parts[parts.length - 1], _group: parts.slice(0, -1).join(_consts2.NAMESPACE_DELIMITER) }, { insensitive: true });
             } else {
                 return (0, _helpers.queryOne)(this._controls, { _name: name }, { insensitive: true });
             }
@@ -731,9 +767,9 @@ var VffData = function () {
             if (!namespace) {
                 return this._controls;
             }
-            var parts = namespace.split(_consts.NAMESPACE_DELIMITER);
+            var parts = namespace.split(_consts2.NAMESPACE_DELIMITER);
             if (parts.length > 1) {
-                return (0, _helpers.query)(this._controls, { _name: parts[parts.length - 1], _group: parts.slice(0, -1).join(_consts.NAMESPACE_DELIMITER) }, { insensitive: true });
+                return (0, _helpers.query)(this._controls, { _name: parts[parts.length - 1], _group: parts.slice(0, -1).join(_consts2.NAMESPACE_DELIMITER) }, { insensitive: true });
             } else {
                 var controls = (0, _helpers.query)(this._controls, { _group: parts[0] }, { insensitive: true });
                 if (!controls.length) {
@@ -744,35 +780,53 @@ var VffData = function () {
         }
     }, {
         key: 'getControlsData',
-        value: function getControlsData(namespace) {
+        value: function getControlsData(namespace, fallback) {
             var data = {};
             var controls = this.getControls(namespace);
             controls.forEach(function (control) {
                 var name = control.getNamespace().substr(namespace.length);
-                if (name.startsWith(_consts.NAMESPACE_DELIMITER)) name = name.substr(1);
+                if (name.startsWith(_consts2.NAMESPACE_DELIMITER)) name = name.substr(1);
                 if (name) {
                     data[name] = control.getValue();
                 } else {
                     data = control.getValue();
                 }
             });
+
+            if (namespace) {
+                if (namespace.indexOf(_consts2.NAMESPACE_DELIMITER) > -1) {
+                    return controls.length ? data : fallback;
+                } else {
+                    return Object.assign({}, fallback, data);
+                }
+            } else {
+                for (var group in fallback) {
+                    for (var control in fallback[group]) {
+                        var key = (0, _helpers.findKey)(data, group + _consts2.NAMESPACE_DELIMITER + control);
+                        if (!key) {
+                            data[this._getFromNameMap(group) + _consts2.NAMESPACE_DELIMITER + control] = fallback[group][control];
+                        }
+                    }
+                }
+            }
             return data;
         }
     }, {
         key: 'on',
         value: function on(namespace, cb, options) {
-            var _this2 = this;
+            var _this3 = this;
 
             if ((0, _helpers.isFunction)(namespace)) {
                 options = cb;cb = namespace;namespace = '';
             }
             options = Object.assign({}, DEFAULT_ON_OPTIONS, options || {});
-            (0, _helpers.on)(_events.VFF_EVENT + namespace, function (event) {
+            (0, _helpers.on)(_events.VFF_EVENT + namespace.toLowerCase(), function (event) {
                 if (!options.changeOnly || event.dataChanged) {
-                    _this2._runCallback(cb, options, new _vffEvent2.default({
+                    _this3._runCallback(cb, options, new _vffEvent2.default({
                         timecode: event.timecode,
                         changed: event.dataChanged,
-                        data: _this2.getControlsData(namespace)
+                        data: _this3.getControlsData(namespace, event.data),
+                        namespace: namespace
                     }));
                 }
             });
@@ -833,6 +887,7 @@ var VffData = function () {
             this._registerControlTimeouts = {};
             this._listeners = {};
             this._timeouts = new WeakMap();
+            this._eventQueue = {};
         }
     }, {
         key: '_runCallback',
@@ -841,10 +896,42 @@ var VffData = function () {
                 data[_key - 2] = arguments[_key];
             }
 
+            var _this4 = this;
+
             if (options.consolidate || options.throttle) {
                 clearTimeout(this._timeouts.get(callback));
+                //todo add data to queue
+                data.forEach(function (event) {
+                    var queue = _this4._eventQueue[event.namespace] || [];
+                    queue.push(event);
+                    _this4._eventQueue[event.namespace] = queue;
+                });
+
                 this._timeouts.set(callback, setTimeout(function () {
-                    callback.apply(undefined, data);
+
+                    function rec(events, agg) {
+                        if (!events.length) {
+                            return agg;
+                        }
+                        var event = events.shift();
+                        if ((0, _helpers.isObject)(event.data) && (0, _helpers.isObject)(agg)) {
+                            Object.assign(agg, event.data);
+                        } else {
+                            agg = event.data;
+                        }
+                        return rec(events, agg);
+                    }
+
+                    data.forEach(function (event) {
+                        if (!(0, _helpers.isObject)(event.data)) {
+                            _this4._eventQueue[event.namespace] = [];
+                        } else {
+                            var events = _this4._eventQueue[event.namespace];
+                            var agg = rec(events, {});
+                            event.data = Object.assign(agg, event.data);
+                        }
+                        callback(event);
+                    });
                 }, typeof options.throttle === 'number' ? options.throttle : 50));
             } else {
                 callback.apply(undefined, data);
@@ -1062,58 +1149,6 @@ module.exports = function (it) {
 "use strict";
 
 
-exports.__esModule = true;
-
-var _iterator = __webpack_require__(63);
-
-var _iterator2 = _interopRequireDefault(_iterator);
-
-var _symbol = __webpack_require__(76);
-
-var _symbol2 = _interopRequireDefault(_symbol);
-
-var _typeof = typeof _symbol2.default === "function" && typeof _iterator2.default === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof _symbol2.default === "function" && obj.constructor === _symbol2.default && obj !== _symbol2.default.prototype ? "symbol" : typeof obj; };
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-exports.default = typeof _symbol2.default === "function" && _typeof(_iterator2.default) === "symbol" ? function (obj) {
-  return typeof obj === "undefined" ? "undefined" : _typeof(obj);
-} : function (obj) {
-  return obj && typeof _symbol2.default === "function" && obj.constructor === _symbol2.default && obj !== _symbol2.default.prototype ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof(obj);
-};
-
-/***/ }),
-/* 16 */
-/***/ (function(module, exports) {
-
-module.exports = true;
-
-
-/***/ }),
-/* 17 */
-/***/ (function(module, exports) {
-
-module.exports = {};
-
-
-/***/ }),
-/* 18 */
-/***/ (function(module, exports) {
-
-var toString = {}.toString;
-
-module.exports = function (it) {
-  return toString.call(it).slice(8, -1);
-};
-
-
-/***/ }),
-/* 19 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
 module.exports = {
     EXPOSE_DELIMITER: " ",
     NAMESPACE_DELIMITER: ".",
@@ -1137,6 +1172,58 @@ module.exports = {
         PROGRAM: "controller-program"
     }
 };
+
+/***/ }),
+/* 16 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+exports.__esModule = true;
+
+var _iterator = __webpack_require__(63);
+
+var _iterator2 = _interopRequireDefault(_iterator);
+
+var _symbol = __webpack_require__(76);
+
+var _symbol2 = _interopRequireDefault(_symbol);
+
+var _typeof = typeof _symbol2.default === "function" && typeof _iterator2.default === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof _symbol2.default === "function" && obj.constructor === _symbol2.default && obj !== _symbol2.default.prototype ? "symbol" : typeof obj; };
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = typeof _symbol2.default === "function" && _typeof(_iterator2.default) === "symbol" ? function (obj) {
+  return typeof obj === "undefined" ? "undefined" : _typeof(obj);
+} : function (obj) {
+  return obj && typeof _symbol2.default === "function" && obj.constructor === _symbol2.default && obj !== _symbol2.default.prototype ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof(obj);
+};
+
+/***/ }),
+/* 17 */
+/***/ (function(module, exports) {
+
+module.exports = true;
+
+
+/***/ }),
+/* 18 */
+/***/ (function(module, exports) {
+
+module.exports = {};
+
+
+/***/ }),
+/* 19 */
+/***/ (function(module, exports) {
+
+var toString = {}.toString;
+
+module.exports = function (it) {
+  return toString.call(it).slice(8, -1);
+};
+
 
 /***/ }),
 /* 20 */
@@ -1331,7 +1418,7 @@ var store = global[SHARED] || (global[SHARED] = {});
   return store[key] || (store[key] = value !== undefined ? value : {});
 })('versions', []).push({
   version: core.version,
-  mode: __webpack_require__(16) ? 'pure' : 'global',
+  mode: __webpack_require__(17) ? 'pure' : 'global',
   copyright: '© 2019 Denis Pushkarev (zloirock.ru)'
 });
 
@@ -1359,7 +1446,7 @@ exports.f = __webpack_require__(1);
 
 var global = __webpack_require__(0);
 var core = __webpack_require__(2);
-var LIBRARY = __webpack_require__(16);
+var LIBRARY = __webpack_require__(17);
 var wksExt = __webpack_require__(35);
 var defineProperty = __webpack_require__(5).f;
 module.exports = function (name) {
@@ -1463,11 +1550,11 @@ __webpack_require__(41)(String, 'String', function (iterated) {
 
 "use strict";
 
-var LIBRARY = __webpack_require__(16);
+var LIBRARY = __webpack_require__(17);
 var $export = __webpack_require__(13);
 var redefine = __webpack_require__(43);
 var hide = __webpack_require__(10);
-var Iterators = __webpack_require__(17);
+var Iterators = __webpack_require__(18);
 var $iterCreate = __webpack_require__(66);
 var setToStringTag = __webpack_require__(25);
 var getPrototypeOf = __webpack_require__(71);
@@ -1646,7 +1733,7 @@ module.exports = document && document.documentElement;
 __webpack_require__(73);
 var global = __webpack_require__(0);
 var hide = __webpack_require__(10);
-var Iterators = __webpack_require__(17);
+var Iterators = __webpack_require__(18);
 var TO_STRING_TAG = __webpack_require__(1)('toStringTag');
 
 var DOMIterables = ('CSSRuleList,CSSStyleDeclaration,CSSValueList,ClientRectList,DOMRectList,DOMStringList,' +
@@ -1757,7 +1844,7 @@ exports.default = VFFEvent;
 /***/ (function(module, exports, __webpack_require__) {
 
 // getting tag from 19.1.3.6 Object.prototype.toString()
-var cof = __webpack_require__(18);
+var cof = __webpack_require__(19);
 var TAG = __webpack_require__(1)('toStringTag');
 // ES3 wrong here
 var ARG = cof(function () { return arguments; }()) == 'Arguments';
@@ -1843,7 +1930,7 @@ if (!setTask || !clearTask) {
     delete queue[id];
   };
   // Node.js 0.8-
-  if (__webpack_require__(18)(process) == 'process') {
+  if (__webpack_require__(19)(process) == 'process') {
     defer = function (id) {
       process.nextTick(ctx(run, id, 1));
     };
@@ -2078,7 +2165,7 @@ var httpApi = _interopRequireWildcard(_http);
 
 var _interactionEvents = __webpack_require__(60);
 
-var _consts = __webpack_require__(19);
+var _consts = __webpack_require__(15);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
@@ -2120,8 +2207,8 @@ vff.getPages = function () {
 vff.onPages = function (cb) {
     return _vffData.vffData.onPages(cb);
 };
-vff.on = function (namespace, cb) {
-    return _vffData.vffData.on(namespace, cb);
+vff.on = function (namespace, cb, options) {
+    return _vffData.vffData.on(namespace, cb, options);
 };
 vff.getQueryParams = function () {
     return _vffData.vffData.getQueryParams();
@@ -2269,7 +2356,7 @@ module.exports = __webpack_require__(7) ? Object.defineProperties : function def
 /***/ (function(module, exports, __webpack_require__) {
 
 // fallback for non-array-like ES3 and non-enumerable old V8 strings
-var cof = __webpack_require__(18);
+var cof = __webpack_require__(19);
 // eslint-disable-next-line no-prototype-builtins
 module.exports = Object('z').propertyIsEnumerable(0) ? Object : function (it) {
   return cof(it) == 'String' ? it.split('') : Object(it);
@@ -2356,7 +2443,7 @@ module.exports = function (it) {
 
 var addToUnscopables = __webpack_require__(74);
 var step = __webpack_require__(75);
-var Iterators = __webpack_require__(17);
+var Iterators = __webpack_require__(18);
 var toIObject = __webpack_require__(14);
 
 // 22.1.3.4 Array.prototype.entries()
@@ -2580,7 +2667,7 @@ if (!USE_NATIVE) {
   __webpack_require__(37).f = $propertyIsEnumerable;
   __webpack_require__(49).f = $getOwnPropertySymbols;
 
-  if (DESCRIPTORS && !__webpack_require__(16)) {
+  if (DESCRIPTORS && !__webpack_require__(17)) {
     redefine(ObjectProto, 'propertyIsEnumerable', $propertyIsEnumerable, true);
   }
 
@@ -2748,7 +2835,7 @@ module.exports = function (it) {
 /***/ (function(module, exports, __webpack_require__) {
 
 // 7.2.2 IsArray(argument)
-var cof = __webpack_require__(18);
+var cof = __webpack_require__(19);
 module.exports = Array.isArray || function isArray(arg) {
   return cof(arg) == 'Array';
 };
@@ -2878,7 +2965,7 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _typeof2 = __webpack_require__(15);
+var _typeof2 = __webpack_require__(16);
 
 var _typeof3 = _interopRequireDefault(_typeof2);
 
@@ -2896,7 +2983,7 @@ var _createClass3 = _interopRequireDefault(_createClass2);
 
 var _helpers = __webpack_require__(4);
 
-var _consts = __webpack_require__(19);
+var _consts = __webpack_require__(15);
 
 var _messenger = __webpack_require__(9);
 
@@ -3243,7 +3330,7 @@ var update = function () {
                                             _vffData.vffData._updateControl(controlName, data[templateName][key], { timecode: timecode }).then(function (controlChange) {
                                                 templateChange[templateName] = controlChange || templateChange[templateName];
                                                 globalChange = controlChange || globalChange;
-                                                (0, _helpers.broadcast)(_events.VFF_EVENT + controlName, { dataChanged: controlChange, timecode: timecode });
+                                                (0, _helpers.broadcast)(_events.VFF_EVENT + controlName.toLowerCase(), { dataChanged: controlChange, timecode: timecode, data: data[templateName][key] });
                                                 resolve();
                                             }, reject);
                                         }));
@@ -3261,9 +3348,9 @@ var update = function () {
 
                             Promise.all(promises).then(function () {
                                 for (var templateName in data) {
-                                    (0, _helpers.broadcast)(_events.VFF_EVENT + templateName, { dataChanged: templateChange[templateName], timecode: timecode });
+                                    (0, _helpers.broadcast)(_events.VFF_EVENT + templateName.toLowerCase(), { dataChanged: templateChange[templateName], timecode: timecode, data: data[templateName] });
                                 }
-                                (0, _helpers.broadcast)(_events.VFF_EVENT, { dataChanged: globalChange, timecode: timecode });
+                                (0, _helpers.broadcast)(_events.VFF_EVENT, { dataChanged: globalChange, timecode: timecode, data: data });
                                 resolve();
                             }, reject);
                         }));
@@ -3289,7 +3376,7 @@ var _interactionEvents = __webpack_require__(60);
 
 var _events = __webpack_require__(3);
 
-var _consts = __webpack_require__(19);
+var _consts = __webpack_require__(15);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -4156,7 +4243,7 @@ module.exports = __webpack_require__(2).Promise;
 
 "use strict";
 
-var LIBRARY = __webpack_require__(16);
+var LIBRARY = __webpack_require__(17);
 var global = __webpack_require__(0);
 var ctx = __webpack_require__(20);
 var classof = __webpack_require__(55);
@@ -4508,7 +4595,7 @@ module.exports = function (iterator, fn, value, entries) {
 /***/ (function(module, exports, __webpack_require__) {
 
 // check on default Array iterator
-var Iterators = __webpack_require__(17);
+var Iterators = __webpack_require__(18);
 var ITERATOR = __webpack_require__(1)('iterator');
 var ArrayProto = Array.prototype;
 
@@ -4523,7 +4610,7 @@ module.exports = function (it) {
 
 var classof = __webpack_require__(55);
 var ITERATOR = __webpack_require__(1)('iterator');
-var Iterators = __webpack_require__(17);
+var Iterators = __webpack_require__(18);
 module.exports = __webpack_require__(2).getIteratorMethod = function (it) {
   if (it != undefined) return it[ITERATOR]
     || it['@@iterator']
@@ -4562,7 +4649,7 @@ var macrotask = __webpack_require__(57).set;
 var Observer = global.MutationObserver || global.WebKitMutationObserver;
 var process = global.process;
 var Promise = global.Promise;
-var isNode = __webpack_require__(18)(process) == 'process';
+var isNode = __webpack_require__(19)(process) == 'process';
 
 module.exports = function () {
   var head, last, notify;
@@ -4887,7 +4974,7 @@ module.exports = {
 "use strict";
 
 
-var _typeof2 = __webpack_require__(15);
+var _typeof2 = __webpack_require__(16);
 
 var _typeof3 = _interopRequireDefault(_typeof2);
 
@@ -4899,7 +4986,7 @@ var _helpers = __webpack_require__(4);
 
 var _vffData = __webpack_require__(8);
 
-var _consts = __webpack_require__(19);
+var _consts = __webpack_require__(15);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -5084,7 +5171,7 @@ exports.default = VffElement;
 "use strict";
 
 
-var _typeof2 = __webpack_require__(15);
+var _typeof2 = __webpack_require__(16);
 
 var _typeof3 = _interopRequireDefault(_typeof2);
 

@@ -18,7 +18,7 @@ async function update(data){
                         vffData._updateControl(controlName, data[templateName][key], {timecode}).then(controlChange => {
                             templateChange[templateName] = controlChange || templateChange[templateName];
                             globalChange = controlChange || globalChange;
-                            broadcast(VFF_EVENT + controlName, { dataChanged: controlChange ,timecode});
+                            broadcast(VFF_EVENT + controlName.toLowerCase(), { dataChanged: controlChange ,timecode, data : data[templateName][key]});
                             resolve();
                         }, reject);
                     }));
@@ -28,9 +28,9 @@ async function update(data){
 
         Promise.all(promises).then(()=>{
             for(let templateName in data){
-                broadcast(VFF_EVENT + templateName, {dataChanged: templateChange[templateName] ,timecode});
+                broadcast(VFF_EVENT + templateName.toLowerCase(), {dataChanged: templateChange[templateName] ,timecode, data: data[templateName]});
             }
-            broadcast(VFF_EVENT, {dataChanged: globalChange, timecode});
+            broadcast(VFF_EVENT, {dataChanged: globalChange, timecode, data});
             resolve();
         }, reject);
     });

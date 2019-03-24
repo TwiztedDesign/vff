@@ -38,7 +38,7 @@ vff.ready               = (cb) => {return vffData.ready(cb);};
 vff.onUpdate            = (cb) => {return vffData.onUpdate(cb);};
 vff.getPages            = () => {return vffData.getPages();};
 vff.onPages             = (cb) => {return vffData.onPages(cb);};
-vff.on                  = (namespace, cb) => {return vffData.on(namespace, cb);};
+vff.on                  = (namespace, cb, options) => {return vffData.on(namespace, cb, options);};
 vff.getQueryParams      = () => {return vffData.getQueryParams();};
 vff.send                = (type, payload) => { send(type, payload); };
 vff.request             = (type, payload, cb) => { request(type, payload, cb); };

@@ -6,3 +6,4 @@ coverage
 .nyc_output
 build.config.json
 npm-debug.log
+examples/test

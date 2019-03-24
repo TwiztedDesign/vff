@@ -1,5 +1,6 @@
 import {vffData} from '../../src/core/vffData.js';
 const messenger = require('../../src/utils/messenger.js');
+const updateHandler  = require('../../src/core/handlers/updateHandler');
 import {ADD} from "../../src/utils/events";
 
 let controlName = 'testControl', controlValue = 'hello';
@@ -80,6 +81,7 @@ describe('vff Data', () => {
     describe('registerControls', () => {
         it('should create controls from object', () => {
             vffData.registerControls({
+
                 title : 'hello',
                 subtitle : 'goodbye'
             });
@@ -208,6 +210,33 @@ describe('vff Data', () => {
             params = [{name: 'param3', value:'val3'}, {name: 'param4', value:'val4'}];
             vffData.addQueryParams(params);
             expect(vffData.getQueryParams()).toEqual(params);
+        });
+    });
+    describe('on', () => {
+        it('should fire with the control value', async (done) => {
+           vffData.registerControl("test." + controlName, controlValue).on(event => {
+               expect(event.data).toBe('new value');
+               done();
+           });
+           updateHandler.update({test : {[controlName.toLowerCase()] : 'new value', control2 : 'another value'}});
+        });
+        it('should fire with with data not registered in the controls', (done) => {
+            vffData.registerControls('test', {control1 : 'val1'}).on(event =>{
+                expect(event.data).toEqual({control1 : 'new value', control2 : 'another value'});
+                done();
+
+            });
+
+            updateHandler.update({test : {control1 : 'new value', control2 : 'another value'}});
+        });
+
+        it('should handle ui', (done) => {
+            vffData.registerControl('control1', 'option1', {group : 'test1', ui: {type: 'dropdown', options: ['option1','option2']}});
+            vffData.on('test1', event => {
+                expect(event.data).toEqual({control1 : 'option2', control2 : 'another value'});
+                done();
+            });
+            updateHandler.update({test1 : {control1 : {value : 'option2'}, control2 : 'another value'}});
         });
     });
 

@@ -3,7 +3,7 @@ const updateHandler  = require('../../../src/core/handlers/updateHandler.js');
 const helpers = require('../../../src/utils/helpers.js');
 const interactionEvents = require('../../../src/core/interactionEvents');
 const {NAMESPACE_DELIMITER, TIMECODE} = require('../../../src/core/consts');
-
+import {VFF_EVENT} from '../../../src/utils/events';
 /******************************* global spies ********************************/
 
 const broadcastSpy = jest.spyOn(helpers, 'broadcast');
@@ -67,5 +67,26 @@ describe('Update Handler', () => {
             expect(isInteractionEventSpy).toHaveBeenCalledTimes(2);
             expect(dispatchEventSpy).toHaveBeenCalledTimes(1);
         });
+        it('should send the correct event for control update', async () => {
+            //Arrange
+            let newValue = 'new value';
+            let payload = {
+                [templateName]:{
+                    [controlName]: newValue,
+                    control2 : "some val",
+                    control3 : {ui : 'dropdown', value : "option1", options : ['option1', 'option2']},
+                    [TIMECODE] : Date.now()
+                }
+            };
+            //Act
+            await updateHandler.update(payload);
+
+            //Assert
+            expect(control.getValue()).toBe(newValue);
+            //Update 3 times for each level, the control, template, and global
+            expect(broadcastSpy).toHaveBeenCalledWith(VFF_EVENT + 'test.control', expect.objectContaining({data : newValue}));
+            expect(broadcastSpy).toHaveBeenCalledWith(VFF_EVENT + 'test.control2', expect.objectContaining({data : "some val"}));
+            expect(broadcastSpy).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({data : {ui : 'dropdown', value : "option1", options : ['option1', 'option2']}}));
+        })
     });
 });
