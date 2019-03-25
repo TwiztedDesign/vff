@@ -683,7 +683,7 @@ var VffData = function () {
 
                 (0, _messenger.send)(_events.ADD, {
                     channel: control.getGroup(),
-                    options: options,
+                    options: control.getOptions(),
                     data: data
                 });
             }, ADD_CONTROL_TIMEOUT);

@@ -66,7 +66,7 @@ class VffData {
 
             send(ADD,{
                 channel : control.getGroup(),
-                options : options,
+                options : control.getOptions(),
                 data    : data
             });
 
