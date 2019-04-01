@@ -14,6 +14,7 @@ import * as playerApi from './core/api/player';
 import * as httpApi from './core/api/http';
 import {bindSyncEvents} from './core/interactionEvents';
 import {MODE} from './core/consts';
+import * as noOverScroll from './utils/noOverscroll';
 
 startListener();
 initVffDom();
@@ -52,6 +53,9 @@ vff.extend              = (name, extension) => { vff[name] = extension; };
 vff.define              = (name, element) => { customElements.define(name, element); };
 vff.uuid                = uuid();
 vff.sync                = (element) => { bindSyncEvents(element); };
+vff.enableOverscroll    = () => {noOverScroll.disable();}; //Enabled by default
+vff.disableOverscroll   = () => {noOverScroll.enable();}; //When disabled, body is not scrollable
+
 
 extend(vff, playerApi);
 extend(vff, eventsApi);
