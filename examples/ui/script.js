@@ -21,7 +21,7 @@ vff.registerControl('js.dropdownObject', 3, {
         type: 'dropdown',
         options :{'one': 1, 'two': 2, 'three': 3}
     }
-}).on(update);
+});
 
 // Radio
 vff.registerControl('js.radio', 'two', {
