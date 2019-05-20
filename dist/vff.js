@@ -3032,7 +3032,7 @@ var VFFControl = function () {
         var parts = name.split(_consts.NAMESPACE_DELIMITER);
         if (parts.length > 1) {
             name = parts[parts.length - 1];
-            group = parts.slice(0, -1).join('.');
+            group = parts.slice(0, -1).join(_consts.NAMESPACE_DELIMITER);
         }
 
         this._name = name;
@@ -3064,7 +3064,7 @@ var VFFControl = function () {
     }, {
         key: "getNamespace",
         value: function getNamespace() {
-            return this.getGroup() + '.' + this.getName();
+            return this.getGroup() + _consts.NAMESPACE_DELIMITER + this.getName();
         }
     }, {
         key: "getOptions",
@@ -3340,6 +3340,9 @@ var update = function () {
 
                                             _vffData.vffData._updateControl(controlName, data[templateName][key], { timecode: timecode }).then(function (controlChange) {
                                                 templateChange[templateName] = controlChange || templateChange[templateName];
+                                                if (controlName.includes(_consts.EXPOSE_DELIMITER)) {
+                                                    templateChange[controlName.split(_consts.EXPOSE_DELIMITER)[0]] = controlChange || templateChange[controlName.split(_consts.EXPOSE_DELIMITER)[0]];
+                                                }
                                                 globalChange = controlChange || globalChange;
                                                 (0, _helpers.broadcast)(_events.VFF_EVENT + controlName.toLowerCase(), { dataChanged: controlChange, timecode: timecode, data: data[templateName][key] });
                                                 resolve();
@@ -3360,6 +3363,11 @@ var update = function () {
                             Promise.all(promises).then(function () {
                                 for (var templateName in data) {
                                     (0, _helpers.broadcast)(_events.VFF_EVENT + templateName.toLowerCase(), { dataChanged: templateChange[templateName], timecode: timecode, data: data[templateName] });
+
+                                    var exposed = groupExposedControls(data[templateName]);
+                                    for (var key in exposed) {
+                                        (0, _helpers.broadcast)(_events.VFF_EVENT + templateName.toLowerCase() + _consts.NAMESPACE_DELIMITER + key.toLowerCase(), { dataChanged: templateChange[templateName + _consts.NAMESPACE_DELIMITER + key], timecode: timecode, data: exposed[key] });
+                                    }
                                 }
                                 (0, _helpers.broadcast)(_events.VFF_EVENT, { dataChanged: globalChange, timecode: timecode, data: data });
                                 resolve();
@@ -3390,6 +3398,20 @@ var _events = __webpack_require__(3);
 var _consts = __webpack_require__(15);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function groupExposedControls(data) {
+    var exposed = {};
+    for (var key in data) {
+        if (key.includes(_consts.EXPOSE_DELIMITER)) {
+            var parts = key.split(_consts.EXPOSE_DELIMITER);
+            var name = parts[0],
+                prop = parts[1];
+            exposed[name] = exposed[name] || {};
+            exposed[name][prop] = data[key];
+        }
+    }
+    return exposed;
+}
 
 function updateInteraction(data) {
     for (var event in data) {

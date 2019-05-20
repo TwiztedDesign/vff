@@ -27,7 +27,7 @@ export default class VFFControl {
         let parts = name.split(NAMESPACE_DELIMITER);
         if(parts.length > 1){
             name = parts[parts.length - 1];
-            group = parts.slice(0,-1).join('.');
+            group = parts.slice(0,-1).join(NAMESPACE_DELIMITER);
         }
 
         this._name = name;
@@ -49,7 +49,7 @@ export default class VFFControl {
 
     getGroup(){ return this._options.group; }
     getName(){ return this._name; }
-    getNamespace(){ return this.getGroup() + '.' + this.getName() ;}
+    getNamespace(){ return this.getGroup() + NAMESPACE_DELIMITER + this.getName() ;}
     getOptions(){ return this._options; }
     getValue(){ return this._value; }
     getBindProp(){ return this.getOptions().bindTo; }
