@@ -618,8 +618,6 @@ var _vffEvent2 = _interopRequireDefault(_vffEvent);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var ADD_CONTROL_TIMEOUT = 3000;
-
 var DEFAULT_ON_OPTIONS = {
     throttle: true,
     changeOnly: true
@@ -632,7 +630,6 @@ var VffData = function () {
         this._controls = [];
         this._pages = [];
         this._pagesDefer = (0, _helpers.defer)();
-        this._registerControlTimeouts = {};
         this._listeners = {};
         this._readyCallbacks = [];
         this._timeouts = new WeakMap();
@@ -654,7 +651,6 @@ var VffData = function () {
     }, {
         key: 'registerControl',
         value: function registerControl(name, value, options) {
-            var _this = this;
 
             if (arguments.length < 2) {
                 //TODO change ref
@@ -670,30 +666,18 @@ var VffData = function () {
                 this._controls.push(control);
             }
 
-            clearTimeout(this._registerControlTimeouts[control.getGroup()]);
-            this._registerControlTimeouts[control.getGroup()] = setTimeout(function () {
-                var controls = (0, _helpers.filter)(_this._controls, function (c) {
-                    return c.getGroup() === control.getGroup();
-                });
-
-                var data = {};
-                controls.forEach(function (control) {
-                    Object.assign(data, control.getValueObject());
-                });
-
-                (0, _messenger.send)(_events.ADD, {
-                    channel: control.getGroup(),
-                    options: control.getOptions(),
-                    data: data
-                });
-            }, ADD_CONTROL_TIMEOUT);
+            (0, _messenger.send)(_events.ADD, {
+                channel: control.getGroup(),
+                options: control.getOptions(),
+                data: control.getValueObject()
+            });
 
             return control;
         }
     }, {
         key: 'registerControls',
         value: function registerControls(namespace, object, options) {
-            var _this2 = this;
+            var _this = this;
 
             if ((0, _helpers.isObject)(namespace)) {
                 options = object || {}, object = namespace, namespace = options.group || _consts.DEFAULT_GROUP_NAME;
@@ -721,7 +705,7 @@ var VffData = function () {
                             options = cb;cb = namespace;namespace = '';
                         }
                         var ns = namespace ? group + '.' + namespace : group;
-                        _this2.on(ns, cb, options);
+                        _this.on(ns, cb, options);
                     };
                 }()
             };
@@ -814,7 +798,7 @@ var VffData = function () {
     }, {
         key: 'on',
         value: function on(namespace, cb, options) {
-            var _this3 = this;
+            var _this2 = this;
 
             if ((0, _helpers.isFunction)(namespace)) {
                 options = cb;cb = namespace;namespace = '';
@@ -822,10 +806,10 @@ var VffData = function () {
             options = Object.assign({}, DEFAULT_ON_OPTIONS, options || {});
             (0, _helpers.on)(_events.VFF_EVENT + namespace.toLowerCase(), function (event) {
                 if (!options.changeOnly || event.dataChanged) {
-                    _this3._runCallback(cb, options, new _vffEvent2.default({
+                    _this2._runCallback(cb, options, new _vffEvent2.default({
                         timecode: event.timecode,
                         changed: event.dataChanged,
-                        data: _this3.getControlsData(namespace, event.data),
+                        data: _this2.getControlsData(namespace, event.data),
                         namespace: namespace
                     }));
                 }
@@ -884,7 +868,6 @@ var VffData = function () {
         key: 'clear',
         value: function clear() {
             this._controls = [];
-            this._registerControlTimeouts = {};
             this._listeners = {};
             this._timeouts = new WeakMap();
             this._eventQueue = {};
@@ -896,15 +879,15 @@ var VffData = function () {
                 data[_key - 2] = arguments[_key];
             }
 
-            var _this4 = this;
+            var _this3 = this;
 
             if (options.consolidate || options.throttle) {
                 clearTimeout(this._timeouts.get(callback));
                 //todo add data to queue
                 data.forEach(function (event) {
-                    var queue = _this4._eventQueue[event.namespace] || [];
+                    var queue = _this3._eventQueue[event.namespace] || [];
                     queue.push(event);
-                    _this4._eventQueue[event.namespace] = queue;
+                    _this3._eventQueue[event.namespace] = queue;
                 });
 
                 this._timeouts.set(callback, setTimeout(function () {
@@ -924,9 +907,9 @@ var VffData = function () {
 
                     data.forEach(function (event) {
                         if (!(0, _helpers.isObject)(event.data)) {
-                            _this4._eventQueue[event.namespace] = [];
+                            _this3._eventQueue[event.namespace] = [];
                         } else {
-                            var events = _this4._eventQueue[event.namespace];
+                            var events = _this3._eventQueue[event.namespace];
                             var agg = rec(events, {});
                             event.data = Object.assign(agg, event.data);
                         }
