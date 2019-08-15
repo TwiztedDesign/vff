@@ -1,5 +1,5 @@
 import {ADD, PAGES_UPDATE, VFF_EVENT} from "../utils/events";
-import {docRef, broadcast, on, defer, queryOne, query, filter, isFunction, isObject, findKey} from '../utils/helpers.js';
+import {docRef, broadcast, on, defer, queryOne, query, isFunction, isObject, findKey} from '../utils/helpers.js';
 import {send} from '../utils/messenger';
 import {REGISTER_TEMPLATE} from '../utils/docRefs';
 import {DEFAULT_GROUP_NAME} from "./consts";
@@ -7,8 +7,6 @@ import {DEFAULT_GROUP_NAME} from "./consts";
 import {NAMESPACE_DELIMITER} from "../core/consts";
 import VFFControl from './vffControl';
 import VFFEvent from './vffEvent';
-
-const ADD_CONTROL_TIMEOUT = 3000;
 
 const DEFAULT_ON_OPTIONS = {
     throttle : true,
@@ -20,7 +18,6 @@ class VffData {
         this._controls = [];
         this._pages = [];
         this._pagesDefer = defer();
-        this._registerControlTimeouts = {};
         this._listeners = {};
         this._readyCallbacks = [];
         this._timeouts = new WeakMap();
@@ -52,25 +49,11 @@ class VffData {
             this._controls.push(control);
         }
 
-
-        clearTimeout(this._registerControlTimeouts[control.getGroup()]);
-        this._registerControlTimeouts[control.getGroup()] = setTimeout(() => {
-            let controls = filter(this._controls, c => {
-                return c.getGroup() === control.getGroup();
-            });
-
-            let data = {};
-            controls.forEach(control => {
-                Object.assign(data, control.getValueObject());
-            });
-
-            send(ADD,{
-                channel : control.getGroup(),
-                options : control.getOptions(),
-                data    : data
-            });
-
-        }, ADD_CONTROL_TIMEOUT);
+        send(ADD,{
+            channel : control.getGroup(),
+            options : control.getOptions(),
+            data    : control.getValueObject()
+        });
 
         return control;
     }
@@ -239,7 +222,6 @@ class VffData {
     }
     clear(){
         this._controls = [];
-        this._registerControlTimeouts = {};
         this._listeners = {};
         this._timeouts = new WeakMap();
         this._eventQueue = {};

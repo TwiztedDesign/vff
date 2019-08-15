@@ -20,7 +20,7 @@ describe('vff Data', () => {
     });
 
     describe('registerControl', () => {
-        it('Should emit an event without options', (done) => {
+        it('Should emit an event with the control options', (done) => {
             //Arrange
             let sendSpy = jest.spyOn(messenger, 'send');
 
@@ -31,7 +31,7 @@ describe('vff Data', () => {
             setTimeout(()=>{
                 expect(sendSpy).toHaveBeenCalledWith(ADD, {
                     channel : control.getGroup(),
-                    options : undefined,
+                    options : control.getOptions(),
                     data    : {[controlName] : controlValue}
                 });
                 done();

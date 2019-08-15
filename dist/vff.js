@@ -618,8 +618,6 @@ var _vffEvent2 = _interopRequireDefault(_vffEvent);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var ADD_CONTROL_TIMEOUT = 3000;
-
 var DEFAULT_ON_OPTIONS = {
     throttle: true,
     changeOnly: true
@@ -632,7 +630,6 @@ var VffData = function () {
         this._controls = [];
         this._pages = [];
         this._pagesDefer = (0, _helpers.defer)();
-        this._registerControlTimeouts = {};
         this._listeners = {};
         this._readyCallbacks = [];
         this._timeouts = new WeakMap();
@@ -654,7 +651,6 @@ var VffData = function () {
     }, {
         key: 'registerControl',
         value: function registerControl(name, value, options) {
-            var _this = this;
 
             if (arguments.length < 2) {
                 //TODO change ref
@@ -670,30 +666,18 @@ var VffData = function () {
                 this._controls.push(control);
             }
 
-            clearTimeout(this._registerControlTimeouts[control.getGroup()]);
-            this._registerControlTimeouts[control.getGroup()] = setTimeout(function () {
-                var controls = (0, _helpers.filter)(_this._controls, function (c) {
-                    return c.getGroup() === control.getGroup();
-                });
-
-                var data = {};
-                controls.forEach(function (control) {
-                    Object.assign(data, control.getValueObject());
-                });
-
-                (0, _messenger.send)(_events.ADD, {
-                    channel: control.getGroup(),
-                    options: control.getOptions(),
-                    data: data
-                });
-            }, ADD_CONTROL_TIMEOUT);
+            (0, _messenger.send)(_events.ADD, {
+                channel: control.getGroup(),
+                options: control.getOptions(),
+                data: control.getValueObject()
+            });
 
             return control;
         }
     }, {
         key: 'registerControls',
         value: function registerControls(namespace, object, options) {
-            var _this2 = this;
+            var _this = this;
 
             if ((0, _helpers.isObject)(namespace)) {
                 options = object || {}, object = namespace, namespace = options.group || _consts.DEFAULT_GROUP_NAME;
@@ -721,7 +705,7 @@ var VffData = function () {
                             options = cb;cb = namespace;namespace = '';
                         }
                         var ns = namespace ? group + '.' + namespace : group;
-                        _this2.on(ns, cb, options);
+                        _this.on(ns, cb, options);
                     };
                 }()
             };
@@ -814,7 +798,7 @@ var VffData = function () {
     }, {
         key: 'on',
         value: function on(namespace, cb, options) {
-            var _this3 = this;
+            var _this2 = this;
 
             if ((0, _helpers.isFunction)(namespace)) {
                 options = cb;cb = namespace;namespace = '';
@@ -822,10 +806,10 @@ var VffData = function () {
             options = Object.assign({}, DEFAULT_ON_OPTIONS, options || {});
             (0, _helpers.on)(_events.VFF_EVENT + namespace.toLowerCase(), function (event) {
                 if (!options.changeOnly || event.dataChanged) {
-                    _this3._runCallback(cb, options, new _vffEvent2.default({
+                    _this2._runCallback(cb, options, new _vffEvent2.default({
                         timecode: event.timecode,
                         changed: event.dataChanged,
-                        data: _this3.getControlsData(namespace, event.data),
+                        data: _this2.getControlsData(namespace, event.data),
                         namespace: namespace
                     }));
                 }
@@ -884,7 +868,6 @@ var VffData = function () {
         key: 'clear',
         value: function clear() {
             this._controls = [];
-            this._registerControlTimeouts = {};
             this._listeners = {};
             this._timeouts = new WeakMap();
             this._eventQueue = {};
@@ -896,15 +879,15 @@ var VffData = function () {
                 data[_key - 2] = arguments[_key];
             }
 
-            var _this4 = this;
+            var _this3 = this;
 
             if (options.consolidate || options.throttle) {
                 clearTimeout(this._timeouts.get(callback));
                 //todo add data to queue
                 data.forEach(function (event) {
-                    var queue = _this4._eventQueue[event.namespace] || [];
+                    var queue = _this3._eventQueue[event.namespace] || [];
                     queue.push(event);
-                    _this4._eventQueue[event.namespace] = queue;
+                    _this3._eventQueue[event.namespace] = queue;
                 });
 
                 this._timeouts.set(callback, setTimeout(function () {
@@ -924,9 +907,9 @@ var VffData = function () {
 
                     data.forEach(function (event) {
                         if (!(0, _helpers.isObject)(event.data)) {
-                            _this4._eventQueue[event.namespace] = [];
+                            _this3._eventQueue[event.namespace] = [];
                         } else {
-                            var events = _this4._eventQueue[event.namespace];
+                            var events = _this3._eventQueue[event.namespace];
                             var agg = rec(events, {});
                             event.data = Object.assign(agg, event.data);
                         }
@@ -3032,7 +3015,7 @@ var VFFControl = function () {
         var parts = name.split(_consts.NAMESPACE_DELIMITER);
         if (parts.length > 1) {
             name = parts[parts.length - 1];
-            group = parts.slice(0, -1).join('.');
+            group = parts.slice(0, -1).join(_consts.NAMESPACE_DELIMITER);
         }
 
         this._name = name;
@@ -3064,7 +3047,7 @@ var VFFControl = function () {
     }, {
         key: "getNamespace",
         value: function getNamespace() {
-            return this.getGroup() + '.' + this.getName();
+            return this.getGroup() + _consts.NAMESPACE_DELIMITER + this.getName();
         }
     }, {
         key: "getOptions",
@@ -3340,6 +3323,9 @@ var update = function () {
 
                                             _vffData.vffData._updateControl(controlName, data[templateName][key], { timecode: timecode }).then(function (controlChange) {
                                                 templateChange[templateName] = controlChange || templateChange[templateName];
+                                                if (controlName.includes(_consts.EXPOSE_DELIMITER)) {
+                                                    templateChange[controlName.split(_consts.EXPOSE_DELIMITER)[0]] = controlChange || templateChange[controlName.split(_consts.EXPOSE_DELIMITER)[0]];
+                                                }
                                                 globalChange = controlChange || globalChange;
                                                 (0, _helpers.broadcast)(_events.VFF_EVENT + controlName.toLowerCase(), { dataChanged: controlChange, timecode: timecode, data: data[templateName][key] });
                                                 resolve();
@@ -3360,6 +3346,11 @@ var update = function () {
                             Promise.all(promises).then(function () {
                                 for (var templateName in data) {
                                     (0, _helpers.broadcast)(_events.VFF_EVENT + templateName.toLowerCase(), { dataChanged: templateChange[templateName], timecode: timecode, data: data[templateName] });
+
+                                    var exposed = groupExposedControls(data[templateName]);
+                                    for (var key in exposed) {
+                                        (0, _helpers.broadcast)(_events.VFF_EVENT + templateName.toLowerCase() + _consts.NAMESPACE_DELIMITER + key.toLowerCase(), { dataChanged: templateChange[templateName + _consts.NAMESPACE_DELIMITER + key], timecode: timecode, data: exposed[key] });
+                                    }
                                 }
                                 (0, _helpers.broadcast)(_events.VFF_EVENT, { dataChanged: globalChange, timecode: timecode, data: data });
                                 resolve();
@@ -3390,6 +3381,20 @@ var _events = __webpack_require__(3);
 var _consts = __webpack_require__(15);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function groupExposedControls(data) {
+    var exposed = {};
+    for (var key in data) {
+        if (key.includes(_consts.EXPOSE_DELIMITER)) {
+            var parts = key.split(_consts.EXPOSE_DELIMITER);
+            var name = parts[0],
+                prop = parts[1];
+            exposed[name] = exposed[name] || {};
+            exposed[name][prop] = data[key];
+        }
+    }
+    return exposed;
+}
 
 function updateInteraction(data) {
     for (var event in data) {
