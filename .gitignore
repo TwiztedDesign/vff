@@ -7,3 +7,4 @@ coverage
 build.config.json
 npm-debug.log
 examples/test
+examples/**/vff.json

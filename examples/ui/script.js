@@ -21,7 +21,7 @@ vff.registerControl('js.dropdownObject', 3, {
         type: 'dropdown',
         options :{'one': 1, 'two': 2, 'three': 3}
     }
-}).on(update);
+});
 
 // Radio
 vff.registerControl('js.radio', 'two', {
@@ -34,6 +34,16 @@ vff.registerControl('js.radioObject', 1, {
     ui : {
         type: 'radio',
         options : {'one': 1, 'two': 2, 'three': 3}
+    }
+});
+
+vff.registerControl('js.range', 1, {
+    ui : {
+        type: 'range',
+        options: {
+            max: 75,
+            min: 14
+        }
     }
 });
 
@@ -76,6 +86,15 @@ vff.registerControl('js.vector3', '10;20;30', {
     }
 });
 
+vff.registerControl('js.color', true, {
+    ui : {
+        type: 'color'
+    }});
+
+vff.registerControl('js.file', true, {
+    ui : {
+        type: 'file'
+    }});
 
 vff.on(event => {
     console.log(event.data);
