@@ -1,6 +1,7 @@
 module.exports = {
     "READY"         : "taco-ready",
     "GO"            : "taco-go",
+    "CROP"          : "vff-crop",
     "NEXT"          : "taco-next",
     "PREV"          : "taco-previous",
     "ADD"           : "taco-addtemplate",

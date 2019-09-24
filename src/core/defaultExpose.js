@@ -1,5 +1,5 @@
 HTMLHeadingElement.prototype.expose = function(){
-    return {text : 'innerText', color : {path : 'style.color'}};
+    return {text : 'innerText', color : {path : 'style.color', ui :  {type : 'color'}}};
 };
 HTMLSpanElement.prototype.expose = function(){
     return {text : 'innerText'};

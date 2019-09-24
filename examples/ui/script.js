@@ -37,7 +37,7 @@ vff.registerControl('js.radioObject', 1, {
     }
 });
 
-vff.registerControl('js.range', 1, {
+vff.registerControl('js.range', 50, {
     ui : {
         type: 'range',
         options: {

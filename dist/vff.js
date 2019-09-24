@@ -120,6 +120,7 @@ if (typeof __e == 'number') __e = core; // eslint-disable-line no-undef
 module.exports = {
     "READY": "taco-ready",
     "GO": "taco-go",
+    "CROP": "vff-crop",
     "NEXT": "taco-next",
     "PREV": "taco-previous",
     "ADD": "taco-addtemplate",
@@ -5263,7 +5264,7 @@ module.exports = {
 
 
 HTMLHeadingElement.prototype.expose = function () {
-    return { text: 'innerText', color: { path: 'style.color' } };
+    return { text: 'innerText', color: { path: 'style.color', ui: { type: 'color' } } };
 };
 HTMLSpanElement.prototype.expose = function () {
     return { text: 'innerText' };
@@ -5385,9 +5386,20 @@ function go(target, time) {
         time: time
     });
 }
+function crop(top, left, width, height) {
+    if (top === undefined) {
+        throw new Error("vff.crop incorrect usage, please pass width, height, top and left values");
+    } else {
+        if (height === undefined) {
+            height = width;
+        }
+        (0, _messenger.send)(_events.CROP, left === undefined ? { crop: top } : { top: top, left: left, width: width, height: height });
+    }
+}
 
 module.exports = {
     go: go,
+    crop: crop,
     next: _helpers.noop,
     previous: _helpers.noop,
     home: _helpers.noop

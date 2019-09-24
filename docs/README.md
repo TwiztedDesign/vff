@@ -34,19 +34,162 @@ The control can be created by simply adding the attribute ```vff-control="name"`
     <h2 vff-control="subtitle">This is a subtitle</h2>
 </div>
 ```
-
-************* Screenshot ****************
+![first-control](./img/first-control.png)
 
 ## Publish your content
 In order to use your newly created overlay, you need to host it in a publicly available accessible location.
-The easyest way to do so is by using VFF-CLI
+The easiest way to do so is by using VFF-CLI
+
+Quick guide:
+1. Open your terminal
+2. `npm install -g vff-cli`
+3. Go to the overlay folder
+4. `vff init`
+5. Answer the questions
+6. `vff login`
+7. Fill in your credentials
+8. `vff serve`
+
+`vff serve` will serve the overlay from your local computer and it will not be uploaded, 
+use `vff serve` command for development proposes.
+When you serve an overlay, you will see a badge appear next to the overlays section in Videoflow's dashboard:
+<img src="./img/overlay-badge.png" alt="drawing" width="80"/>
+and the overlay item will appear in the overlays gallery
+<img src="./img/served-overlay.png" alt="drawing" width="200"/>
+If you see a broken link icon next to the overlay name
+<img src="./img/broken-link.png" alt="drawing" width="20"/>
+it means that the overlay is not properly served, try running `vff serve` again
+
+When you think your overlay is ready or you want to see it in production environment, use `vff deploy`.
+The overlay will be uploaded to Videoflow's servers and will become independent from your local computer.
+hen the overlay is deployed it will appear in the overlay gallery with a different background color.
+<img src="./img/deployed-overlay.png" alt="drawing" width="200"/>
+If you want to update your deployed overlay just run `vff deploy` again.
+>[!TIP] You can have the same overlay both served and deployed at the same time
 
 
-# VFF Global
+**Please refer to the [cli docs](https://github.com/TwiztedDesign/vff-cli/blob/master/README.md) for the full VFF-CLI documentation**
+
+## The Controller
+Explaining the videoflow controller with screenshots.
+
+
+## Groups and Namespaces
+In Videoflow, each control is part of a group, a group name for a control can be provided via the **group** property in the options object, or via the **namespace** notation.
+If no group name is provided, a default group name will be set to "untitled template".
+The name space notation look like: **{group name}.{control name}**.
+
+```html
+<h1 vff-control="title">Title</h1>
+```
+is the same as 
+```html
+<h1 vff-control="untitled template.title">Title</h1>
+```
+and the same as
+```javascript
+vff.registerControl("title", "Title", {group: "untitled template"});
+//or
+vff.registerControl("untitled template.title", "Title");
+```
+
+All the controls with the same group name will be grouped in the controller
+>[!NOTE]
+- Group names are case sensitive
+- Control names in *vff-control* attributes must not contain spaces 
+
+## HTML Attributes
+A control is a communication channel between the overlay and the controller.
+To control a simple text in the overlay from the controller you can do the following:
+```html
+<span id="title"></span>
+```
+```javascript
+vff.registerControl("header.title", "").on(event => {
+    document.getElementById("title").innerText = event.data;
+})
+```
+### vff-control
+A shorter way of doing that is using *HTML Attributes*:
+```html
+<span vff-control="header.title"></span>
+```
+This will expose the innerText attribute to the controller automatically.
+Each HTML element will expose different parameters by default when using *vff-control* attribute:
+
+| HTML Element | Exposed Parameters |
+| :------------:| ----------------- |
+| &lt;H1>       | innerText<br>style.color |
+| &lt;span>     | innerText |
+| &lt;p>        | innerText |
+| &lt;img>      | src |
+
+### vff-options
+
+The *vff-options* attribute excepts the same options onbject as you would pass to *vff.registerControl*
+
+```html
+<span vff-control="title" vff-options="{group : 'header'}"></span>
+```
+
+
+## Registering multiple controls
+
+
+
+
+# window.vff
 
 After including the vff script in your html file, a "vff" object is set on the window object.
 
 ## Methods
+
+### registerControl(name, value, options)
+* **name** - _string_ - name of the control
+* **value** - _Any_ - value of the control
+* **options** - _object_ - refer to the options object (optional)
+
+Registers a control in the VFF and returns a control object
+
+```javascript
+vff.registerControl("title", "Title text");
+```
+
+
+### registerControls(controls, options)
+* **controls** - _object_ - an object representing multiple controls where the key is the name and the value is the value of the control
+* **options** - _object_ - refer to the options object
+
+Registers multiple controls in the VFF
+
+### updateControl(name, value, options)
+### getControl(name)
+### ready(callback)
+### onUpdate(callback)
+### getPages()
+### onPages(callback)
+### on(namespace, callback, options)
+### getQueryParams()
+### send(type, payload)
+### request(type, payload, callback)
+### setup(options)
+### isMobile
+### isController()
+### mode
+### MODE
+### defer
+### uuid
+### extend(name, extension)
+### define(name, element)
+### sync(element)
+### enableOverscroll()
+### disableOverscroll()
+
+### get(url, callback)
+### track(name, data)
+
+
+
 |       Method     | Details                                                                                             |
 |------------------|-----------------------------------------------------------------------------------------------------|
 | registerControl(**name**, **data**, **options**)       | Registers a control in the VFF and returns a control object<br>**name** - _string_ - name of the control<br>**value** - _Any_ - value of the control<br>**options** - _object_ - refer to the options object|
