@@ -22,330 +22,247 @@ you need for your overlay, but in addition you'll need to add the VFF lib. A bas
 Add the following code in your HTML header
 
 ```html
-<script src="https://rawgit.com/TwiztedDesign/vff/master/dist/vff.js"></script>
+<script src="https://unpkg.com/vff@1"></script>
 ```
 
-## Create your first template
-A template is a group of properties that are related to the same logical object. For example a template can be a "Lower Third" or a "Side Panel". You can add as many templates as needed and structure them in any way you see fit.
+## Create your first control
+A control is a connection between an element in the overlay and Videoflow's controller.
+The control can be created by simply adding the attribute ```vff-control="name"```
 ```html
-<!-- Register the template by using the "vff-template" attribute -->
-<div vff-template="lowerThird">
-    <!-- Register each property of the template by using the "vff-name" attribute -->
-    <h1 vff-name="title">This is a title</h1>
-    <h2 vff-name="subTitle">This is a subtitle</h1>
+<div id="header">
+    <h1 vff-control="title">This is a title</h1>
+    <h2 vff-control="subtitle">This is a subtitle</h2>
 </div>
 ```
-
-Here we used two attributes "vff-template" and "vff-name". The "vff-template" declares a template by name, in this case it's "lowerThird". Then inside that template, we declare two properties by using "vff-name".
-Note that spaces are not allowed, but Videoflow will separate the names based on the Camel Case of the string, so "lowerThird" will be shown "Lower Third" and "subTitle" will shown as "Sub Title" in Videoflow Controller.
-While adding templates and properties can be easily done in the HTML, for a more complex control over your content is recommended to add the templates and their properties via JavaScript.
+![first-control](./img/first-control.png)
 
 ## Publish your content
-In order to use your newly created overlay, you need to host it in a publicly available accessible location, for example Netlify. Once you project has been published, you can add it as an overlay by pusing the url of your
-project to the "Overlay" filed of you project. Here is the full basic core:
+In order to use your newly created overlay, you need to host it in a publicly available accessible location.
+The easiest way to do so is by using VFF-CLI
+
+Quick guide:
+1. Open your terminal
+2. `npm install -g vff-cli`
+3. Go to the overlay folder
+4. `vff init`
+5. Answer the questions
+6. `vff login`
+7. Fill in your credentials
+8. `vff serve`
+
+`vff serve` will serve the overlay from your local computer and it will not be uploaded, 
+use `vff serve` command for development proposes.
+When you serve an overlay, you will see a badge appear next to the overlays section in Videoflow's dashboard:
+<img src="./img/overlay-badge.png" alt="drawing" width="80"/>
+and the overlay item will appear in the overlays gallery
+<img src="./img/served-overlay.png" alt="drawing" width="200"/>
+If you see a broken link icon next to the overlay name
+<img src="./img/broken-link.png" alt="drawing" width="20"/>
+it means that the overlay is not properly served, try running `vff serve` again
+
+When you think your overlay is ready or you want to see it in production environment, use `vff deploy`.
+The overlay will be uploaded to Videoflow's servers and will become independent from your local computer.
+hen the overlay is deployed it will appear in the overlay gallery with a different background color.
+<img src="./img/deployed-overlay.png" alt="drawing" width="200"/>
+If you want to update your deployed overlay just run `vff deploy` again.
+>[!TIP] You can have the same overlay both served and deployed at the same time
+
+
+**Please refer to the [cli docs](https://github.com/TwiztedDesign/vff-cli/blob/master/README.md) for the full VFF-CLI documentation**
+<!-- 
+## The Controller
+Explaining the videoflow controller with screenshots.
+ -->
+
+## Groups and Namespaces
+In Videoflow, each control is part of a group, a group name for a control can be provided via the **group** property in the options object, or via the **namespace** notation.
+If no group name is provided, a default group name will be set to "untitled template".
+The namespace notation looks like: **{group name}.{control name}**.
+
 ```html
-<html>
-    <header>
-        <script src="https://rawgit.com/TwiztedDesign/vff/master/dist/vff.js"></script>
-    </header>
-    <body>
-        <div vff-template="lowerThird">
-            <h1 vff-name="title">This is a title</h1>
-            <h2 vff-name="subTitle">This is a subtitle</h1>
-        </div>
-    </body>
-</html>
+<h1 vff-control="title">Title</h1>
+```
+is the same as 
+```html
+<h1 vff-control="untitled template.title">Title</h1>
+```
+and the same as
+```javascript
+vff.registerControl("title", "Title", {group: "untitled template"});
+//or
+vff.registerControl("untitled template.title", "Title");
 ```
 
-# VFF Global
+All the controls with the same group name will be grouped in the controller
+>[!NOTE]
+- Group names are case sensitive
+- Control names in *vff-control* attributes must not contain spaces 
+
+## HTML Attributes
+A control is a communication channel between the overlay and the controller.
+To control a simple text in the overlay from the controller you can do the following:
+```html
+<span id="title"></span>
+```
+```javascript
+vff.registerControl("header.title", "").on(event => {
+    document.getElementById("title").innerText = event.data;
+})
+```
+### vff-control
+A shorter way of doing that is using *HTML Attributes*:
+```html
+<span vff-control="header.title"></span>
+```
+This will expose the innerText attribute to the controller automatically.
+Each HTML element will expose different parameters by default when using *vff-control* attribute:
+
+| HTML Element | Exposed Parameters |
+| :------------:| ----------------- |
+| &lt;H1>       | innerText<br>style.color |
+| &lt;span>     | innerText |
+| &lt;p>        | innerText |
+| &lt;img>      | src |
+
+### vff-options
+
+The *vff-options* attribute excepts the same options object as you would pass to *vff.registerControl*
+
+```html
+<span vff-control="title" vff-options="{group : 'header'}"></span>
+```
+
+<!-- 
+## Registering multiple controls
+ -->
+
+## Adding controls (JavaScript)
+```javascript
+let title = vff.registerControl("header.title", 'This is a title');
+let subtitle = vff.registerControl("subtitle", 'This is a subtitle', {group : "header"});
+```
+The above code will generate the same result as the code we used in the "Getting Started" example in the HTML file.
+The function "registerControl" will return a control object that will contain functions for events and additional data. Note that when registering the control via js, you can specify any name you want for the control,
+the first parameter is the name of the control as it would be displayed in the controller (title) and the second parameter is the value of the control.
+
+
+
+# window.vff
 
 After including the vff script in your html file, a "vff" object is set on the window object.
 
 ## Methods
+
+### registerControl(name, value, options)
+* **name** - _string_ - name of the control
+* **value** - _Any_ - value of the control
+* **options** - _object_ - refer to the options object (optional)
+
+Registers a control in the VFF and returns a control object
+
+```javascript
+vff.registerControl("title", "Title text");
+```
+
+
+### registerControls(controls, options)
+* **controls** - _object_ - an object representing multiple controls where the key is the name and the value is the value of the control
+* **options** - _object_ - refer to the options object
+
+Registers multiple controls in the VFF.
+
+### track(name, properties)
+* **name** - _string_ - name of the event
+* **properties** - _object_ - an object of arbitrary properties (optional)
+
+Use "track" for sending statistical information about user action and engagement,
+it can be viewed in the statistics section in the videoflow platform.
+
+<!-- ### updateControl(name, value, options)
+### getControl(name)
+### ready(callback)
+### onUpdate(callback)
+### getPages()
+### onPages(callback)
+### on(namespace, callback, options)
+### getQueryParams()
+### send(type, payload)
+### request(type, payload, callback)
+### setup(options)
+### isMobile
+### isController()
+### mode
+### MODE
+### defer
+### uuid
+### extend(name, extension)
+### define(name, element)
+### sync(element)
+### enableOverscroll()
+### disableOverscroll()
+
+
+### videoTransform(top, left, width, height) //crop
+### get(url, callback)
+### track(name, data) -->
+
+<!-- 
+
 |       Method     | Details                                                                                             |
 |------------------|-----------------------------------------------------------------------------------------------------|
-| registerTemplate(**name**, **data**)| Registers a template in the VFF and returns a template object<br>**name** - _string_ - name of the template<br>**data** - _object_ - data of the template|
-| getTemplate(**name**)               | Returns a registered template by name<br>**name** - _string_ - name of the template to return|
-| getTemplates()                      | Returns an array of all the registered templates|
+| registerControl(**name**, **data**, **options**)       | Registers a control in the VFF and returns a control object<br>**name** - _string_ - name of the control<br>**value** - _Any_ - value of the control<br>**options** - _object_ - refer to the options object|
+| registerControls(**controls**, **options**)            | Registers multiple controls in the VFF<br>**controls** - _object_ - an object representing multiple controls where the key is the name and the value is the value of the control<br>**options** - _object_ - refer to the options object|
+| updateControl(**name**, **value**, **options**)   | Updates the value of a specific control<br>**name** - _string_ - name of the control to update<br>**value** - _Any_ - value to be updated<br>**options** - _object_ - refer to the options object|
+| on(**namespace**, **callback**, **options**)       | trigger callback when data for any of the controls is the **namespace** arrives<br>**namespace** - _string_ - dot delimited string that describes a controls in the same namespace<br>**callback** - _function(**data**)_ - data handler<br>**options** - _object(optional)_ - options object (described [here](#options))|
+| setup(**options**)                                | Sends global options to the videoflow platform (described [here](#setup))|
+
+## Setup
+The setup allows you to send options to videoflow platform in order to define property fields that relevant to your project.
+The options object looks the follow
+```javascript
+// Creating the options object
+var options = {
+    overrides: [
+        {
+            key: "Show In Home Screen",
+            visibility: true,
+            rename: "Show In Side Bar"
+        },
+        {
+            key: "Background",
+            visibility: false
+        }
+    ]
+};
+// Send setup options
+vff.setup(options);
+```
+
+### Overrides Options
+|        Property    | Type      |  Default   | Details                                                                                         |
+|--------------------|-----------|------------|-------------------------------------------------------------------------------------------------|
+| key                | _String_  | *empty*    | The field that you want to change. The key should be like the name in the UI |
+| visibility         | _String_  | *true*     | Show or hide the field |
+| rename             | _String_  | *key*      | Rename the field |
 
 
-# Templates
-Once the VFF lib is registered, it generates a global object that you can access from anywhere in your code. The global object "vff" contains all the functions and the properties you need to generate templates and control your overlay.
+# Controls
+Once the VFF lib is registered, it generates a global object that you can access from anywhere in your code. The global object "vff" contains all the functions and the properties you need to generate controls and control your overlay.
 The "vff" object also contains events that will be fired based on various conditions, such as a change in a data that arrives from an external source like a controller or an API call.
 
 
 ## Methods
 |        Method      | Details                                                                                               |
 |--------------------|-------------------------------------------------------------------------------------------------------|
-| $element()         | Returns the DOM element of the template if exists                                                     |
-| $on(**callback**, **options**)  | triggers callback when data for the template arrives<br>**callback** - _function(**data**)_ - data handler<br>**options** - _object(optional)_ - options object (described [here](#options))|
-| $on(**path**, **callback**, **options**)| trigger callback when data for the **path** in the template arrives<br>**path** - _string_ - dot delimited string that describes a path in the template<br>**callback** - _function(**data**)_ - data handler<br>**options** - _object(optional)_ - options object (described [here](#options))|
-| $emit(**payload**) | Emits a message to every player with the same project<br>**payload** - _object_ - data to be sent     |
-
+| on(**callback**, **options**)  | triggers callback when data for the control arrives<br>**callback** - _function(**data**)_ - data handler<br>**options** - _object(optional)_ - options object (described [here](#options))|
+| before(**middleware**, **options**)| add a middleware function that will be triggered in the order of the addition when data for the control arrives<br>**middleware** - _function(**data**, **next**)_ - the middleware function ([read more](#middleware))<br>**options** - _object(optional)_ - options object (described [here](#options))|
+| emit(**payload**) | Emits a message to every player with the same project<br>**payload** - _object_ - data to be sent     |
 
 ## options
 |        Property    | Type      |  Default   | Details                                                                                         |
 |--------------------|-----------|------------|-------------------------------------------------------------------------------------------------|
-| changeOnly         | _Boolean_ | *true*     | trigger callback only if dat is changed |
-
-
-
-## Adding templates (JavaScript)
-```javascript
-// Registering the template object
-var lowerThird = {
-    title       : "This is a title",
-    subTitle    : "This is a subtitle"
-};
-// Register the object as a template
-var lowerThird = vff.registerTemplate("Lower Third", lowerThird);
-```
-The above code will generate the same result as the code we used in the "Getting Started" example in the HTML file. The name of the template is the object name, and the properties of the template as the object properties.
-The function "registerTemplate" will return a template object that will contain functions for events and additional data. Note that when registering the template via js, you can specify any name you want for the template,
-the first pram is the name of the template as it would be displayed in the controller (Lower Third) and the second param is the object that will be used to contain the data of the template.
-
-## Working with Frameworks
-VFF will update the registered object on any change, you can then bind you template object directly to the DOM using your favorite framework, here are a few examples using different frameworks:
-
-### AngularJS
-### angular.js
-HTML
-```html
-<html>
-    <header>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.7.2/angular.min.js"></script>
-        <script src="https://rawgit.com/TwiztedDesign/vff/master/dist/vff.js"></script>
-    </header>
-    <body ng-app="tfApp">
-        <div ng-controller="lowerThirdController">
-            <h1>{{lowerThird.title}}</h1>
-            <h2>{{lowerThird.subTitle}}</h1>
-        </div>
-    </body>
-</html>
-```
-Javascript
-```javascript
-angular.module('tfApp', [])
-    .controller('lowerThirdController', ['$scope', function($scope) {
-        // Registering the template object on the scope
-        $scope.lowerThird = {
-            title       : "This is a title",
-            subTitle    : "This is a subtitle"
-        };
-        // Register the object as a template
-        var lowerThird = vff.registerTemplate("Lower Third", lowerThird);
-        }
-    ]);
-```
-<!--### React
-    ///TODO
-### Vue
-    ///TODO-->
-
-## Complex objects as templates
-So far we have looked at simple objects with only primitives as properties, but what will we see if we register the following object as a template:
-
-```javascript
-// Registering the template object
-var lowerThird = {
-    title       : "This is a title",
-    subTitle    : "This is a subtitle",
-    stocksData  : [
-        {
-            name    : "APPL",
-            value   : "$75"
-        },
-        {
-            name    : "GOOG",
-            value   : "$65"
-        }
-    ]
-};
-// Register the object as a template
-var lowerThird = vff.registerTemplate("Lower Third", lowerThird);
-```
-The controller will still show only the "Title" and the "Sub Title" properties. It will ignore any objects that are not primitives unless they follow a specific structure that describes a UI element such as a dropdown.
-While the property "stockData" will not be shown by the controller, it will still be active and available.
-
-You can still access it via the Videoflow API. This is useful when you have to display a lot of data from a 3rd party source.
-You will not see it in the controller and will not be able to edit the data, since it arrives for an external source via the API, but you will still be able to use the data in your overlay app.
-Your entire template can be viewed as an object at any time in the data dashboard of the controller.
-
-## Custom UI Elements
-So far we have been adding only primitive objects to our template. In the previous example have added two strings. Additional primitives you can add are numbers and booleans. In addition to the primitive types
-you can also create custom objects that will be used to extend the UI elements that can be used in the template. Normally objects are not shown in the UI of the controller, unless you follow the UI element object structure.
-
-```javascript
-var myTemplate = {
-    myDropdown : {
-        ui          : 'dropdown',
-        value       : 'USA',
-        options     : [
-            'USA',
-            'Canada',
-            'Mexico',
-            'UK'
-        ]
-    }
-}
-```
-The above example will create a template, with a single ui element, that will be presented as a dropdown box, with the options 'USA', 'Canada', 'Mexico' & 'UK' to choose from, and 'USA' as the default selected value.
-When you make another selection from the drop down, the "value" property will be updated. Keep that in mind when binding your elements to the template object.
-The key part here is the "ui" property. Without the ui property & without the appropriate ui value, this object would have been ignored by the controller and you would not see it in the UI.
-
-### Dropdown
-```javascript
-var myTemplate = {
-    myDropdown : {
-        //Declare the type of the ui element
-        ui          : 'dropdown',
-        //Bind your element to the value property
-        value       : 'USA',
-        options     : [
-            'USA',
-            'Canada',
-            'Mexico',
-            'UK'
-        ]
-    }
-}
-```
-### Radio Group
-```javascript
-var myTemplate = {
-    myRadioGroup : {
-        //Declare the type of the ui element
-        ui          : 'radio',
-        //Bind your element to the value property
-        value       : 'USA',
-        options     : [
-            'USA',
-            'Canada',
-            'Mexico',
-            'UK'
-        ]
-    }
-}
-```
-
-### Range Slider
-```javascript
-var myTemplate = {
-    mySlider : {
-        //Declare the type of the ui element
-        ui        : 'range',
-        //Bind your element to the value property
-        value       : '0',
-        min         : -50,
-        max         : 10,
-        step        : 0.1
-    }
-}
-```
-
-## Template Events
-When the template get new data for the controller or the API an event is triggered, this event can be used to added extra functionality as a response to the new data. For example, to trigger an animation.
-We will register a new function for the event on our "Lower Third" template:
-```javascript
-// Registering the template object
-var lowerThird = {
-    title       : "This is a title",
-    subTitle    : "This is a subtitle",
-};
-// Register the object as a template
-var lowerThird = vff.registerTemplate("Lower Third", lowerThird);
-
-lowerThird.onData(function(data){
-    // Respond to the event
-    var d = new Date(data.__timecode__);
-    alert("New data received on " + d.toString());
-});
-```
-The "data" object of the function carries the template object with extra property for the time code (__timecode__).
-
-A template can emit a message which will be received by all opened Videoflow players.
-
-```javascript
-var lowerThird = vff.getTemplate("lowerThird");
-lowerThird.emit({"title" : "Breaking News"});
-```
-
-The code above will emit a message from the "lowerThird" template with a new title.
-It will be received in all of the open Videoflow players and the title will be changed.
-Any appropriate "onData" listeners will be triggered;
-
-The received message
-```json
-{
-  "overlay": "the overlay url",
-  "template": "template name",
-  "data": {
-    "title": "Breaking News"
-  },
-  "query": {//query params from the emitting project
-    "param1" : "value1"
-  },
-  "origin": "origin url",
-  "channel": "lowerThird"
-}
-```
-
-
-
-## getPages
-```javascript
-vff.getPages();
-```
-Get all the project pages (for now, mainly used to build home screen overlays)
-
-
-## getQueryParams
-```javascript
-vff.getQueryParams();
-```
-Get the project query params (can?t use window.location.search because the overlay can be opened in an iframe)
-
-<!--
-## extend
-```javascript
-vff.extend(name, extension)
-```
-Extend the vff global object
-## define
-```javascript
-vff.define(name, element)
-```
-Define a vff custom element  
-Name - string - element name should be at least two words, dash separated (i.e vff-telestrator) **should consider auto ?vff-? prefix
--->
-
-# Player control
-
-## go
-```javascript
-vff('pagename', timecode)
-```
-Go to page
-
-* target - ***string*** - target page name
-* timecode - ***int*** - ***optional*** - target time if the target page is video
-
-
-# Globals
-
-## isMobile
-
-**boolean**
-
-
-## isController
-
-**boolean**
-
-## mode
-
-**String:** _normal_ | _controller-preview_ | _controller-program_
+| changeOnly         | _Boolean_ | *true*     | trigger callback only if data is changed |
+ -->
 
 [![travis build](https://img.shields.io/travis/TwiztedDesign/vff.svg)](https://travis-ci.org/TwiztedDesign/vff)
 ![version](https://img.shields.io/npm/v/vff.svg)
