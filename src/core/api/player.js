@@ -20,9 +20,10 @@ function crop(top, left, width, height){
 
 
 module.exports = {
-    go          : go,
-    crop        : crop,
-    next        : noop,
-    previous    : noop,
-    home        : noop,
+    go              : go,
+    crop            : crop,
+    videoTransform  : crop,
+    next            : noop,
+    previous        : noop,
+    home            : noop,
 };

@@ -9,3 +9,7 @@ build.config.json
 npm-debug.log
 examples/test
 examples/**/vff.json
+examples/**/vff.js
+examples/**/vff.js.map
+examples/**/vff.min.js
+docs/**/*_DEP.md

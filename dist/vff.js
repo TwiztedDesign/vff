@@ -5400,6 +5400,7 @@ function crop(top, left, width, height) {
 module.exports = {
     go: go,
     crop: crop,
+    videoTransform: crop,
     next: _helpers.noop,
     previous: _helpers.noop,
     home: _helpers.noop
