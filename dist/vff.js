@@ -121,6 +121,7 @@ module.exports = {
     "READY": "taco-ready",
     "GO": "taco-go",
     "CROP": "vff-crop",
+    "AUDIO_TRACK": "vff-audio-track",
     "NEXT": "taco-next",
     "PREV": "taco-previous",
     "ADD": "taco-addtemplate",
@@ -5397,9 +5398,14 @@ function crop(top, left, width, height) {
     }
 }
 
+function switchAudioTrack(channel) {
+    (0, _messenger.send)(_events.AUDIO_TRACK, channel);
+}
+
 module.exports = {
     go: go,
     crop: crop,
+    audioTrack: switchAudioTrack,
     videoTransform: crop,
     next: _helpers.noop,
     previous: _helpers.noop,
