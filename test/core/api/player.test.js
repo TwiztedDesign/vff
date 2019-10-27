@@ -1,6 +1,6 @@
 const playerApi       = require('../../../src/core/api/player');
 const messenger = require('../../../src/utils/messenger.js');
-import {GO} from '../../../src/utils/events';
+import {GO, CROP} from '../../../src/utils/events';
 
 describe("Player Api", () =>{
    describe("Go", () => {
@@ -12,4 +12,11 @@ describe("Player Api", () =>{
 
       });
    });
+   it("Should send crop massage", () => {
+       const send = jest.spyOn(messenger, 'send');
+       playerApi.crop(0);
+       expect(send).toHaveBeenCalledTimes(1);
+       expect(send).toHaveBeenCalledWith(CROP,  {"crop": 0});
+   });
+
 });
