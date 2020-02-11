@@ -5398,9 +5398,74 @@ function crop(top, left, width, height) {
         (0, _messenger.send)(_events.CROP, left === undefined ? { crop: top } : { top: top, left: left, width: width, height: height });
     }
 }
+
 function transform(fromTopLeftX, fromTopLeftY, fromBottomRightX, fromBottomRightY, toTopLeftX, toTopLeftY, toBottomRightX, toBottomRightY, options) {
+    options = options || {};
+
+    //()
+    //({})
+    //(0.2,0.2,0.4,0.4)
+    //(0.2,0.2,0.4,0.4,{})
+    //(0.2,0.2,0.4,0.4,0,0,1,1)
+    //(0.2,0.2,0.4,0.4,0,0,1,1,{})
+
+
+    var _iteratorNormalCompletion = true;
+    var _didIteratorError = false;
+    var _iteratorError = undefined;
+
+    try {
+        for (var _iterator = arguments[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+            var arg = _step.value;
+
+            if (arg === undefined) {
+                throw new Error("vff.transform incorrect usage, please pass fromTopLeftX, fromTopLeftY, fromBottomRightX, fromBottomRightY, toTopLeftX, toTopLeftY, toBottomRightX and toBottomRightY values");
+            }
+        }
+    } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+    } finally {
+        try {
+            if (!_iteratorNormalCompletion && _iterator.return) {
+                _iterator.return();
+            }
+        } finally {
+            if (_didIteratorError) {
+                throw _iteratorError;
+            }
+        }
+    }
+
     (0, _messenger.send)(_events.TRANSFORM, { fromTopLeftX: fromTopLeftX, fromTopLeftY: fromTopLeftY, fromBottomRightX: fromBottomRightX, fromBottomRightY: fromBottomRightY, toTopLeftX: toTopLeftX, toTopLeftY: toTopLeftY, toBottomRightX: toBottomRightX, toBottomRightY: toBottomRightY, options: options });
 }
+
+function transformToFullscreen(fromTopLeftX, fromTopLeftY, fromBottomRightX, fromBottomRightY, options) {
+    transform(fromTopLeftX, fromTopLeftY, fromBottomRightX, fromBottomRightY, 0, 0, 1, 1, options);
+}
+
+function addMethod(object, name, fn) {
+    var old = object[name];
+    object[name] = function () {
+        if (fn.length == arguments.length) return fn.apply(this, arguments);else if (typeof old == 'function') return old.apply(this, arguments);
+    };
+}
+var t = {};
+addMethod(t, 'transform', function () {
+    transform();
+});
+addMethod(t, 'transform', function (x0, y0, x1, y1) {
+    transform(x0, y0, x1, y1, 0, 0, 1, 1, {});
+});
+addMethod(t, 'transform', function (x0, y0, x1, y1, options) {
+    transform(x0, y0, x1, y1, 0, 0, 1, 1, options);
+});
+addMethod(t, 'transform', function (x0, y0, x1, y1, x00, y00, x11, y11) {
+    transform(x0, y0, x1, y1, x00, y00, x11, y11, {});
+});
+addMethod(t, 'transform', function (x0, y0, x1, y1, x00, y00, x11, y11, options) {
+    transform(x0, y0, x1, y1, x00, y00, x11, y11, options);
+});
 
 function switchAudioTrack(channel) {
     (0, _messenger.send)(_events.AUDIO_TRACK, channel);
@@ -5409,7 +5474,9 @@ function switchAudioTrack(channel) {
 module.exports = {
     go: go,
     crop: crop,
-    transform: transform,
+    transform: t.transform,
+    transformToFullscreen: transformToFullscreen,
+    transformToFullScreen: transformToFullscreen,
     audioTrack: switchAudioTrack,
     videoTransform: crop,
     next: _helpers.noop,

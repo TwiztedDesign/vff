@@ -1,6 +1,6 @@
 const playerApi       = require('../../../src/core/api/player');
 const messenger = require('../../../src/utils/messenger.js');
-import {GO, CROP, AUDIO_TRACK} from '../../../src/utils/events';
+import {GO, CROP, TRANSFORM,AUDIO_TRACK} from '../../../src/utils/events';
 
 describe("Player Api", () =>{
    describe("Go", () => {
@@ -44,4 +44,28 @@ describe("Player Api", () =>{
             expect(send).toHaveBeenCalledWith(AUDIO_TRACK, 0);
         });
    });
+   describe("Transform", () => {
+       it("Should handle overloading", () => {
+           const send = jest.spyOn(messenger, 'send');
+           playerApi.transform(0,0,1,1);
+           expect(send).toHaveBeenCalledTimes(1);
+           expect(send).toHaveBeenCalledWith(TRANSFORM,  {fromTopLeftX : 0, fromTopLeftY : 0, fromBottomRightX: 1, fromBottomRightY : 1,
+               toTopLeftX: 0, toTopLeftY : 0, toBottomRightX:1, toBottomRightY :1, options : {}});
+       });
+       it("Should handle overloading", () => {
+           const send = jest.spyOn(messenger, 'send');
+           playerApi.transform(0,0,1,1,2,2,2,2);
+           expect(send).toHaveBeenCalledTimes(1);
+           expect(send).toHaveBeenCalledWith(TRANSFORM,  {fromTopLeftX : 0, fromTopLeftY : 0, fromBottomRightX: 1, fromBottomRightY : 1,
+               toTopLeftX: 2, toTopLeftY : 2, toBottomRightX:2, toBottomRightY :2, options : {}});
+       });
+       it("Should Throw error when incorrect number of arguments is passed", () => {
+           const send = jest.spyOn(messenger, 'send');
+           playerApi.transform(0,0,1,1,2,2);
+           expect(send).toHaveBeenCalledTimes(1);
+           expect(send).toHaveBeenCalledWith(TRANSFORM,  {fromTopLeftX : undefined, fromTopLeftY : undefined, fromBottomRightX: undefined, fromBottomRightY : undefined,
+               toTopLeftX: undefined, toTopLeftY : undefined, toBottomRightX:undefined, toBottomRightY :undefined, options : undefined});
+
+       })
+   })
 });

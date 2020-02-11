@@ -178,6 +178,23 @@ Registers multiple controls in the VFF.
 Use "track" for sending statistical information about user action and engagement,
 it can be viewed in the statistics section in the videoflow platform.
 
+
+### transform(fromX0, fromY0, fromX1, fromY1, topX0, toY0, fromX1, toY1, options)
+#### transform(fromX0, fromY0, fromX1, fromY1, options)
+* **fromX0** - _float_ - percent value \[0-1\] of the top left X coordinate
+* **fromY0** - _float_ - percent value \[0-1\] of the top left Y coordinate
+* **fromX1** - _float_ - percent value \[0-1\] of the bottom right X coordinate
+* **fromY1** - _float_ - percent value \[0-1\] of the bottom right Y coordinate
+* **toX0** - _float_ - percent value \[0-1\] of the top left X coordinate **(default 0)**
+* **toY0** - _float_ - percent value \[0-1\] of the top left Y coordinate **(default 0)**
+* **toX1** - _float_ - percent value \[0-1\] of the bottom right X coordinate **(default 1)**
+* **toY1** - _float_ - percent value \[0-1\] of the bottom right Y coordinate **(default 1)**
+* **options** - _object_ - optional
+
+
+Transforms part of the video content to another part of the screen  
+
+
 <!-- ### updateControl(name, value, options)
 ### getControl(name)
 ### ready(callback)

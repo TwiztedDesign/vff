@@ -353,6 +353,22 @@ function parseRJSON(json){
     );
 }
 
+function overlaod(object, name, fn){
+    const old = object[ name ];
+    if ( old ) {
+        object[name] = function () {
+            if (fn.length == arguments.length)
+                return fn.apply(this, arguments);
+            else if (typeof old == 'function')
+                return old.apply(this, arguments);
+        };
+    }
+    else {
+        object[name] = fn;
+    }
+}
+
+
 function noop(){}
 
 
@@ -383,5 +399,6 @@ module.exports = {
     getQueryParams  : getQueryParams,
     parseRJSON      : parseRJSON,
     isFunction      : isFunction,
-    isObject        : isObject
+    isObject        : isObject,
+    overlaod
 };
