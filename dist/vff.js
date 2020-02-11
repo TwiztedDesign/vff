@@ -5398,8 +5398,8 @@ function crop(top, left, width, height) {
         (0, _messenger.send)(_events.CROP, left === undefined ? { crop: top } : { top: top, left: left, width: width, height: height });
     }
 }
-function transform(fromTopLeftX, fromTopLeftY, fromBottomRightX, fromBottomRightY, toTopLeftX, toTopLeftY, toBottomRightX, toBottomRightY) {
-    (0, _messenger.send)(_events.TRANSFORM, { fromTopLeftX: fromTopLeftX, fromTopLeftY: fromTopLeftY, fromBottomRightX: fromBottomRightX, fromBottomRightY: fromBottomRightY, toTopLeftX: toTopLeftX, toTopLeftY: toTopLeftY, toBottomRightX: toBottomRightX, toBottomRightY: toBottomRightY });
+function transform(fromTopLeftX, fromTopLeftY, fromBottomRightX, fromBottomRightY, toTopLeftX, toTopLeftY, toBottomRightX, toBottomRightY, options) {
+    (0, _messenger.send)(_events.TRANSFORM, { fromTopLeftX: fromTopLeftX, fromTopLeftY: fromTopLeftY, fromBottomRightX: fromBottomRightX, fromBottomRightY: fromBottomRightY, toTopLeftX: toTopLeftX, toTopLeftY: toTopLeftY, toBottomRightX: toBottomRightX, toBottomRightY: toBottomRightY, options: options });
 }
 
 function switchAudioTrack(channel) {
