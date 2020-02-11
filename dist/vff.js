@@ -121,6 +121,7 @@ module.exports = {
     "READY": "taco-ready",
     "GO": "taco-go",
     "CROP": "vff-crop",
+    "TRANSFORM": "vff-transform",
     "AUDIO_TRACK": "vff-audio-track",
     "NEXT": "taco-next",
     "PREV": "taco-previous",
@@ -5397,6 +5398,9 @@ function crop(top, left, width, height) {
         (0, _messenger.send)(_events.CROP, left === undefined ? { crop: top } : { top: top, left: left, width: width, height: height });
     }
 }
+function transform(fromTopLeftX, fromTopLeftY, fromBottomRightX, fromBottomRightY, toTopLeftX, toTopLeftY, toBottomRightX, toBottomRightY) {
+    (0, _messenger.send)(_events.TRANSFORM, { fromTopLeftX: fromTopLeftX, fromTopLeftY: fromTopLeftY, fromBottomRightX: fromBottomRightX, fromBottomRightY: fromBottomRightY, toTopLeftX: toTopLeftX, toTopLeftY: toTopLeftY, toBottomRightX: toBottomRightX, toBottomRightY: toBottomRightY });
+}
 
 function switchAudioTrack(channel) {
     (0, _messenger.send)(_events.AUDIO_TRACK, channel);
@@ -5405,6 +5409,7 @@ function switchAudioTrack(channel) {
 module.exports = {
     go: go,
     crop: crop,
+    transform: transform,
     audioTrack: switchAudioTrack,
     videoTransform: crop,
     next: _helpers.noop,

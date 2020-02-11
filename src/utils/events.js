@@ -2,6 +2,7 @@ module.exports = {
     "READY"         : "taco-ready",
     "GO"            : "taco-go",
     "CROP"          : "vff-crop",
+    "TRANSFORM"     :"vff-transform",
     "AUDIO_TRACK"   : "vff-audio-track",
     "NEXT"          : "taco-next",
     "PREV"          : "taco-previous",

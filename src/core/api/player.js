@@ -1,5 +1,5 @@
 import {send} from '../../utils/messenger.js';
-import {GO, CROP, AUDIO_TRACK} from '../../utils/events.js';
+import {GO, CROP, AUDIO_TRACK, TRANSFORM} from '../../utils/events.js';
 import {noop} from '../../utils/helpers';
 
 
@@ -17,6 +17,9 @@ function crop(top, left, width, height){
         send(CROP, left === undefined? {crop : top} : {top, left, width, height});
     }
 }
+function transform(fromTopLeftX, fromTopLeftY, fromBottomRightX, fromBottomRightY, toTopLeftX, toTopLeftY, toBottomRightX, toBottomRightY, options){
+    send(TRANSFORM, {fromTopLeftX, fromTopLeftY, fromBottomRightX, fromBottomRightY, toTopLeftX, toTopLeftY, toBottomRightX, toBottomRightY, options});
+}
 
 function switchAudioTrack(channel){
     send(AUDIO_TRACK, channel);
@@ -26,6 +29,7 @@ function switchAudioTrack(channel){
 module.exports = {
     go              : go,
     crop            : crop,
+    transform       : transform,
     audioTrack      : switchAudioTrack,
     videoTransform  : crop,
     next            : noop,
