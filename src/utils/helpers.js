@@ -368,6 +368,34 @@ function overlaod(object, name, fn){
     }
 }
 
+function getAllChildrenIncludinShadowDOM(el){
+    let shadow = el.shadowRoot;
+    let children = Array.from(el.children || []);
+    if(shadow){
+        children = children.concat(Array.from(shadow.children || []));
+    }
+    return children;
+}
+
+function searchAttributeHelper(acc, element, attr){
+    if(element.hasAttribute && element.hasAttribute(attr)){
+        acc.push(element);
+    }
+    if(!element.shadowRoot && (!element.children || !element.children.length)){
+        return acc;
+    } else {
+        let children = getAllChildrenIncludinShadowDOM(element);
+
+        for(let i = 0 ; i < children.length ; i++){
+            searchAttributeHelper(acc, children[i], attr);
+        }
+    }
+    return acc;
+}
+
+function searchAttribute(attr){
+    return searchAttributeHelper([], document, attr);
+}
 
 function noop(){}
 
@@ -400,5 +428,6 @@ module.exports = {
     parseRJSON      : parseRJSON,
     isFunction      : isFunction,
     isObject        : isObject,
-    overlaod
+    overlaod,
+    searchAttribute
 };

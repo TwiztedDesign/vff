@@ -5,6 +5,7 @@ import {EXPOSE_DELIMITER, ATTRIBUTE} from './consts';
 
 function initDOM() {
     let controls = document.querySelectorAll(`[${ATTRIBUTE.CONTROL}]`);
+    // let controls = searchAttribute(ATTRIBUTE.CONTROL);
     controls.forEach(control => {
 
         let name = control.getAttribute(ATTRIBUTE.CONTROL);

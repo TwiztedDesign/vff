@@ -6,8 +6,8 @@ import {start as startListener} from './utils/listener';
 import {init as initVffDom} from './core/initDOM';
 import vffElement from './core/vffElement';
 import './core/defaultExpose';
-import "../scripts/custom-elements.min";
-import "../scripts/custom-elements-es5-adapter.exec";
+// import "../scripts/custom-elements.min";
+// import "../scripts/custom-elements-es5-adapter.exec";
 import {isMobile, extend, defer, uuid} from './utils/helpers';
 import * as eventsApi from './core/api/events';
 import * as playerApi from './core/api/player';
@@ -50,7 +50,13 @@ vff.mode                = MODE.NORMAL;
 vff.MODE                = MODE; //Enum
 vff.defer               = defer;
 vff.extend              = (name, extension) => { vff[name] = extension; };
-vff.define              = (name, element) => { customElements.define(name, element); };
+
+//Deprecated
+vff.define              = (name, element) => {
+    if('customElements' in window){
+        customElements.define(name, element);
+    }
+};
 vff.uuid                = uuid();
 vff.sync                = (element) => { bindSyncEvents(element); };
 vff.enableOverscroll    = () => {noOverScroll.disable();}; //Enabled by default
