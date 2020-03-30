@@ -164,7 +164,7 @@ function flatten(data) {
     }
     recurse(data, "");
     return result;
-};
+}
 
 function scanVffData(){
     root = {};
@@ -257,7 +257,7 @@ async function controllerExists(url){
         url = url ||  new URL("/controller.html", document.baseURI).href;
         var xhr = new XMLHttpRequest();
         xhr.open("GET", url, true);
-        xhr.onload = function (e) {
+        xhr.onload = function () {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
                     resolve(url);
@@ -267,7 +267,7 @@ async function controllerExists(url){
                 }
             }
         };
-        xhr.onerror = function (e) {
+        xhr.onerror = function () {
             reject();
         };
         xhr.send(null);
@@ -314,8 +314,8 @@ module.exports = {
                            if(el.hasAttribute(ATTRIBUTE.SELECTION)){
                                handleSelect(el, e.data);
                            }
-                           setValue(el, flat[key])
-                       })
+                           setValue(el, flat[key]);
+                       });
                     });
 
                 }, {changeOnly : false});
@@ -325,7 +325,7 @@ module.exports = {
                     vffData.registerController(url);
                     // registerController(url);
                 }, () => {
-                    console.log('No custom controller');
+                    // console.log('No custom controller');
                 });
             }
         });
