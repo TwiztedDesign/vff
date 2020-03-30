@@ -5225,7 +5225,7 @@ var controllerExists = function () {
                             url = url || new URL("/controller.html", document.baseURI).href;
                             var xhr = new XMLHttpRequest();
                             xhr.open("GET", url, true);
-                            xhr.onload = function (e) {
+                            xhr.onload = function () {
                                 if (xhr.readyState === 4) {
                                     if (xhr.status === 200) {
                                         resolve(url);
@@ -5234,7 +5234,7 @@ var controllerExists = function () {
                                     }
                                 }
                             };
-                            xhr.onerror = function (e) {
+                            xhr.onerror = function () {
                                 reject();
                             };
                             xhr.send(null);
@@ -5459,7 +5459,7 @@ function flatten(data) {
     }
     recurse(data, "");
     return result;
-};
+}
 
 function scanVffData() {
     root = {};
@@ -5569,7 +5569,7 @@ module.exports = {
                     _vffData.vffData.registerController(url);
                     // registerController(url);
                 }, function () {
-                    console.log('No custom controller');
+                    // console.log('No custom controller');
                 });
             }
         });
