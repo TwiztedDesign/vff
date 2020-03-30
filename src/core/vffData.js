@@ -58,6 +58,25 @@ class VffData {
         return control;
     }
 
+    registerController(url){
+        this._controller = this._controller || new VFFControl('controller.main', {}, {ui : {type : 'custom', url}});
+        this._controls.push(this._controller);
+        send(ADD,{
+            channel : this._controller.getGroup(),
+            options : this._controller.getOptions(),
+            data    : this._controller.getValueObject()
+        });
+        return this._controller;
+    }
+    updateController(value, options){
+        if(!this._controller) return;
+        this._controller.updateValue(value, options);
+    }
+    getControllerData(){
+        return (this._controller? this._controller.getValue() : {});
+    }
+
+
     registerControls(namespace, object, options){
         if(isObject(namespace)){
             options = object || {}, object = namespace, namespace = options.group || DEFAULT_GROUP_NAME; }
@@ -181,6 +200,22 @@ class VffData {
                     timecode : event.timecode,
                     changed : event.dataChanged,
                     data: this.getControlsData(namespace, event.data),
+                    namespace
+                }));
+            }
+        });
+    }
+    onController(namespace, cb, options){
+        if(isFunction(namespace)){
+            options = cb; cb = namespace; namespace = '';
+        }
+        options = Object.assign({}, DEFAULT_ON_OPTIONS, options || {});
+        on(VFF_EVENT + 'controller.main', event => {
+            if(event.data.value && event.data.value[namespace]){
+                this._runCallback(cb, options, new VFFEvent({
+                    timecode : event.timecode,
+                    changed : event.dataChanged,
+                    data: event.data.value[namespace],
                     namespace
                 }));
             }

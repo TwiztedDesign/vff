@@ -4,6 +4,7 @@ import {READY} from './utils/events.js';
 import {vffData} from './core/vffData.js';
 import {start as startListener} from './utils/listener';
 import {init as initVffDom} from './core/initDOM';
+import {init as initControllerDom} from './core/controllerDOM';
 import vffElement from './core/vffElement';
 import './core/defaultExpose';
 // import "../scripts/custom-elements.min";
@@ -18,6 +19,7 @@ import * as noOverScroll from './utils/noOverscroll';
 
 startListener();
 initVffDom();
+initControllerDom();
 
 window.addEventListener('load', () => {
     send(READY);
@@ -40,12 +42,14 @@ vff.onUpdate            = (cb) => {return vffData.onUpdate(cb);};
 vff.getPages            = () => {return vffData.getPages();};
 vff.onPages             = (cb) => {return vffData.onPages(cb);};
 vff.on                  = (namespace, cb, options) => {return vffData.on(namespace, cb, options);};
+vff.onController        = (namespace, cb, options) => {return vffData.onController(namespace, cb, options);};
 vff.getQueryParams      = () => {return vffData.getQueryParams();};
 vff.send                = (type, payload) => { send(type, payload); };
 vff.request             = (type, payload, cb) => { request(type, payload, cb); };
 vff.setup               = (options) => {return setup(options);};
 vff.isMobile            = isMobile;
 vff.isController        = () => {return vff.mode === MODE.PREVIEW || vff.mode === MODE.PROGRAM;};
+vff.data                = () => {return vffData.getControllerData();};
 vff.mode                = MODE.NORMAL;
 vff.MODE                = MODE; //Enum
 vff.defer               = defer;

@@ -377,8 +377,8 @@ function getAllChildrenIncludinShadowDOM(el){
     return children;
 }
 
-function searchAttributeHelper(acc, element, attr){
-    if(element.hasAttribute && element.hasAttribute(attr)){
+function searchAttributeHelper(acc, element, attr, value){
+    if(element.hasAttribute && element.hasAttribute(attr) && (value === undefined || element.getAttribute(attr) === value)){
         acc.push(element);
     }
     if(!element.shadowRoot && (!element.children || !element.children.length)){
@@ -387,14 +387,14 @@ function searchAttributeHelper(acc, element, attr){
         let children = getAllChildrenIncludinShadowDOM(element);
 
         for(let i = 0 ; i < children.length ; i++){
-            searchAttributeHelper(acc, children[i], attr);
+            searchAttributeHelper(acc, children[i], attr, value);
         }
     }
     return acc;
 }
 
-function searchAttribute(attr){
-    return searchAttributeHelper([], document, attr);
+function searchAttribute(attr, value, element){
+    return searchAttributeHelper([], element || document, attr, value);
 }
 
 function noop(){}

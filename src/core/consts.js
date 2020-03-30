@@ -13,7 +13,10 @@ module.exports = {
         CONTROL         : "vff-control",
         BIND            : "vff-bind",
         OPTIONS         : "vff-options",
-        EXPOSE          : "vff-expose"
+        EXPOSE          : "vff-expose",
+        CONTROLLER      : "vff-controller",
+        DATA            : "vff-data",
+        SELECTION       : "vff-select-from"
     },
     MODE                : {
         NORMAL          : "normal",
