@@ -5323,6 +5323,7 @@ function setByPath(obj, path, value) {
     for (var i = 0; i < path.length; i++) {
         if (i === path.length - 1) {
             result[path[i]] = value;
+            result.__isArray = !isNaN(path[i]);
         } else {
             if (result[path[i]] === undefined) {
                 result[path[i]] = {};
@@ -5519,7 +5520,7 @@ var mutationObserver = new MutationObserver(function (mutations) {
         }
     });
     if (change) {
-        gatherData();
+        setTimeout(gatherData, 100);
     }
 });
 
@@ -5543,7 +5544,7 @@ function observe() {
     (0, _helpers.searchAttribute)(_consts.ATTRIBUTE.DATA).forEach(function (element) {
         return attachListeners(element);
     });
-    gatherData();
+    setTimeout(gatherData, 100);
 }
 
 module.exports = {
@@ -5552,14 +5553,15 @@ module.exports = {
             if ((0, _helpers.searchAttribute)(_consts.ATTRIBUTE.CONTROLLER).length) {
                 // registerController();
                 _vffData.vffData.registerController().on(function (e) {
-
-                    var flat = flatten(e.data);
-                    Object.keys(flat).forEach(function (key) {
-                        (0, _helpers.searchAttribute)(_consts.ATTRIBUTE.DATA, key).forEach(function (el) {
-                            if (el.hasAttribute(_consts.ATTRIBUTE.SELECTION)) {
-                                handleSelect(el, e.data);
-                            }
-                            setValue(el, flat[key]);
+                    setTimeout(function () {
+                        var flat = flatten(e.data);
+                        Object.keys(flat).forEach(function (key) {
+                            (0, _helpers.searchAttribute)(_consts.ATTRIBUTE.DATA, key).forEach(function (el) {
+                                if (el.hasAttribute(_consts.ATTRIBUTE.SELECTION)) {
+                                    handleSelect(el, e.data);
+                                }
+                                setValue(el, flat[key]);
+                            });
                         });
                     });
                 }, { changeOnly: false });

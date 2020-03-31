@@ -37,6 +37,7 @@ function setByPath(obj, path, value){
     for (let i = 0; i < path.length; i++) {
         if(i === path.length -1){
             result[path[i]] = value;
+            result.__isArray = !isNaN(path[i]);
         } else {
             if(result[path[i]] === undefined){
                 result[path[i]] = {};
@@ -225,7 +226,7 @@ let mutationObserver = new MutationObserver(function(mutations) {
         }
     });
     if(change){
-        gatherData();
+        setTimeout(gatherData, 100);
     }
 });
 
@@ -247,7 +248,7 @@ function startDomObeserver(){
 function observe(){
     startDomObeserver();
     searchAttribute(ATTRIBUTE.DATA).forEach(element => attachListeners(element));
-    gatherData();
+    setTimeout(gatherData, 100);
 
 }
 
@@ -307,15 +308,16 @@ module.exports = {
             if(searchAttribute(ATTRIBUTE.CONTROLLER).length){
                 // registerController();
                 vffData.registerController().on(e => {
-
-                    let flat = flatten(e.data);
-                    Object.keys(flat).forEach(key => {
-                       searchAttribute(ATTRIBUTE.DATA, key).forEach(el => {
-                           if(el.hasAttribute(ATTRIBUTE.SELECTION)){
-                               handleSelect(el, e.data);
-                           }
-                           setValue(el, flat[key]);
-                       });
+                    setTimeout(()=>{
+                        let flat = flatten(e.data);
+                        Object.keys(flat).forEach(key => {
+                            searchAttribute(ATTRIBUTE.DATA, key).forEach(el => {
+                                if(el.hasAttribute(ATTRIBUTE.SELECTION)){
+                                    handleSelect(el, e.data);
+                                }
+                                setValue(el, flat[key]);
+                            });
+                        });
                     });
 
                 }, {changeOnly : false});
