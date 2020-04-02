@@ -114,6 +114,7 @@ module.exports = {
     "GO": "taco-go",
     "CROP": "vff-crop",
     "TRANSFORM": "vff-transform",
+    "UPLOAD": "vff-upload-asset",
     "AUDIO_TRACK": "vff-audio-track",
     "NEXT": "taco-next",
     "PREV": "taco-previous",
@@ -5893,8 +5894,19 @@ module.exports = {
 
 var _controllerDOM = __webpack_require__(63);
 
+var _events = __webpack_require__(2);
+
+var _messenger = __webpack_require__(9);
+
+function upload(asset, cb) {
+    (0, _messenger.request)(_events.UPLOAD, { asset: asset }, function (res) {
+        cb(res.payload);
+    });
+}
+
 module.exports = {
-    update: _controllerDOM.update
+    update: _controllerDOM.update,
+    upload: upload
 };
 
 /***/ }),
