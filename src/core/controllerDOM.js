@@ -332,5 +332,5 @@ module.exports = {
             }
         });
     },
-    controllerExists
+    update : () => {setTimeout(gatherData, 100);}
 };

@@ -211,11 +211,11 @@ class VffData {
         }
         options = Object.assign({}, DEFAULT_ON_OPTIONS, options || {});
         on(VFF_EVENT + 'controller.main', event => {
-            if(event.data.value && event.data.value[namespace]){
+            if(event.data.value && (event.data.value[namespace] || !namespace)){
                 this._runCallback(cb, options, new VFFEvent({
                     timecode : event.timecode,
                     changed : event.dataChanged,
-                    data: event.data.value[namespace],
+                    data: namespace? event.data.value[namespace] : event.data.value,
                     namespace
                 }));
             }

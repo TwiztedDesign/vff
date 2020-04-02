@@ -12,6 +12,7 @@ import './core/defaultExpose';
 import {isMobile, extend, defer, uuid} from './utils/helpers';
 import * as eventsApi from './core/api/events';
 import * as playerApi from './core/api/player';
+import * as controllerApi from './core/api/controller';
 import * as httpApi from './core/api/http';
 import {bindSyncEvents} from './core/interactionEvents';
 import {MODE} from './core/consts';
@@ -71,8 +72,7 @@ extend(vff, playerApi);
 extend(vff, eventsApi);
 
 
-
-
+vff.extend('controller', controllerApi);
 vff.extend('http', httpApi);
 
 
