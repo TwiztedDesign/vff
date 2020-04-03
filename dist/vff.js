@@ -2352,7 +2352,8 @@ var _events = __webpack_require__(2);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var root = {};
-var style = {};
+// let style = {};
+
 
 // function debounce(func, wait, immediate) {
 //     let timeout;
@@ -2530,15 +2531,15 @@ function flatten(data) {
     recurse(data, "");
     return result;
 }
-function scanVffStyle() {
-    style = {};
-    var elements = (0, _helpers.searchAttribute)(_consts.ATTRIBUTE.STYLE);
-    elements.forEach(function (element) {
-        var path = element.getAttribute(_consts.ATTRIBUTE.STYLE);
-        var value = getValue(element);
-        setByPath(style, path, value);
-    });
-}
+// function scanVffStyle(){
+//     style = {};
+//     let elements = searchAttribute(ATTRIBUTE.STYLE);
+//     elements.forEach(element => {
+//         let path = element.getAttribute(ATTRIBUTE.STYLE);
+//         let value = getValue(element);
+//         setByPath(style, path, value);
+//     });
+// }
 
 function scanVffData() {
     root = {};
@@ -4009,7 +4010,9 @@ function updateStyles(data) {
                 }
             }
         }
-    } catch (e) {}
+    } catch (e) {
+        //
+    }
 }
 
 function groupExposedControls(data) {
@@ -6173,8 +6176,7 @@ module.exports = {
 
 
 function deviceChange(data) {
-    console.log("Device Change", data);
-    vff.isMobile = data.device === 'mobile';
+    window.vff.isMobile = data.device === 'mobile';
 }
 
 module.exports = {
