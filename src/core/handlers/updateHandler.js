@@ -45,6 +45,18 @@ async function update(data){
     });
 }
 
+function updateStyles(data){
+    try{
+        let d = data.controller.main.value.__style;
+        for (let [key, value] of Object.entries(d)) {
+            let prop = '--' + key.replace(/([A-Z])/g, (g) => `-${g[0].toLowerCase()}`);
+            document.documentElement.style.setProperty(prop, value);
+        }
+    } catch (e) {
+
+    }
+}
+
 function groupExposedControls(data){
     let exposed = {};
     for(let key in data){
@@ -68,5 +80,6 @@ function updateInteraction(data){
 
 module.exports = {
     update : update,
-    updateInteraction : updateInteraction
+    updateInteraction : updateInteraction,
+    updateStyles
 };

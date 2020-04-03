@@ -16,7 +16,9 @@ module.exports = {
         EXPOSE          : "vff-expose",
         CONTROLLER      : "vff-controller",
         DATA            : "vff-data",
-        SELECTION       : "vff-select-from"
+        STYLE           : "vff-style",
+        SELECTION       : "vff-select-from",
+        SUFFIX          : "vff-suffix"
     },
     MODE                : {
         NORMAL          : "normal",

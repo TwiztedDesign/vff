@@ -3,6 +3,7 @@ import {vffData} from "./vffData";
 import {ATTRIBUTE} from './consts';
 import {VFF_EVENT} from "../utils/events";
 let root = {};
+let style = {};
 
 
 
@@ -124,15 +125,22 @@ function handleSelect(el, data){
     setByPath(data, el.getAttribute(ATTRIBUTE.DATA), getValue(el));
 }
 function getValue(el){
+    let suffix = el.getAttribute(ATTRIBUTE.SUFFIX) || '';
+    let value;
     switch (el.constructor.name){
         case 'HTMLSelectElement':
         case 'HTMLInputElement':
-            return el.value;
+            value = el.value;
+            break;
         default:
-            return el.value;
+            value = el.value;
+            break;
     }
+    return value + suffix;
 }
 function setValue(el, value){
+    let suffix = el.getAttribute(ATTRIBUTE.SUFFIX) || '';
+    value = suffix? value.slice(0, -suffix.length) : value;
     switch (el.constructor.name){
         case 'HTMLSelectElement':
         case 'HTMLInputElement':
@@ -165,6 +173,15 @@ function flatten(data) {
     }
     recurse(data, "");
     return result;
+}
+function scanVffStyle(){
+    style = {};
+    let elements = searchAttribute(ATTRIBUTE.STYLE);
+    elements.forEach(element => {
+        let path = element.getAttribute(ATTRIBUTE.STYLE);
+        let value = getValue(element);
+        setByPath(style, path, value);
+    });
 }
 
 function scanVffData(){
@@ -260,7 +277,7 @@ async function controllerExists(url){
         xhr.open("GET", url, true);
         xhr.onload = function () {
             if (xhr.readyState === 4) {
-                if (xhr.status === 200) {
+                if (xhr.status === 200 && xhr.response && new DOMParser().parseFromString(xhr.response, 'text/html').querySelector('[vff-controller]')) {
                     resolve(url);
                 } else {
                     reject();

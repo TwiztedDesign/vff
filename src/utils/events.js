@@ -20,6 +20,14 @@ module.exports = {
     "VF_DATA"       : "vff-vf-data",
     "VF_SETUP"      : "vff-vf-setup",
 
+    "DATA_READY"    : "vff-data-ready",
+    "CUSTOM_READY"  : "vff-custom-ready",
+
+    "VIDEO_PLAYING" : "vff-video-playing",
+    "VIDEO_STARTED" : "vff-video-started",
+    "VIDEO_PAUSED"  : "vff-video-paused",
+
+    "DEVICE_CHANGE" : "vff-device-change",
 
     "INTERACTION"   : "vff-interaction",
     "TOUCH"         : "taco-touch-element",

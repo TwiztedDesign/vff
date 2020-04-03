@@ -131,6 +131,15 @@ module.exports = {
     "VF_DATA": "vff-vf-data",
     "VF_SETUP": "vff-vf-setup",
 
+    "DATA_READY": "vff-data-ready",
+    "CUSTOM_READY": "vff-custom-ready",
+
+    "VIDEO_PLAYING": "vff-video-playing",
+    "VIDEO_STARTED": "vff-video-started",
+    "VIDEO_PAUSED": "vff-video-paused",
+
+    "DEVICE_CHANGE": "vff-device-change",
+
     "INTERACTION": "vff-interaction",
     "TOUCH": "taco-touch-element",
     "MOUSE_MOVE": "taco-mouse-move",
@@ -1159,7 +1168,9 @@ module.exports = {
         EXPOSE: "vff-expose",
         CONTROLLER: "vff-controller",
         DATA: "vff-data",
-        SELECTION: "vff-select-from"
+        STYLE: "vff-style",
+        SELECTION: "vff-select-from",
+        SUFFIX: "vff-suffix"
     },
     MODE: {
         NORMAL: "normal",
@@ -2277,7 +2288,7 @@ var controllerExists = function () {
                             xhr.open("GET", url, true);
                             xhr.onload = function () {
                                 if (xhr.readyState === 4) {
-                                    if (xhr.status === 200) {
+                                    if (xhr.status === 200 && xhr.response && new DOMParser().parseFromString(xhr.response, 'text/html').querySelector('[vff-controller]')) {
                                         resolve(url);
                                     } else {
                                         reject();
@@ -2341,6 +2352,7 @@ var _events = __webpack_require__(2);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var root = {};
+var style = {};
 
 // function debounce(func, wait, immediate) {
 //     let timeout;
@@ -2469,15 +2481,22 @@ function handleSelect(el, data) {
     setByPath(data, el.getAttribute(_consts.ATTRIBUTE.DATA), getValue(el));
 }
 function getValue(el) {
+    var suffix = el.getAttribute(_consts.ATTRIBUTE.SUFFIX) || '';
+    var value = void 0;
     switch (el.constructor.name) {
         case 'HTMLSelectElement':
         case 'HTMLInputElement':
-            return el.value;
+            value = el.value;
+            break;
         default:
-            return el.value;
+            value = el.value;
+            break;
     }
+    return value + suffix;
 }
 function setValue(el, value) {
+    var suffix = el.getAttribute(_consts.ATTRIBUTE.SUFFIX) || '';
+    value = suffix ? value.slice(0, -suffix.length) : value;
     switch (el.constructor.name) {
         case 'HTMLSelectElement':
         case 'HTMLInputElement':
@@ -2510,6 +2529,15 @@ function flatten(data) {
     }
     recurse(data, "");
     return result;
+}
+function scanVffStyle() {
+    style = {};
+    var elements = (0, _helpers.searchAttribute)(_consts.ATTRIBUTE.STYLE);
+    elements.forEach(function (element) {
+        var path = element.getAttribute(_consts.ATTRIBUTE.STYLE);
+        var value = getValue(element);
+        setByPath(style, path, value);
+    });
 }
 
 function scanVffData() {
@@ -2716,6 +2744,9 @@ vff.getControl = function (name) {
 };
 vff.ready = function (cb) {
     return _vffData.vffData.ready(cb);
+};
+vff.customReady = function () {
+    (0, _messenger.send)(_events.CUSTOM_READY);
 };
 
 vff.onUpdate = function (cb) {
@@ -3812,6 +3843,8 @@ module.exports = {
 "use strict";
 
 
+var _messenger = __webpack_require__(9);
+
 var _updateHandler = __webpack_require__(96);
 
 var _pagesHandler = __webpack_require__(116);
@@ -3822,15 +3855,26 @@ var _reloadHandler = __webpack_require__(118);
 
 var _vfDataHandler = __webpack_require__(119);
 
+var _playerHandler = __webpack_require__(129);
+
 var events = __webpack_require__(2);
 
 
+var dataReady = false;
 var handlers = {};
-handlers[events.UPDATE] = _updateHandler.update;
+handlers[events.UPDATE] = function (e) {
+    if (!dataReady) {
+        dataReady = true;
+        (0, _messenger.send)(events.DATA_READY);
+    }
+    (0, _updateHandler.updateStyles)(e);
+    (0, _updateHandler.update)(e);
+};
 handlers[events.PAGES] = _pagesHandler.pages;
 handlers[events.QUERY_PARAMS] = _queryParamsHandler.queryParams;
 handlers[events.RELOAD] = _reloadHandler.reload;
 handlers[events.VF_DATA] = _vfDataHandler.handleVFData;
+handlers[events.DEVICE_CHANGE] = _playerHandler.deviceChange;
 
 module.exports = handlers;
 
@@ -3840,6 +3884,10 @@ module.exports = handlers;
 
 "use strict";
 
+
+var _slicedToArray2 = __webpack_require__(130);
+
+var _slicedToArray3 = _interopRequireDefault(_slicedToArray2);
 
 var _regenerator = __webpack_require__(55);
 
@@ -3926,6 +3974,44 @@ var _consts = __webpack_require__(13);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function updateStyles(data) {
+    try {
+        var d = data.controller.main.value.__style;
+        var _iteratorNormalCompletion = true;
+        var _didIteratorError = false;
+        var _iteratorError = undefined;
+
+        try {
+            for (var _iterator = Object.entries(d)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                var _ref2 = _step.value;
+
+                var _ref3 = (0, _slicedToArray3.default)(_ref2, 2);
+
+                var key = _ref3[0];
+                var value = _ref3[1];
+
+                var prop = '--' + key.replace(/([A-Z])/g, function (g) {
+                    return '-' + g[0].toLowerCase();
+                });
+                document.documentElement.style.setProperty(prop, value);
+            }
+        } catch (err) {
+            _didIteratorError = true;
+            _iteratorError = err;
+        } finally {
+            try {
+                if (!_iteratorNormalCompletion && _iterator.return) {
+                    _iterator.return();
+                }
+            } finally {
+                if (_didIteratorError) {
+                    throw _iteratorError;
+                }
+            }
+        }
+    } catch (e) {}
+}
+
 function groupExposedControls(data) {
     var exposed = {};
     for (var key in data) {
@@ -3950,7 +4036,8 @@ function updateInteraction(data) {
 
 module.exports = {
     update: update,
-    updateInteraction: updateInteraction
+    updateInteraction: updateInteraction,
+    updateStyles: updateStyles
 };
 
 /***/ }),
@@ -6077,6 +6164,138 @@ module.exports = {
         module.exports = noOverScroll;
     }
 })();
+
+/***/ }),
+/* 129 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+function deviceChange(data) {
+    console.log("Device Change", data);
+    vff.isMobile = data.device === 'mobile';
+}
+
+module.exports = {
+    deviceChange: deviceChange
+};
+
+/***/ }),
+/* 130 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+exports.__esModule = true;
+
+var _isIterable2 = __webpack_require__(131);
+
+var _isIterable3 = _interopRequireDefault(_isIterable2);
+
+var _getIterator2 = __webpack_require__(134);
+
+var _getIterator3 = _interopRequireDefault(_getIterator2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = function () {
+  function sliceIterator(arr, i) {
+    var _arr = [];
+    var _n = true;
+    var _d = false;
+    var _e = undefined;
+
+    try {
+      for (var _i = (0, _getIterator3.default)(arr), _s; !(_n = (_s = _i.next()).done); _n = true) {
+        _arr.push(_s.value);
+
+        if (i && _arr.length === i) break;
+      }
+    } catch (err) {
+      _d = true;
+      _e = err;
+    } finally {
+      try {
+        if (!_n && _i["return"]) _i["return"]();
+      } finally {
+        if (_d) throw _e;
+      }
+    }
+
+    return _arr;
+  }
+
+  return function (arr, i) {
+    if (Array.isArray(arr)) {
+      return arr;
+    } else if ((0, _isIterable3.default)(Object(arr))) {
+      return sliceIterator(arr, i);
+    } else {
+      throw new TypeError("Invalid attempt to destructure non-iterable instance");
+    }
+  };
+}();
+
+/***/ }),
+/* 131 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = { "default": __webpack_require__(132), __esModule: true };
+
+/***/ }),
+/* 132 */
+/***/ (function(module, exports, __webpack_require__) {
+
+__webpack_require__(48);
+__webpack_require__(40);
+module.exports = __webpack_require__(133);
+
+
+/***/ }),
+/* 133 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var classof = __webpack_require__(57);
+var ITERATOR = __webpack_require__(1)('iterator');
+var Iterators = __webpack_require__(18);
+module.exports = __webpack_require__(4).isIterable = function (it) {
+  var O = Object(it);
+  return O[ITERATOR] !== undefined
+    || '@@iterator' in O
+    // eslint-disable-next-line no-prototype-builtins
+    || Iterators.hasOwnProperty(classof(O));
+};
+
+
+/***/ }),
+/* 134 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = { "default": __webpack_require__(135), __esModule: true };
+
+/***/ }),
+/* 135 */
+/***/ (function(module, exports, __webpack_require__) {
+
+__webpack_require__(48);
+__webpack_require__(40);
+module.exports = __webpack_require__(136);
+
+
+/***/ }),
+/* 136 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var anObject = __webpack_require__(7);
+var get = __webpack_require__(106);
+module.exports = __webpack_require__(4).getIterator = function (it) {
+  var iterFn = get(it);
+  if (typeof iterFn != 'function') throw TypeError(it + ' is not iterable!');
+  return anObject(iterFn.call(it));
+};
+
 
 /***/ })
 /******/ ]);

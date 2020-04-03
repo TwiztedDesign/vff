@@ -1,6 +1,6 @@
 import {send, request} from './utils/messenger.js';
 import {setup} from './core/vffSetup';
-import {READY} from './utils/events.js';
+import {READY, CUSTOM_READY} from './utils/events.js';
 import {vffData} from './core/vffData.js';
 import {start as startListener} from './utils/listener';
 import {init as initVffDom} from './core/initDOM';
@@ -37,7 +37,7 @@ vff.registerControls    = (object, options) => {return vffData.registerControls(
 vff.updateControl       = (name, value, options) => {return vffData.updateControl(name, value, options);};
 vff.getControl          = (name) => {return vffData.getControl(name);};
 vff.ready               = (cb) => {return vffData.ready(cb);};
-
+vff.customReady         = () => {send(CUSTOM_READY);};
 
 vff.onUpdate            = (cb) => {return vffData.onUpdate(cb);};
 vff.getPages            = () => {return vffData.getPages();};
