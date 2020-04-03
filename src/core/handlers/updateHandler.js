@@ -53,7 +53,7 @@ function updateStyles(data){
             document.documentElement.style.setProperty(prop, value);
         }
     } catch (e) {
-
+        //
     }
 }
 

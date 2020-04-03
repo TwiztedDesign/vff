@@ -3,7 +3,7 @@ import {vffData} from "./vffData";
 import {ATTRIBUTE} from './consts';
 import {VFF_EVENT} from "../utils/events";
 let root = {};
-let style = {};
+// let style = {};
 
 
 
@@ -174,15 +174,15 @@ function flatten(data) {
     recurse(data, "");
     return result;
 }
-function scanVffStyle(){
-    style = {};
-    let elements = searchAttribute(ATTRIBUTE.STYLE);
-    elements.forEach(element => {
-        let path = element.getAttribute(ATTRIBUTE.STYLE);
-        let value = getValue(element);
-        setByPath(style, path, value);
-    });
-}
+// function scanVffStyle(){
+//     style = {};
+//     let elements = searchAttribute(ATTRIBUTE.STYLE);
+//     elements.forEach(element => {
+//         let path = element.getAttribute(ATTRIBUTE.STYLE);
+//         let value = getValue(element);
+//         setByPath(style, path, value);
+//     });
+// }
 
 function scanVffData(){
     root = {};
