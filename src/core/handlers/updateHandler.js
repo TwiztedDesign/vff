@@ -15,13 +15,13 @@ async function update(data){
                     promises.push(new Promise((resolve, reject) => {
                         let controlName = `${templateName}${NAMESPACE_DELIMITER}${key}`;
 
-                        vffData._updateControl(controlName, data[templateName][key], {timecode}).then(controlChange => {
-                            templateChange[templateName] = controlChange || templateChange[templateName];
+                        vffData._updateControl(controlName, data[templateName][key], {timecode}).then((res) => {
+                            templateChange[templateName] = res.controlChange || templateChange[templateName];
                             if(controlName.includes(EXPOSE_DELIMITER)){
-                                templateChange[controlName.split(EXPOSE_DELIMITER)[0]] = controlChange || templateChange[controlName.split(EXPOSE_DELIMITER)[0]];
+                                templateChange[controlName.split(EXPOSE_DELIMITER)[0]] = res.controlChange || templateChange[controlName.split(EXPOSE_DELIMITER)[0]];
                             }
-                            globalChange = controlChange || globalChange;
-                            broadcast(VFF_EVENT + controlName.toLowerCase(), { dataChanged: controlChange, timecode, data : data[templateName][key]});
+                            globalChange = res.controlChange || globalChange;
+                            broadcast(VFF_EVENT + controlName.toLowerCase(), { dataChanged: res.controlChange, timecode, data : data[templateName][key], oldValue : res.oldVal});
                             resolve();
                         }, reject);
                     }));

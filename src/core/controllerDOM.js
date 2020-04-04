@@ -3,7 +3,7 @@ import {vffData} from "./vffData";
 import {ATTRIBUTE} from './consts';
 import {VFF_EVENT} from "../utils/events";
 let root = {};
-// let style = {};
+let style = {};
 
 
 
@@ -174,23 +174,22 @@ function flatten(data) {
     recurse(data, "");
     return result;
 }
-// function scanVffStyle(){
-//     style = {};
-//     let elements = searchAttribute(ATTRIBUTE.STYLE);
-//     elements.forEach(element => {
-//         let path = element.getAttribute(ATTRIBUTE.STYLE);
-//         let value = getValue(element);
-//         setByPath(style, path, value);
-//     });
-// }
 
 function scanVffData(){
     root = {};
-    let elements = searchAttribute(ATTRIBUTE.DATA);
+    style = {};
+    let elements = searchAttribute([ATTRIBUTE.DATA, ATTRIBUTE.STYLE]);
     elements.forEach(element => {
-        let path = element.getAttribute(ATTRIBUTE.DATA);
-        let value = getValue(element);
-        setByPath(root, path, value);
+        if(element.hasAttribute(ATTRIBUTE.DATA)){
+            let path = element.getAttribute(ATTRIBUTE.DATA);
+            let value = getValue(element);
+            setByPath(root, path, value);
+        }
+        if(element.hasAttribute(ATTRIBUTE.STYLE)){
+            let path = element.getAttribute(ATTRIBUTE.STYLE);
+            let value = getValue(element);
+            setByPath(style, path, value);
+        }
     });
     convertObjectsToArrays(root);
 }
@@ -205,18 +204,29 @@ function gatherData(){
     // console.log('Gather data');
     scanVffData();
     scanSelectFrom();
+    root.__style = style;
     vffData.updateController(root);
     broadcast(VFF_EVENT, { dataChanged: true, root});
 }
 
 function updateListener(event){
     // console.log('Update Listener');
-    setByPath(root, event.target.getAttribute(ATTRIBUTE.DATA), getValue(event.target));
+    if(event.target.hasAttribute(ATTRIBUTE.DATA)){
+        setByPath(root, event.target.getAttribute(ATTRIBUTE.DATA), getValue(event.target));
+    }
+    if(event.target.hasAttribute(ATTRIBUTE.STYLE)){
+        setByPath(style, event.target.getAttribute(ATTRIBUTE.STYLE), getValue(event.target));
+    }
+
     convertObjectsToArrays(root);
     searchAttribute(ATTRIBUTE.DATA, event.target.getAttribute(ATTRIBUTE.DATA)).forEach(el => {
         setValue(el, getValue(event.target));
     });
+    searchAttribute(ATTRIBUTE.STYLE, event.target.getAttribute(ATTRIBUTE.STYLE)).forEach(el => {
+        setValue(el, getValue(event.target));
+    });
     scanSelectFrom();
+    root.__style = style;
     vffData.updateController(root);
     broadcast(VFF_EVENT, { dataChanged: true, root});
 
@@ -230,13 +240,13 @@ function attachListeners(element){
 let mutationObserver = new MutationObserver(function(mutations) {
     let change = false;
     mutations.forEach(function(mutation) {
-        if(mutation.type === 'attributes' && mutation.target.hasAttribute(ATTRIBUTE.DATA)){
+        if(mutation.type === 'attributes' && (mutation.target.hasAttribute(ATTRIBUTE.DATA) || mutation.target.hasAttribute(ATTRIBUTE.STYLE))){
             change = true;
             attachListeners(mutation.target);
         }
         if(mutation.type === 'childList' && mutation.removedNodes.length){
             mutation.removedNodes.forEach(node => {
-                if(searchAttribute(ATTRIBUTE.DATA, undefined, node).length){
+                if(searchAttribute([ATTRIBUTE.DATA, ATTRIBUTE.STYLE], undefined, node).length){
                     change = true;
                 }
             });
@@ -249,7 +259,7 @@ let mutationObserver = new MutationObserver(function(mutations) {
 
 function startDomObeserver(){
     mutationObserver.observe(document.documentElement, {
-        attributeFilter: [ATTRIBUTE.DATA],
+        attributeFilter: [ATTRIBUTE.DATA, ATTRIBUTE.STYLE],
         // attributes: false,
         attributeOldValue: false,
         characterData: false,
@@ -264,7 +274,7 @@ function startDomObeserver(){
 
 function observe(){
     startDomObeserver();
-    searchAttribute(ATTRIBUTE.DATA).forEach(element => attachListeners(element));
+    searchAttribute([ATTRIBUTE.DATA, ATTRIBUTE.STYLE]).forEach(element => attachListeners(element));
     setTimeout(gatherData, 100);
 
 }
@@ -328,7 +338,7 @@ module.exports = {
                     setTimeout(()=>{
                         let flat = flatten(e.data);
                         Object.keys(flat).forEach(key => {
-                            searchAttribute(ATTRIBUTE.DATA, key).forEach(el => {
+                            searchAttribute([ATTRIBUTE.DATA, ATTRIBUTE.STYLE], key.replace('__style.', '')).forEach(el => {
                                 if(el.hasAttribute(ATTRIBUTE.SELECTION)){
                                     handleSelect(el, e.data);
                                 }

@@ -1,5 +1,5 @@
 import {ADD, PAGES_UPDATE, VFF_EVENT} from "../utils/events";
-import {docRef, broadcast, on, defer, queryOne, query, isFunction, isObject, findKey} from '../utils/helpers.js';
+import {docRef, broadcast, on, defer, queryOne, query, isFunction, isObject, findKey, deepCompare, getByPath} from '../utils/helpers.js';
 import {send} from '../utils/messenger';
 import {REGISTER_TEMPLATE} from '../utils/docRefs';
 import {DEFAULT_GROUP_NAME} from "./consts";
@@ -118,7 +118,7 @@ class VffData {
             }
             return control._setValue(value);
         }
-        return Promise.resolve(true);
+        return Promise.resolve({controlChange: true});
     }
 
     updateControl(name, value, options) {
@@ -211,13 +211,16 @@ class VffData {
         }
         options = Object.assign({}, DEFAULT_ON_OPTIONS, options || {});
         on(VFF_EVENT + 'controller.main', event => {
-            if(event.data.value && (event.data.value[namespace] || !namespace)){
-                this._runCallback(cb, options, new VFFEvent({
-                    timecode : event.timecode,
-                    changed : event.dataChanged,
-                    data: namespace? event.data.value[namespace] : event.data.value,
-                    namespace
-                }));
+            if(event.data.value && (event.data.value[namespace] || getByPath(event.data.value, namespace) || !namespace)){
+                let dataChanged = !deepCompare(getByPath(event.data.value, namespace), getByPath(event.oldValue, namespace));
+                if(!options.changeOnly || dataChanged) {
+                    this._runCallback(cb, options, new VFFEvent({
+                        timecode: event.timecode,
+                        changed: dataChanged,
+                        data: namespace ? event.data.value[namespace] : event.data.value,
+                        namespace
+                    }));
+                }
             }
         });
     }

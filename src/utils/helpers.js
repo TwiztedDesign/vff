@@ -394,7 +394,11 @@ function searchAttributeHelper(acc, element, attr, value){
 }
 
 function searchAttribute(attr, value, element){
-    return searchAttributeHelper([], element || document, attr, value);
+    if(Array.isArray(attr)){
+        return [...new Set(attr.map((att) => searchAttributeHelper([], element || document, att, value)).flat())];
+    } else {
+        return searchAttributeHelper([], element || document, attr, value);
+    }
 }
 
 function noop(){}
