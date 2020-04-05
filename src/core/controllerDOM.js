@@ -210,7 +210,6 @@ function gatherData(){
 }
 
 function updateListener(event){
-    // console.log('Update Listener');
     if(event.target.hasAttribute(ATTRIBUTE.DATA)){
         setByPath(root, event.target.getAttribute(ATTRIBUTE.DATA), getValue(event.target));
     }
@@ -282,7 +281,7 @@ function observe(){
 
 async function controllerExists(url){
     return new Promise((resolve, reject) => {
-        url = url ||  new URL("/controller.html", document.baseURI).href;
+        url = url ||  new URL("./controller.html", document.baseURI).href;
         var xhr = new XMLHttpRequest();
         xhr.open("GET", url, true);
         xhr.onload = function () {

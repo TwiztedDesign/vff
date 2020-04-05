@@ -2381,7 +2381,7 @@ var controllerExists = function () {
                 switch (_context.prev = _context.next) {
                     case 0:
                         return _context.abrupt("return", new Promise(function (resolve, reject) {
-                            url = url || new URL("/controller.html", document.baseURI).href;
+                            url = url || new URL("./controller.html", document.baseURI).href;
                             var xhr = new XMLHttpRequest();
                             xhr.open("GET", url, true);
                             xhr.onload = function () {
@@ -2664,7 +2664,6 @@ function gatherData() {
 }
 
 function updateListener(event) {
-    // console.log('Update Listener');
     if (event.target.hasAttribute(_consts.ATTRIBUTE.DATA)) {
         setByPath(root, event.target.getAttribute(_consts.ATTRIBUTE.DATA), getValue(event.target));
     }
