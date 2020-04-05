@@ -212,7 +212,7 @@ class VffData {
         options = Object.assign({}, DEFAULT_ON_OPTIONS, options || {});
         on(VFF_EVENT + 'controller.main', event => {
             if(event.data.value && (event.data.value[namespace] || getByPath(event.data.value, namespace) || !namespace)){
-                let dataChanged = !deepCompare(getByPath(event.data.value, namespace), getByPath(event.oldValue, namespace));
+                let dataChanged = !event.oldValue || !deepCompare(getByPath(event.data.value, namespace), getByPath(event.oldValue, namespace));
                 if(!options.changeOnly || dataChanged) {
                     this._runCallback(cb, options, new VFFEvent({
                         timecode: event.timecode,

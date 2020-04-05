@@ -966,7 +966,7 @@ var VffData = function () {
             options = Object.assign({}, DEFAULT_ON_OPTIONS, options || {});
             (0, _helpers.on)(_events.VFF_EVENT + 'controller.main', function (event) {
                 if (event.data.value && (event.data.value[namespace] || (0, _helpers.getByPath)(event.data.value, namespace) || !namespace)) {
-                    var dataChanged = !(0, _helpers.deepCompare)((0, _helpers.getByPath)(event.data.value, namespace), (0, _helpers.getByPath)(event.oldValue, namespace));
+                    var dataChanged = !event.oldValue || !(0, _helpers.deepCompare)((0, _helpers.getByPath)(event.data.value, namespace), (0, _helpers.getByPath)(event.oldValue, namespace));
                     if (!options.changeOnly || dataChanged) {
                         _this3._runCallback(cb, options, new _vffEvent2.default({
                             timecode: event.timecode,
