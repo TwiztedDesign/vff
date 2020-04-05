@@ -2830,6 +2830,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 (0, _controllerDOM.init)();
 
 window.addEventListener('load', function () {
+    _helpers.isMobile ? window.document.body.classList.add('vff-mobile') : window.document.body.classList.remove('vff-mobile');
     (0, _messenger.send)(_events.READY);
 });
 
@@ -5814,6 +5815,11 @@ module.exports = {
 
 function deviceChange(data) {
     window.vff.isMobile = data.device === 'mobile';
+    if (window.vff.isMobile) {
+        window.document.body.classList.add('vff-mobile');
+    } else {
+        window.document.body.classList.remove('vff-mobile');
+    }
 }
 
 module.exports = {

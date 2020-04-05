@@ -23,6 +23,7 @@ initVffDom();
 initControllerDom();
 
 window.addEventListener('load', () => {
+    isMobile ? window.document.body.classList.add('vff-mobile') : window.document.body.classList.remove('vff-mobile');
     send(READY);
 });
 
