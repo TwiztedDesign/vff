@@ -971,7 +971,7 @@ var VffData = function () {
                         _this3._runCallback(cb, options, new _vffEvent2.default({
                             timecode: event.timecode,
                             changed: dataChanged,
-                            data: namespace ? event.data.value[namespace] : event.data.value,
+                            data: namespace ? (0, _helpers.getByPath)(event.data.value, namespace) : event.data.value,
                             namespace: namespace
                         }));
                     }
@@ -2438,6 +2438,27 @@ var controllerExists = function () {
 //     setValues();
 // }
 
+//
+// function registerControls(){
+//     let elements = searchAttribute([ATTRIBUTE.DATA, ATTRIBUTE.STYLE]);
+//     elements.forEach(element => {
+//         if(element.hasAttribute(ATTRIBUTE.DATA)){
+//             let path = element.getAttribute(ATTRIBUTE.DATA);
+//             let value = getValue(element);
+//             vffData.registerControl(path.replace(/\./g,'-'), value, {group : 'controller'}).on(e => {
+//                 console.log(e);
+//             });
+//         }
+//         if(element.hasAttribute(ATTRIBUTE.STYLE)){
+//             let path = element.getAttribute(ATTRIBUTE.STYLE);
+//             let value = getValue(element);
+//             vffData.registerControl(path.replace(/\./g,'-'), value, {group : 'style'}).on(e => {
+//                 console.log(e);
+//             });
+//         }
+//     });
+// }
+
 
 var _helpers = __webpack_require__(4);
 
@@ -2590,11 +2611,23 @@ function getValue(el) {
             value = el.value;
             break;
     }
+    switch (el.tagName) {
+        case 'VFF-CHECKBOX':
+        case 'VFF-RADIO-BUTTON':
+            value = el.checked;
+            break;
+    }
     return value + suffix;
 }
 function setValue(el, value) {
     var suffix = el.getAttribute(_consts.ATTRIBUTE.SUFFIX) || '';
     value = suffix ? value.slice(0, -suffix.length) : value;
+    switch (el.tagName) {
+        case 'VFF-CHECKBOX':
+        case 'VFF-RADIO-BUTTON':
+            el.checked = value;
+            return;
+    }
     switch (el.constructor.name) {
         case 'HTMLSelectElement':
         case 'HTMLInputElement':
@@ -2613,6 +2646,7 @@ function flatten(data) {
             result[prop] = cur;
         } else if (Array.isArray(cur)) {
             var l = cur.length;
+            result[prop] = cur;
             for (var i = 0; i < l; i++) {
                 recurse(cur[i], prop + "." + i);
             }if (l === 0) result[prop] = [];
@@ -2620,6 +2654,7 @@ function flatten(data) {
             var isEmpty = true;
             for (var p in cur) {
                 isEmpty = false;
+                result[prop ? prop + "." + p : p] = cur[p];
                 recurse(cur[p], prop ? prop + "." + p : p);
             }
             if (isEmpty && prop) result[prop] = {};
@@ -2685,8 +2720,13 @@ function updateListener(event) {
 }
 
 function attachListeners(element) {
-    element.removeEventListener('input', updateListener);
-    element.addEventListener('input', updateListener);
+    if (element.tagName === 'VFF-CHECKBOX' || element.tagName === 'VFF-RADIO-BUTTON') {
+        element.removeEventListener('click', updateListener);
+        element.addEventListener('click', updateListener);
+    } else {
+        element.removeEventListener('input', updateListener);
+        element.addEventListener('input', updateListener);
+    }
 }
 
 var mutationObserver = new MutationObserver(function (mutations) {

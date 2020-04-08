@@ -217,7 +217,7 @@ class VffData {
                     this._runCallback(cb, options, new VFFEvent({
                         timecode: event.timecode,
                         changed: dataChanged,
-                        data: namespace ? event.data.value[namespace] : event.data.value,
+                        data: namespace ? getByPath(event.data.value, namespace) : event.data.value,
                         namespace
                     }));
                 }

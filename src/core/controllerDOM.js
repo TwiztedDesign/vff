@@ -136,11 +136,23 @@ function getValue(el){
             value = el.value;
             break;
     }
+    switch (el.tagName){
+        case 'VFF-CHECKBOX':
+        case 'VFF-RADIO-BUTTON':
+            value = el.checked;
+            break;
+    }
     return value + suffix;
 }
 function setValue(el, value){
     let suffix = el.getAttribute(ATTRIBUTE.SUFFIX) || '';
     value = suffix? value.slice(0, -suffix.length) : value;
+    switch (el.tagName){
+        case 'VFF-CHECKBOX':
+        case 'VFF-RADIO-BUTTON':
+            el.checked = value;
+            return;
+    }
     switch (el.constructor.name){
         case 'HTMLSelectElement':
         case 'HTMLInputElement':
@@ -159,6 +171,7 @@ function flatten(data) {
             result[prop] = cur;
         } else if (Array.isArray(cur)) {
             let l = cur.length;
+            result[prop] = cur;
             for (let i = 0 ; i < l; i++)
                 recurse(cur[i], prop + "." + i);
             if (l === 0) result[prop] = [];
@@ -166,6 +179,7 @@ function flatten(data) {
             let isEmpty = true;
             for (let p in cur) {
                 isEmpty = false;
+                result[prop ? prop + "." + p : p] = cur[p];
                 recurse(cur[p], prop ? prop + "." + p : p);
             }
             if (isEmpty && prop) result[prop] = {};
@@ -232,8 +246,13 @@ function updateListener(event){
 }
 
 function attachListeners(element){
-    element.removeEventListener('input', updateListener);
-    element.addEventListener('input', updateListener);
+    if(element.tagName === 'VFF-CHECKBOX' || element.tagName === 'VFF-RADIO-BUTTON'){
+        element.removeEventListener('click', updateListener);
+        element.addEventListener('click', updateListener);
+    } else {
+        element.removeEventListener('input', updateListener);
+        element.addEventListener('input', updateListener);
+    }
 }
 
 let mutationObserver = new MutationObserver(function(mutations) {
@@ -325,6 +344,27 @@ async function controllerExists(url){
 //
 //     });
 //     setValues();
+// }
+
+//
+// function registerControls(){
+//     let elements = searchAttribute([ATTRIBUTE.DATA, ATTRIBUTE.STYLE]);
+//     elements.forEach(element => {
+//         if(element.hasAttribute(ATTRIBUTE.DATA)){
+//             let path = element.getAttribute(ATTRIBUTE.DATA);
+//             let value = getValue(element);
+//             vffData.registerControl(path.replace(/\./g,'-'), value, {group : 'controller'}).on(e => {
+//                 console.log(e);
+//             });
+//         }
+//         if(element.hasAttribute(ATTRIBUTE.STYLE)){
+//             let path = element.getAttribute(ATTRIBUTE.STYLE);
+//             let value = getValue(element);
+//             vffData.registerControl(path.replace(/\./g,'-'), value, {group : 'style'}).on(e => {
+//                 console.log(e);
+//             });
+//         }
+//     });
 // }
 
 
