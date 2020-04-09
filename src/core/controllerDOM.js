@@ -224,31 +224,32 @@ function gatherData(){
 }
 
 function updateListener(event){
-    if(event.target.hasAttribute(ATTRIBUTE.DATA)){
-        setByPath(root, event.target.getAttribute(ATTRIBUTE.DATA), getValue(event.target));
-    }
-    if(event.target.hasAttribute(ATTRIBUTE.STYLE)){
-        setByPath(style, event.target.getAttribute(ATTRIBUTE.STYLE), getValue(event.target));
-    }
+    setTimeout(() => {
+        if(event.target.hasAttribute(ATTRIBUTE.DATA)){
+            setByPath(root, event.target.getAttribute(ATTRIBUTE.DATA), getValue(event.target));
+        }
+        if(event.target.hasAttribute(ATTRIBUTE.STYLE)){
+            setByPath(style, event.target.getAttribute(ATTRIBUTE.STYLE), getValue(event.target));
+        }
 
-    convertObjectsToArrays(root);
-    searchAttribute(ATTRIBUTE.DATA, event.target.getAttribute(ATTRIBUTE.DATA)).forEach(el => {
-        setValue(el, getValue(event.target));
+        convertObjectsToArrays(root);
+        searchAttribute(ATTRIBUTE.DATA, event.target.getAttribute(ATTRIBUTE.DATA)).forEach(el => {
+            setValue(el, getValue(event.target));
+        });
+        searchAttribute(ATTRIBUTE.STYLE, event.target.getAttribute(ATTRIBUTE.STYLE)).forEach(el => {
+            setValue(el, getValue(event.target));
+        });
+        scanSelectFrom();
+        root.__style = style;
+        vffData.updateController(root);
+        broadcast(VFF_EVENT, { dataChanged: true, root});
     });
-    searchAttribute(ATTRIBUTE.STYLE, event.target.getAttribute(ATTRIBUTE.STYLE)).forEach(el => {
-        setValue(el, getValue(event.target));
-    });
-    scanSelectFrom();
-    root.__style = style;
-    vffData.updateController(root);
-    broadcast(VFF_EVENT, { dataChanged: true, root});
-
 }
 
 function attachListeners(element){
     if(element.tagName === 'VFF-CHECKBOX' || element.tagName === 'VFF-RADIO-BUTTON'){
-        element.removeEventListener('click', updateListener);
-        element.addEventListener('click', updateListener);
+        element.removeEventListener('click', updateListener, false);
+        element.addEventListener('click', updateListener, false);
     } else {
         element.removeEventListener('input', updateListener);
         element.addEventListener('input', updateListener);

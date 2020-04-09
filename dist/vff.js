@@ -2699,30 +2699,32 @@ function gatherData() {
 }
 
 function updateListener(event) {
-    if (event.target.hasAttribute(_consts.ATTRIBUTE.DATA)) {
-        setByPath(root, event.target.getAttribute(_consts.ATTRIBUTE.DATA), getValue(event.target));
-    }
-    if (event.target.hasAttribute(_consts.ATTRIBUTE.STYLE)) {
-        setByPath(style, event.target.getAttribute(_consts.ATTRIBUTE.STYLE), getValue(event.target));
-    }
+    setTimeout(function () {
+        if (event.target.hasAttribute(_consts.ATTRIBUTE.DATA)) {
+            setByPath(root, event.target.getAttribute(_consts.ATTRIBUTE.DATA), getValue(event.target));
+        }
+        if (event.target.hasAttribute(_consts.ATTRIBUTE.STYLE)) {
+            setByPath(style, event.target.getAttribute(_consts.ATTRIBUTE.STYLE), getValue(event.target));
+        }
 
-    convertObjectsToArrays(root);
-    (0, _helpers.searchAttribute)(_consts.ATTRIBUTE.DATA, event.target.getAttribute(_consts.ATTRIBUTE.DATA)).forEach(function (el) {
-        setValue(el, getValue(event.target));
+        convertObjectsToArrays(root);
+        (0, _helpers.searchAttribute)(_consts.ATTRIBUTE.DATA, event.target.getAttribute(_consts.ATTRIBUTE.DATA)).forEach(function (el) {
+            setValue(el, getValue(event.target));
+        });
+        (0, _helpers.searchAttribute)(_consts.ATTRIBUTE.STYLE, event.target.getAttribute(_consts.ATTRIBUTE.STYLE)).forEach(function (el) {
+            setValue(el, getValue(event.target));
+        });
+        scanSelectFrom();
+        root.__style = style;
+        _vffData.vffData.updateController(root);
+        (0, _helpers.broadcast)(_events.VFF_EVENT, { dataChanged: true, root: root });
     });
-    (0, _helpers.searchAttribute)(_consts.ATTRIBUTE.STYLE, event.target.getAttribute(_consts.ATTRIBUTE.STYLE)).forEach(function (el) {
-        setValue(el, getValue(event.target));
-    });
-    scanSelectFrom();
-    root.__style = style;
-    _vffData.vffData.updateController(root);
-    (0, _helpers.broadcast)(_events.VFF_EVENT, { dataChanged: true, root: root });
 }
 
 function attachListeners(element) {
     if (element.tagName === 'VFF-CHECKBOX' || element.tagName === 'VFF-RADIO-BUTTON') {
-        element.removeEventListener('click', updateListener);
-        element.addEventListener('click', updateListener);
+        element.removeEventListener('click', updateListener, false);
+        element.addEventListener('click', updateListener, false);
     } else {
         element.removeEventListener('input', updateListener);
         element.addEventListener('input', updateListener);
