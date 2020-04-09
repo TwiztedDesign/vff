@@ -5,7 +5,7 @@ import {pages} from "./handlers/pagesHandler.js";
 import {queryParams} from "./handlers/queryParamsHandler.js";
 import {reload} from "./handlers/reloadHandler.js";
 import {handleVFData} from './handlers/vfDataHandler';
-import {deviceChange} from './handlers/playerHandler';
+import {deviceChange, playerStatus} from './handlers/playerHandler';
 
 let dataReady = false;
 let handlers = {};
@@ -22,6 +22,7 @@ handlers[events.QUERY_PARAMS] = queryParams;
 handlers[events.RELOAD] = reload;
 handlers[events.VF_DATA] = handleVFData;
 handlers[events.DEVICE_CHANGE] = deviceChange;
+handlers[events.PLAYER_STATUS] = playerStatus;
 
 
 module.exports = handlers;

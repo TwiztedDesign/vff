@@ -142,6 +142,7 @@ module.exports = {
     "DATA_READY": "vff-data-ready",
     "CUSTOM_READY": "vff-custom-ready",
 
+    "PLAYER_STATUS": "vff-player-status",
     "VIDEO_PLAYING": "vff-video-playing",
     "VIDEO_STARTED": "vff-video-started",
     "VIDEO_PAUSED": "vff-video-paused",
@@ -2438,7 +2439,7 @@ var controllerExists = function () {
 //     setValues();
 // }
 
-//
+
 // function registerControls(){
 //     let elements = searchAttribute([ATTRIBUTE.DATA, ATTRIBUTE.STYLE]);
 //     elements.forEach(element => {
@@ -2446,14 +2447,14 @@ var controllerExists = function () {
 //             let path = element.getAttribute(ATTRIBUTE.DATA);
 //             let value = getValue(element);
 //             vffData.registerControl(path.replace(/\./g,'-'), value, {group : 'controller'}).on(e => {
-//                 console.log(e);
+//                 // console.log(e);
 //             });
 //         }
 //         if(element.hasAttribute(ATTRIBUTE.STYLE)){
 //             let path = element.getAttribute(ATTRIBUTE.STYLE);
 //             let value = getValue(element);
 //             vffData.registerControl(path.replace(/\./g,'-'), value, {group : 'style'}).on(e => {
-//                 console.log(e);
+//                 // console.log(e);
 //             });
 //         }
 //     });
@@ -2600,7 +2601,7 @@ function handleSelect(el, data) {
     setByPath(data, el.getAttribute(_consts.ATTRIBUTE.DATA), getValue(el));
 }
 function getValue(el) {
-    var suffix = el.getAttribute(_consts.ATTRIBUTE.SUFFIX) || '';
+    var suffix = el.getAttribute(_consts.ATTRIBUTE.SUFFIX);
     var value = void 0;
     switch (el.constructor.name) {
         case 'HTMLSelectElement':
@@ -2617,7 +2618,7 @@ function getValue(el) {
             value = el.checked;
             break;
     }
-    return value + suffix;
+    return suffix ? value + suffix : value;
 }
 function setValue(el, value) {
     var suffix = el.getAttribute(_consts.ATTRIBUTE.SUFFIX) || '';
@@ -2778,7 +2779,7 @@ module.exports = {
     init: function init() {
         window.addEventListener('load', function () {
             if ((0, _helpers.searchAttribute)(_consts.ATTRIBUTE.CONTROLLER).length) {
-                // registerController();
+                // registerControls();
                 _vffData.vffData.registerController().on(function (e) {
                     setTimeout(function () {
                         var flat = flatten(e.data);
@@ -2849,6 +2850,8 @@ var _controller = __webpack_require__(139);
 
 var controllerApi = _interopRequireWildcard(_controller);
 
+var _video = __webpack_require__(142);
+
 var _http = __webpack_require__(140);
 
 var httpApi = _interopRequireWildcard(_http);
@@ -2865,9 +2868,10 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+(0, _listener.start)();
 // import "../scripts/custom-elements.min";
 // import "../scripts/custom-elements-es5-adapter.exec";
-(0, _listener.start)();
+
 (0, _initDOM.init)();
 (0, _controllerDOM.init)();
 
@@ -2961,7 +2965,10 @@ vff.disableOverscroll = function () {
 (0, _helpers.extend)(vff, playerApi);
 (0, _helpers.extend)(vff, eventsApi);
 
+vff._playerStatus = {};
+
 vff.extend('controller', controllerApi);
+vff.extend('video', _video.api);
 vff.extend('http', httpApi);
 
 module.exports = vff;
@@ -4116,6 +4123,7 @@ handlers[events.QUERY_PARAMS] = _queryParamsHandler.queryParams;
 handlers[events.RELOAD] = _reloadHandler.reload;
 handlers[events.VF_DATA] = _vfDataHandler.handleVFData;
 handlers[events.DEVICE_CHANGE] = _playerHandler.deviceChange;
+handlers[events.PLAYER_STATUS] = _playerHandler.playerStatus;
 
 module.exports = handlers;
 
@@ -5864,8 +5872,14 @@ function deviceChange(data) {
     }
 }
 
+function playerStatus(data) {
+    window.vff._playerStatus = data;
+    //todo handle time change, handle status change
+}
+
 module.exports = {
-    deviceChange: deviceChange
+    deviceChange: deviceChange,
+    playerStatus: playerStatus
 };
 
 /***/ }),
@@ -6469,6 +6483,73 @@ module.exports = {
         module.exports = noOverScroll;
     }
 })();
+
+/***/ }),
+/* 142 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _messenger = __webpack_require__(5);
+
+var api = {};
+
+Object.defineProperty(api, 'currentTime', {
+    get: function get() {
+        return window.vff._playerStatus.timecode;
+    }
+});
+
+Object.defineProperty(api, 'src', {
+    get: function get() {
+        return window.vff._playerStatus.src;
+    }
+});
+
+Object.defineProperty(api, 'duration', {
+    get: function get() {
+        return window.vff._playerStatus.duration;
+    }
+});
+
+Object.defineProperty(api, 'paused', {
+    get: function get() {
+        return window.vff._playerStatus.paused;
+    }
+});
+
+Object.defineProperty(api, 'muted', {
+    get: function get() {
+        return window.vff._playerStatus.muted;
+    }
+});
+
+api.play = function () {
+    (0, _messenger.send)('vff-play');
+};
+
+api.pause = function () {
+    (0, _messenger.send)('vff-pause');
+};
+
+api.goTo = function () {
+    (0, _messenger.send)('taco-go', {});
+};
+
+/*
+-- isPlaying //(paused)
+-- currentTime
+-- length //(duration)
+gotTo(time, play)
+-- play()
+-- pause()
+onProgress //timeupdate
+onsStateChange(state=>{})
+-- src
+ */
+
+module.exports = { api: api };
 
 /***/ })
 /******/ ]);

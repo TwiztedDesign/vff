@@ -125,7 +125,7 @@ function handleSelect(el, data){
     setByPath(data, el.getAttribute(ATTRIBUTE.DATA), getValue(el));
 }
 function getValue(el){
-    let suffix = el.getAttribute(ATTRIBUTE.SUFFIX) || '';
+    let suffix = el.getAttribute(ATTRIBUTE.SUFFIX);
     let value;
     switch (el.constructor.name){
         case 'HTMLSelectElement':
@@ -142,7 +142,7 @@ function getValue(el){
             value = el.checked;
             break;
     }
-    return value + suffix;
+    return suffix? (value + suffix) : value;
 }
 function setValue(el, value){
     let suffix = el.getAttribute(ATTRIBUTE.SUFFIX) || '';
@@ -347,7 +347,7 @@ async function controllerExists(url){
 //     setValues();
 // }
 
-//
+
 // function registerControls(){
 //     let elements = searchAttribute([ATTRIBUTE.DATA, ATTRIBUTE.STYLE]);
 //     elements.forEach(element => {
@@ -355,14 +355,14 @@ async function controllerExists(url){
 //             let path = element.getAttribute(ATTRIBUTE.DATA);
 //             let value = getValue(element);
 //             vffData.registerControl(path.replace(/\./g,'-'), value, {group : 'controller'}).on(e => {
-//                 console.log(e);
+//                 // console.log(e);
 //             });
 //         }
 //         if(element.hasAttribute(ATTRIBUTE.STYLE)){
 //             let path = element.getAttribute(ATTRIBUTE.STYLE);
 //             let value = getValue(element);
 //             vffData.registerControl(path.replace(/\./g,'-'), value, {group : 'style'}).on(e => {
-//                 console.log(e);
+//                 // console.log(e);
 //             });
 //         }
 //     });
@@ -373,7 +373,7 @@ module.exports = {
     init : () => {
         window.addEventListener('load', function(){
             if(searchAttribute(ATTRIBUTE.CONTROLLER).length){
-                // registerController();
+                // registerControls();
                 vffData.registerController().on(e => {
                     setTimeout(()=>{
                         let flat = flatten(e.data);

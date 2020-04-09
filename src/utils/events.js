@@ -23,6 +23,7 @@ module.exports = {
     "DATA_READY"    : "vff-data-ready",
     "CUSTOM_READY"  : "vff-custom-ready",
 
+    "PLAYER_STATUS" : "vff-player-status",
     "VIDEO_PLAYING" : "vff-video-playing",
     "VIDEO_STARTED" : "vff-video-started",
     "VIDEO_PAUSED"  : "vff-video-paused",

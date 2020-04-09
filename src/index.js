@@ -13,6 +13,7 @@ import {isMobile, extend, defer, uuid} from './utils/helpers';
 import * as eventsApi from './core/api/events';
 import * as playerApi from './core/api/player';
 import * as controllerApi from './core/api/controller';
+import {api as videoApi} from './core/api/video';
 import * as httpApi from './core/api/http';
 import {bindSyncEvents} from './core/interactionEvents';
 import {MODE} from './core/consts';
@@ -72,8 +73,10 @@ vff.disableOverscroll   = () => {noOverScroll.enable();}; //When disabled, body 
 extend(vff, playerApi);
 extend(vff, eventsApi);
 
+vff._playerStatus = {};
 
 vff.extend('controller', controllerApi);
+vff.extend('video', videoApi);
 vff.extend('http', httpApi);
 
 
