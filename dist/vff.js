@@ -6447,7 +6447,7 @@ var currentTime = function () {
             while (1) {
                 switch (_context.prev = _context.next) {
                     case 0:
-                        return _context.abrupt('return', new Promise(function (resolve, reject) {
+                        return _context.abrupt('return', new Promise(function (resolve) {
                             (0, _messenger.request)('vff-current-time', {}, function (res) {
                                 resolve(res.payload.currentTime);
                             });

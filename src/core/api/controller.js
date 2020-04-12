@@ -10,10 +10,10 @@ function upload(asset, cb){
 }
 
 async function currentTime(){
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         request('vff-current-time',{}, res => {
             resolve(res.payload.currentTime);
-        })
+        });
     });
 }
 
