@@ -537,7 +537,7 @@ function getAllChildrenIncludinShadowDOM(el) {
 }
 
 function searchAttributeHelper(acc, element, attr, value) {
-    if (element.hasAttribute && element.hasAttribute(attr) && (value === undefined || element.getAttribute(attr) === value)) {
+    if (element.hasAttribute && element.hasAttribute(attr) && (value === undefined || element.getAttribute(attr).replace(/\[/g, ".").replace(/\]/g, ".").replace(/\.\./g, ".").replace(/\.$/, "") === value)) {
         acc.push(element);
     }
     if (!element.shadowRoot && (!element.children || !element.children.length)) {
@@ -2469,6 +2469,8 @@ var _consts = __webpack_require__(14);
 
 var _events = __webpack_require__(3);
 
+var _uploader = __webpack_require__(134);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var root = {};
@@ -2617,6 +2619,13 @@ function getValue(el) {
         case 'VFF-RADIO-BUTTON':
             value = el.checked;
             break;
+        case 'VFF-IMAGE-BROWSER':
+            value = "";
+            if (el.value) value = el.value;
+            if (el.selectedFiles && el.selectedFiles.length) {
+                value = el.selectedFiles[0].url || '';
+            }
+            break;
     }
     return suffix ? value + suffix : value;
 }
@@ -2627,6 +2636,23 @@ function setValue(el, value) {
         case 'VFF-CHECKBOX':
         case 'VFF-RADIO-BUTTON':
             el.checked = value;
+            return;
+        case 'VFF-IMAGE-BROWSER':
+            el.value = value;
+            if (value && (!el.selectedFiles.length || el.selectedFiles[0].url !== value)) {
+                fetch(value).then(function (res) {
+                    if (res.status === 200) {
+                        return res.blob();
+                    } else {
+                        throw new Error("Can't fetch image" + value);
+                    }
+                }).then(function (img) {
+                    el.selectedFiles = [];
+                    var file = new File([img], value, { type: img.type });
+                    file.url = value;
+                    el.addFiles([file]);
+                });
+            }
             return;
     }
     switch (el.constructor.name) {
@@ -2672,6 +2698,7 @@ function scanVffData() {
     elements.forEach(function (element) {
         if (element.hasAttribute(_consts.ATTRIBUTE.DATA)) {
             var path = element.getAttribute(_consts.ATTRIBUTE.DATA);
+            element.setAttribute(_consts.ATTRIBUTE.DATA, path.replace(/\[/g, ".").replace(/\]/g, ".").replace(/\.\./g, ".").replace(/\.$/, ""));
             var value = getValue(element);
             setByPath(root, path, value);
         }
@@ -2722,10 +2749,27 @@ function updateListener(event) {
     });
 }
 
+function imageBrowserListener(event) {
+    if (event.target.selectedFiles.length && flatten(root)[event.target.getAttribute(_consts.ATTRIBUTE.DATA).replace(/\[/g, ".").replace(/\]/g, ".").replace(/\.\./g, ".").replace(/\.$/, "")] !== event.target.selectedFiles[0].url) {
+        window.vff.controller.upload(event.target.selectedFiles[0], function (e) {
+            // console.log("upload file");
+            (0, _uploader.uploadFile)(event.target.selectedFiles[0], e.urls.uploadUrl);
+            event.target.selectedFiles[0].url = e.urls.cdnUrl;
+            updateListener(event);
+        });
+    } else {
+        event.target.value = '';
+        updateListener(event);
+    }
+}
+
 function attachListeners(element) {
     if (element.tagName === 'VFF-CHECKBOX' || element.tagName === 'VFF-RADIO-BUTTON') {
         element.removeEventListener('click', updateListener, false);
         element.addEventListener('click', updateListener, false);
+    } else if (element.tagName === 'VFF-IMAGE-BROWSER') {
+        element.removeEventListener('vff:change', imageBrowserListener, false);
+        element.addEventListener('vff:change', imageBrowserListener, false);
     } else {
         element.removeEventListener('input', updateListener);
         element.addEventListener('input', updateListener);
@@ -2735,7 +2779,7 @@ function attachListeners(element) {
 var mutationObserver = new MutationObserver(function (mutations) {
     var change = false;
     mutations.forEach(function (mutation) {
-        if (mutation.type === 'attributes' && (mutation.target.hasAttribute(_consts.ATTRIBUTE.DATA) || mutation.target.hasAttribute(_consts.ATTRIBUTE.STYLE))) {
+        if (mutation.type === 'attributes' && (mutation.target.hasAttribute(_consts.ATTRIBUTE.DATA) || mutation.target.hasAttribute(_consts.ATTRIBUTE.STYLE)) && mutation.target.getAttribute(mutation.attributeName) !== mutation.oldValue) {
             change = true;
             attachListeners(mutation.target);
         }
@@ -2756,7 +2800,7 @@ function startDomObeserver() {
     mutationObserver.observe(document.documentElement, {
         attributeFilter: [_consts.ATTRIBUTE.DATA, _consts.ATTRIBUTE.STYLE],
         // attributes: false,
-        attributeOldValue: false,
+        attributeOldValue: true,
         characterData: false,
         characterDataOldValue: false,
         childList: true,
@@ -2830,29 +2874,29 @@ var _initDOM = __webpack_require__(133);
 
 var _controllerDOM = __webpack_require__(68);
 
-var _vffElement = __webpack_require__(134);
+var _vffElement = __webpack_require__(135);
 
 var _vffElement2 = _interopRequireDefault(_vffElement);
 
-__webpack_require__(136);
+__webpack_require__(137);
 
 var _helpers = __webpack_require__(4);
 
-var _events2 = __webpack_require__(137);
+var _events2 = __webpack_require__(138);
 
 var eventsApi = _interopRequireWildcard(_events2);
 
-var _player = __webpack_require__(138);
+var _player = __webpack_require__(139);
 
 var playerApi = _interopRequireWildcard(_player);
 
-var _controller = __webpack_require__(139);
+var _controller = __webpack_require__(140);
 
 var controllerApi = _interopRequireWildcard(_controller);
 
-var _video = __webpack_require__(142);
+var _video = __webpack_require__(141);
 
-var _http = __webpack_require__(140);
+var _http = __webpack_require__(142);
 
 var httpApi = _interopRequireWildcard(_http);
 
@@ -2860,7 +2904,7 @@ var _interactionEvents = __webpack_require__(67);
 
 var _consts = __webpack_require__(14);
 
-var _noOverscroll = __webpack_require__(141);
+var _noOverscroll = __webpack_require__(143);
 
 var noOverScroll = _interopRequireWildcard(_noOverscroll);
 
@@ -5999,6 +6043,97 @@ module.exports = {
 "use strict";
 
 
+var _helpers = __webpack_require__(4);
+
+var uploads = {};
+
+// import Worker from './webworkers/fileupload.worker.js';
+//
+// let worker = new Worker();
+// // let worker = new Worker('./webworkers/fileupload.js', { type: "module" });
+//
+// worker.onerror = function (e) {
+//     console.log('ERROR: Line ', e.lineno, ' in ', e.filename, ': ', e.message);
+// };
+//
+
+
+function _upload(file, url) {
+
+    var uid = (0, _helpers.uuid)();
+
+    var req = new XMLHttpRequest();
+    uploads[uid] = req;
+    req.open("PUT", url, true);
+    req.setRequestHeader('Content-type', file.type);
+    req.upload.onprogress = function () {
+        // console.log(JSON.stringify({uuid, type: 'progress', progress : event.loaded / event.total, loaded : event.loaded, total : event.total}));
+    };
+    req.onreadystatechange = function () {
+        if (req.readyState !== 4) return;
+        if (req.status >= 200 && req.status < 300) {
+            // console.log(JSON.stringify({uuid, type: 'success', filename : file.name}));
+            delete uploads[_helpers.uuid];
+        } else {
+            // console.log(JSON.stringify({uuid, type: 'error', data: {
+            //         status: req.status,
+            //         statusText: req.statusText
+            //     }}));
+            delete uploads[_helpers.uuid];
+        }
+    };
+    req.send(file);
+}
+
+// function uploadFile(file, uploadUrl){
+//     let uid = uuid();
+//     let handler = function(e){
+//         let msg = JSON.parse(e.data);
+//         if(msg.uuid !== uid) return;
+//         switch (msg.type){
+//             case 'progress':
+//                 // console.log(`${(msg.progress*100).toFixed(0)}%`);
+//                 break;
+//
+//             case 'success':
+//                 worker.removeEventListener('message', handler);
+//                 delete uploads[uid];
+//                 break;
+//             case 'error':
+//                 if(msg.data.status !== 0 || msg.data.statusText){
+//                     // console.log('Failed to upload file - error ', msg.data.statusText);
+//                 }
+//                 worker.removeEventListener('message', handler);
+//
+//                 delete uploads[uid];
+//                 break;
+//             default:
+//                 break;
+//         }
+//     };
+//
+//     worker.addEventListener('message', handler);
+//
+//     uploads[uid] = true;
+//     worker.postMessage({
+//         cmd     : 'upload',
+//         file,
+//         url     : uploadUrl,
+//         uuid: uid
+//     });
+// }
+
+module.exports = {
+    uploadFile: _upload
+};
+
+/***/ }),
+/* 135 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
@@ -6011,7 +6146,7 @@ var _createClass2 = __webpack_require__(43);
 
 var _createClass3 = _interopRequireDefault(_createClass2);
 
-var _htmlAccessorObserver = __webpack_require__(135);
+var _htmlAccessorObserver = __webpack_require__(136);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -6081,7 +6216,7 @@ var VffElement = function () {
 exports.default = VffElement;
 
 /***/ }),
-/* 135 */
+/* 136 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6156,7 +6291,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 136 */
+/* 137 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6176,7 +6311,7 @@ HTMLImageElement.prototype.expose = function () {
 };
 
 /***/ }),
-/* 137 */
+/* 138 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6200,7 +6335,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 138 */
+/* 139 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6292,11 +6427,44 @@ module.exports = {
 };
 
 /***/ }),
-/* 139 */
+/* 140 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
+
+var _regenerator = __webpack_require__(61);
+
+var _regenerator2 = _interopRequireDefault(_regenerator);
+
+var _asyncToGenerator2 = __webpack_require__(62);
+
+var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
+
+var currentTime = function () {
+    var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee() {
+        return _regenerator2.default.wrap(function _callee$(_context) {
+            while (1) {
+                switch (_context.prev = _context.next) {
+                    case 0:
+                        return _context.abrupt('return', new Promise(function (resolve, reject) {
+                            (0, _messenger.request)('vff-current-time', {}, function (res) {
+                                resolve(res.payload.currentTime);
+                            });
+                        }));
+
+                    case 1:
+                    case 'end':
+                        return _context.stop();
+                }
+            }
+        }, _callee, this);
+    }));
+
+    return function currentTime() {
+        return _ref.apply(this, arguments);
+    };
+}();
 
 var _controllerDOM = __webpack_require__(68);
 
@@ -6304,19 +6472,94 @@ var _events = __webpack_require__(3);
 
 var _messenger = __webpack_require__(5);
 
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 function upload(asset, cb) {
-    (0, _messenger.request)(_events.UPLOAD, { asset: asset }, function (res) {
+    (0, _messenger.request)(_events.UPLOAD, { asset: { name: asset.name, type: asset.type } }, function (res) {
         cb(res.payload);
     });
 }
 
+function go(time) {
+    (0, _messenger.send)('vff-video-go', { time: time });
+}
+
 module.exports = {
     update: _controllerDOM.update,
-    upload: upload
+    upload: upload,
+    currentTime: currentTime,
+    go: go
 };
 
 /***/ }),
-/* 140 */
+/* 141 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _messenger = __webpack_require__(5);
+
+var api = {};
+
+Object.defineProperty(api, 'currentTime', {
+    get: function get() {
+        return window.vff._playerStatus.timecode;
+    }
+});
+
+Object.defineProperty(api, 'src', {
+    get: function get() {
+        return window.vff._playerStatus.src;
+    }
+});
+
+Object.defineProperty(api, 'duration', {
+    get: function get() {
+        return window.vff._playerStatus.duration;
+    }
+});
+
+Object.defineProperty(api, 'paused', {
+    get: function get() {
+        return window.vff._playerStatus.paused;
+    }
+});
+
+Object.defineProperty(api, 'muted', {
+    get: function get() {
+        return window.vff._playerStatus.muted;
+    }
+});
+
+api.play = function () {
+    (0, _messenger.send)('vff-play');
+};
+
+api.pause = function () {
+    (0, _messenger.send)('vff-pause');
+};
+
+api.goTo = function () {
+    (0, _messenger.send)('taco-go', {});
+};
+
+/*
+-- isPlaying //(paused)
+-- currentTime
+-- length //(duration)
+gotTo(time, play)
+-- play()
+-- pause()
+onProgress //timeupdate
+onsStateChange(state=>{})
+-- src
+ */
+
+module.exports = { api: api };
+
+/***/ }),
+/* 142 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6351,7 +6594,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 141 */
+/* 143 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6483,73 +6726,6 @@ module.exports = {
         module.exports = noOverScroll;
     }
 })();
-
-/***/ }),
-/* 142 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _messenger = __webpack_require__(5);
-
-var api = {};
-
-Object.defineProperty(api, 'currentTime', {
-    get: function get() {
-        return window.vff._playerStatus.timecode;
-    }
-});
-
-Object.defineProperty(api, 'src', {
-    get: function get() {
-        return window.vff._playerStatus.src;
-    }
-});
-
-Object.defineProperty(api, 'duration', {
-    get: function get() {
-        return window.vff._playerStatus.duration;
-    }
-});
-
-Object.defineProperty(api, 'paused', {
-    get: function get() {
-        return window.vff._playerStatus.paused;
-    }
-});
-
-Object.defineProperty(api, 'muted', {
-    get: function get() {
-        return window.vff._playerStatus.muted;
-    }
-});
-
-api.play = function () {
-    (0, _messenger.send)('vff-play');
-};
-
-api.pause = function () {
-    (0, _messenger.send)('vff-pause');
-};
-
-api.goTo = function () {
-    (0, _messenger.send)('taco-go', {});
-};
-
-/*
--- isPlaying //(paused)
--- currentTime
--- length //(duration)
-gotTo(time, play)
--- play()
--- pause()
-onProgress //timeupdate
-onsStateChange(state=>{})
--- src
- */
-
-module.exports = { api: api };
 
 /***/ })
 /******/ ]);

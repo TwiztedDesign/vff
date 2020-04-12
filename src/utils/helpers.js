@@ -378,7 +378,7 @@ function getAllChildrenIncludinShadowDOM(el){
 }
 
 function searchAttributeHelper(acc, element, attr, value){
-    if(element.hasAttribute && element.hasAttribute(attr) && (value === undefined || element.getAttribute(attr) === value)){
+    if(element.hasAttribute && element.hasAttribute(attr) && (value === undefined || element.getAttribute(attr).replace(/\[/g,".").replace(/\]/g,".").replace(/\.\./g, ".").replace(/\.$/, "") === value)){
         acc.push(element);
     }
     if(!element.shadowRoot && (!element.children || !element.children.length)){

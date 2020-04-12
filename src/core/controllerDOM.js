@@ -2,6 +2,7 @@ import {broadcast, searchAttribute, trim} from "../utils/helpers";
 import {vffData} from "./vffData";
 import {ATTRIBUTE} from './consts';
 import {VFF_EVENT} from "../utils/events";
+import {uploadFile} from "../utils/uploader";
 let root = {};
 let style = {};
 
@@ -141,6 +142,13 @@ function getValue(el){
         case 'VFF-RADIO-BUTTON':
             value = el.checked;
             break;
+        case 'VFF-IMAGE-BROWSER':
+            value = "";
+            if(el.value) value = el.value;
+            if(el.selectedFiles && el.selectedFiles.length){
+                value = el.selectedFiles[0].url || '';
+            }
+            break;
     }
     return suffix? (value + suffix) : value;
 }
@@ -151,6 +159,25 @@ function setValue(el, value){
         case 'VFF-CHECKBOX':
         case 'VFF-RADIO-BUTTON':
             el.checked = value;
+            return;
+        case 'VFF-IMAGE-BROWSER':
+            el.value = value;
+            if(value && (!el.selectedFiles.length || el.selectedFiles[0].url !== value)){
+                fetch(value)
+                    .then(res => {
+                        if(res.status === 200){
+                            return res.blob();
+                        } else {
+                            throw new Error("Can't fetch image" + value);
+                        }
+                    })
+                    .then(img => {
+                        el.selectedFiles = [];
+                        let file = new File([img], value, {type: img.type});
+                        file.url = value;
+                        el.addFiles([file]);
+                    });
+            }
             return;
     }
     switch (el.constructor.name){
@@ -196,6 +223,7 @@ function scanVffData(){
     elements.forEach(element => {
         if(element.hasAttribute(ATTRIBUTE.DATA)){
             let path = element.getAttribute(ATTRIBUTE.DATA);
+            element.setAttribute(ATTRIBUTE.DATA, path.replace(/\[/g,".").replace(/\]/g,".").replace(/\.\./g, ".").replace(/\.$/, ""));
             let value = getValue(element);
             setByPath(root, path, value);
         }
@@ -246,11 +274,31 @@ function updateListener(event){
     });
 }
 
+function imageBrowserListener(event){
+    if(event.target.selectedFiles.length && flatten(root)[event.target.getAttribute(ATTRIBUTE.DATA).replace(/\[/g,".").replace(/\]/g,".").replace(/\.\./g, ".").replace(/\.$/, "")] !== event.target.selectedFiles[0].url){
+        window.vff.controller.upload(event.target.selectedFiles[0], (e)=>{
+            // console.log("upload file");
+            uploadFile(event.target.selectedFiles[0],e.urls.uploadUrl);
+            event.target.selectedFiles[0].url = e.urls.cdnUrl;
+            updateListener(event);
+        });
+    } else {
+        event.target.value = '';
+        updateListener(event);
+    }
+}
+
 function attachListeners(element){
     if(element.tagName === 'VFF-CHECKBOX' || element.tagName === 'VFF-RADIO-BUTTON'){
         element.removeEventListener('click', updateListener, false);
         element.addEventListener('click', updateListener, false);
-    } else {
+
+    }
+    else if(element.tagName === 'VFF-IMAGE-BROWSER'){
+        element.removeEventListener('vff:change', imageBrowserListener, false);
+        element.addEventListener('vff:change', imageBrowserListener, false);
+    }
+    else {
         element.removeEventListener('input', updateListener);
         element.addEventListener('input', updateListener);
     }
@@ -259,7 +307,8 @@ function attachListeners(element){
 let mutationObserver = new MutationObserver(function(mutations) {
     let change = false;
     mutations.forEach(function(mutation) {
-        if(mutation.type === 'attributes' && (mutation.target.hasAttribute(ATTRIBUTE.DATA) || mutation.target.hasAttribute(ATTRIBUTE.STYLE))){
+        if(mutation.type === 'attributes' && (mutation.target.hasAttribute(ATTRIBUTE.DATA) || mutation.target.hasAttribute(ATTRIBUTE.STYLE)) &&
+                mutation.target.getAttribute(mutation.attributeName) !== mutation.oldValue){
             change = true;
             attachListeners(mutation.target);
         }
@@ -280,7 +329,7 @@ function startDomObeserver(){
     mutationObserver.observe(document.documentElement, {
         attributeFilter: [ATTRIBUTE.DATA, ATTRIBUTE.STYLE],
         // attributes: false,
-        attributeOldValue: false,
+        attributeOldValue: true,
         characterData: false,
         characterDataOldValue: false,
         childList: true,
