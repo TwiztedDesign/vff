@@ -278,9 +278,13 @@ function imageBrowserListener(event){
     if(event.target.selectedFiles.length && flatten(root)[event.target.getAttribute(ATTRIBUTE.DATA).replace(/\[/g,".").replace(/\]/g,".").replace(/\.\./g, ".").replace(/\.$/, "")] !== event.target.selectedFiles[0].url){
         window.vff.controller.upload(event.target.selectedFiles[0], (e)=>{
             // console.log("upload file");
-            uploadFile(event.target.selectedFiles[0],e.urls.uploadUrl);
-            event.target.selectedFiles[0].url = e.urls.cdnUrl;
-            updateListener(event);
+            uploadFile(event.target.selectedFiles[0],e.urls.uploadUrl, {
+                onSuccess : ()=> {
+                    event.target.selectedFiles[0].url = e.urls.cdnUrl;
+                    updateListener(event);
+                }
+            });
+
         });
     } else {
         event.target.value = '';

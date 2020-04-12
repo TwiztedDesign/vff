@@ -15,20 +15,26 @@ let uploads = {};
 
 
 
-function _upload(file, url){
+function _upload(file, url, options){
 
     let uid = uuid();
-
+    options = options || {};
     let req = new XMLHttpRequest();
     uploads[uid] = req;
     req.open("PUT", url, true);
     req.setRequestHeader('Content-type', file.type);
     req.upload.onprogress = function() {
+        if(options.onProgress){
+            options.onProgress(event.loaded / event.total);
+        }
         // console.log(JSON.stringify({uuid, type: 'progress', progress : event.loaded / event.total, loaded : event.loaded, total : event.total}));
     };
     req.onreadystatechange = function () {
         if (req.readyState !== 4) return;
         if (req.status >= 200 && req.status < 300) {
+            if(options.onSuccess){
+                options.onSuccess();
+            }
             // console.log(JSON.stringify({uuid, type: 'success', filename : file.name}));
             delete uploads[uuid];
         } else {
@@ -36,6 +42,12 @@ function _upload(file, url){
             //         status: req.status,
             //         statusText: req.statusText
             //     }}));
+            if(options.onError){
+                options.onError({
+                    status: req.status,
+                    statusText: req.statusText
+                });
+            }
             delete uploads[uuid];
         }
     };
