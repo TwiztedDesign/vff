@@ -6,8 +6,8 @@ import {uploadFile} from "../utils/uploader";
 let root = {};
 let style = {};
 
-const gatherDataTimeout = 200;
-const initialDataTimeout = 100;
+const gatherDataTimeout = 300;
+const initialDataTimeout = 150;
 
 // function debounce(func, wait, immediate) {
 //     let timeout;

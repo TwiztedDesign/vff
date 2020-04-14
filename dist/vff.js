@@ -2476,8 +2476,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var root = {};
 var style = {};
 
-var gatherDataTimeout = 200;
-var initialDataTimeout = 100;
+var gatherDataTimeout = 300;
+var initialDataTimeout = 150;
 
 // function debounce(func, wait, immediate) {
 //     let timeout;
@@ -2759,6 +2759,7 @@ function updateListener(event) {
 function imageBrowserListener(event) {
     if (event.target.selectedFiles.length && flatten(root)[event.target.getAttribute(_consts.ATTRIBUTE.DATA).replace(/\[/g, ".").replace(/\]/g, ".").replace(/\.\./g, ".").replace(/\.$/, "")] !== event.target.selectedFiles[0].url && event.target.url !== event.target.selectedFiles[0].url) {
         window.vff.controller.upload(event.target.selectedFiles[0], function (e) {
+            // eslint-disable-next-line
             console.log("upload file");
             (0, _uploader.uploadFile)(event.target.selectedFiles[0], e.urls.uploadUrl, {
                 onSuccess: function onSuccess() {
