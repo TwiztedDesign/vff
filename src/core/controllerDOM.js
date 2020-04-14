@@ -284,6 +284,7 @@ function imageBrowserListener(event){
             flatten(root)[event.target.getAttribute(ATTRIBUTE.DATA).replace(/\[/g,".").replace(/\]/g,".").replace(/\.\./g, ".").replace(/\.$/, "")] !== event.target.selectedFiles[0].url &&
             event.target.url !== event.target.selectedFiles[0].url){
         window.vff.controller.upload(event.target.selectedFiles[0], (e)=>{
+            // eslint-disable-next-line
             console.log("upload file");
             uploadFile(event.target.selectedFiles[0],e.urls.uploadUrl, {
                 onSuccess : ()=> {
