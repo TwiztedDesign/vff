@@ -6,7 +6,8 @@ import {uploadFile} from "../utils/uploader";
 let root = {};
 let style = {};
 
-
+const gatherDataTimeout = 200;
+const initialDataTimeout = 100;
 
 // function debounce(func, wait, immediate) {
 //     let timeout;
@@ -145,6 +146,7 @@ function getValue(el){
         case 'VFF-IMAGE-BROWSER':
             value = "";
             if(el.value) value = el.value;
+            if(el.url) value = el.url;
             if(el.selectedFiles && el.selectedFiles.length){
                 value = el.selectedFiles[0].url || '';
             }
@@ -162,6 +164,7 @@ function setValue(el, value){
             return;
         case 'VFF-IMAGE-BROWSER':
             el.value = value;
+            el.url = value;
             if(value && (!el.selectedFiles.length || el.selectedFiles[0].url !== value)){
                 fetch(value)
                     .then(res => {
@@ -175,6 +178,8 @@ function setValue(el, value){
                         el.selectedFiles = [];
                         let file = new File([img], value, {type: img.type});
                         file.url = value;
+                        el.value = value;
+                        el.url = value;
                         el.addFiles([file]);
                     });
             }
@@ -275,9 +280,11 @@ function updateListener(event){
 }
 
 function imageBrowserListener(event){
-    if(event.target.selectedFiles.length && flatten(root)[event.target.getAttribute(ATTRIBUTE.DATA).replace(/\[/g,".").replace(/\]/g,".").replace(/\.\./g, ".").replace(/\.$/, "")] !== event.target.selectedFiles[0].url){
+    if(event.target.selectedFiles.length &&
+            flatten(root)[event.target.getAttribute(ATTRIBUTE.DATA).replace(/\[/g,".").replace(/\]/g,".").replace(/\.\./g, ".").replace(/\.$/, "")] !== event.target.selectedFiles[0].url &&
+            event.target.url !== event.target.selectedFiles[0].url){
         window.vff.controller.upload(event.target.selectedFiles[0], (e)=>{
-            // console.log("upload file");
+            console.log("upload file");
             uploadFile(event.target.selectedFiles[0],e.urls.uploadUrl, {
                 onSuccess : ()=> {
                     event.target.selectedFiles[0].url = e.urls.cdnUrl;
@@ -288,6 +295,7 @@ function imageBrowserListener(event){
         });
     } else {
         event.target.value = '';
+        event.target.url = '';
         updateListener(event);
     }
 }
@@ -325,7 +333,7 @@ let mutationObserver = new MutationObserver(function(mutations) {
         }
     });
     if(change){
-        setTimeout(gatherData, 100);
+        setTimeout(gatherData, gatherDataTimeout);
     }
 });
 
@@ -347,7 +355,7 @@ function startDomObeserver(){
 function observe(){
     startDomObeserver();
     searchAttribute([ATTRIBUTE.DATA, ATTRIBUTE.STYLE]).forEach(element => attachListeners(element));
-    setTimeout(gatherData, 100);
+    setTimeout(gatherData, gatherDataTimeout);
 
 }
 
@@ -438,9 +446,9 @@ module.exports = {
                                 setValue(el, flat[key]);
                             });
                         });
-                    });
+                    }, initialDataTimeout);
 
-                }, {changeOnly : false});
+                }, {changeOnly : false, throttle : 0});
                 observe();
             } else {
                 controllerExists().then(url => {
@@ -452,5 +460,5 @@ module.exports = {
             }
         });
     },
-    update : () => {setTimeout(gatherData, 100);}
+    update : () => {setTimeout(gatherData, gatherDataTimeout);}
 };

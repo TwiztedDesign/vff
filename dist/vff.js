@@ -2476,6 +2476,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var root = {};
 var style = {};
 
+var gatherDataTimeout = 200;
+var initialDataTimeout = 100;
+
 // function debounce(func, wait, immediate) {
 //     let timeout;
 //
@@ -2622,6 +2625,7 @@ function getValue(el) {
         case 'VFF-IMAGE-BROWSER':
             value = "";
             if (el.value) value = el.value;
+            if (el.url) value = el.url;
             if (el.selectedFiles && el.selectedFiles.length) {
                 value = el.selectedFiles[0].url || '';
             }
@@ -2639,6 +2643,7 @@ function setValue(el, value) {
             return;
         case 'VFF-IMAGE-BROWSER':
             el.value = value;
+            el.url = value;
             if (value && (!el.selectedFiles.length || el.selectedFiles[0].url !== value)) {
                 fetch(value).then(function (res) {
                     if (res.status === 200) {
@@ -2650,6 +2655,8 @@ function setValue(el, value) {
                     el.selectedFiles = [];
                     var file = new File([img], value, { type: img.type });
                     file.url = value;
+                    el.value = value;
+                    el.url = value;
                     el.addFiles([file]);
                 });
             }
@@ -2750,9 +2757,9 @@ function updateListener(event) {
 }
 
 function imageBrowserListener(event) {
-    if (event.target.selectedFiles.length && flatten(root)[event.target.getAttribute(_consts.ATTRIBUTE.DATA).replace(/\[/g, ".").replace(/\]/g, ".").replace(/\.\./g, ".").replace(/\.$/, "")] !== event.target.selectedFiles[0].url) {
+    if (event.target.selectedFiles.length && flatten(root)[event.target.getAttribute(_consts.ATTRIBUTE.DATA).replace(/\[/g, ".").replace(/\]/g, ".").replace(/\.\./g, ".").replace(/\.$/, "")] !== event.target.selectedFiles[0].url && event.target.url !== event.target.selectedFiles[0].url) {
         window.vff.controller.upload(event.target.selectedFiles[0], function (e) {
-            // console.log("upload file");
+            console.log("upload file");
             (0, _uploader.uploadFile)(event.target.selectedFiles[0], e.urls.uploadUrl, {
                 onSuccess: function onSuccess() {
                     event.target.selectedFiles[0].url = e.urls.cdnUrl;
@@ -2762,6 +2769,7 @@ function imageBrowserListener(event) {
         });
     } else {
         event.target.value = '';
+        event.target.url = '';
         updateListener(event);
     }
 }
@@ -2795,7 +2803,7 @@ var mutationObserver = new MutationObserver(function (mutations) {
         }
     });
     if (change) {
-        setTimeout(gatherData, 100);
+        setTimeout(gatherData, gatherDataTimeout);
     }
 });
 
@@ -2819,7 +2827,7 @@ function observe() {
     (0, _helpers.searchAttribute)([_consts.ATTRIBUTE.DATA, _consts.ATTRIBUTE.STYLE]).forEach(function (element) {
         return attachListeners(element);
     });
-    setTimeout(gatherData, 100);
+    setTimeout(gatherData, gatherDataTimeout);
 }
 
 module.exports = {
@@ -2838,8 +2846,8 @@ module.exports = {
                                 setValue(el, flat[key]);
                             });
                         });
-                    });
-                }, { changeOnly: false });
+                    }, initialDataTimeout);
+                }, { changeOnly: false, throttle: 0 });
                 observe();
             } else {
                 controllerExists().then(function (url) {
@@ -2852,7 +2860,7 @@ module.exports = {
         });
     },
     update: function update() {
-        setTimeout(gatherData, 100);
+        setTimeout(gatherData, gatherDataTimeout);
     }
 };
 
