@@ -1,3 +1,5 @@
+import {broadcast} from '../../utils/helpers';
+import {VIDEO_TIME_UPDATE} from '../../utils/events';
 
 function deviceChange(data){
     window.vff.isMobile = data.device === 'mobile';
@@ -9,8 +11,11 @@ function deviceChange(data){
 }
 
 function playerStatus(data){
+    if(!window.vff._playerStatus || data.timecode !== window.vff._playerStatus.timecode){
+        broadcast(VIDEO_TIME_UPDATE, data.timecode);
+    }
     window.vff._playerStatus = data;
-    //todo handle time change, handle status change
+    //TODO handle status change
 }
 
 module.exports = {

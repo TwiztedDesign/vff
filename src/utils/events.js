@@ -27,6 +27,7 @@ module.exports = {
     "VIDEO_PLAYING" : "vff-video-playing",
     "VIDEO_STARTED" : "vff-video-started",
     "VIDEO_PAUSED"  : "vff-video-paused",
+    "VIDEO_TIME_UPDATE" : "vff-time-update",
 
     "DEVICE_CHANGE" : "vff-device-change",
 

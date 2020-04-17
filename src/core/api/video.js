@@ -1,4 +1,6 @@
 import {send} from '../../utils/messenger.js';
+import {on} from '../../utils/helpers.js'
+import {VIDEO_TIME_UPDATE} from '../../utils/events';
 const api = {};
 
 Object.defineProperty(api, 'currentTime', {
@@ -43,6 +45,10 @@ api.goTo = function(){
     send('taco-go', {
 
     });
+};
+
+api.onTimeUpdate = function(fn){
+    on(VIDEO_TIME_UPDATE, fn);
 };
 
 

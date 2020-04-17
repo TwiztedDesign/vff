@@ -104,61 +104,6 @@ $exports.store = store;
 
 /***/ }),
 /* 2 */
-/***/ (function(module, exports) {
-
-var core = module.exports = { version: '2.6.2' };
-if (typeof __e == 'number') __e = core; // eslint-disable-line no-undef
-
-
-/***/ }),
-/* 3 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = {
-    "READY": "taco-ready",
-    "GO": "taco-go",
-    "CROP": "vff-crop",
-    "TRANSFORM": "vff-transform",
-    "UPLOAD": "vff-upload-asset",
-    "AUDIO_TRACK": "vff-audio-track",
-    "NEXT": "taco-next",
-    "PREV": "taco-previous",
-    "ADD": "taco-addtemplate",
-    "UPDATE": "taco-update",
-    "PAGES": "taco-pages",
-    "USER_UPDATE": "taco-user-update",
-    "QUERY_PARAMS": "taco-query-params",
-    "OUTGOING_EVENT": "taco-event-sent",
-    "VFF_EVENT": "taco-event-received",
-    "ACK": "taco-ack",
-    "TRACK_EVENT": "vff-track-event",
-    "RELOAD": "vff-reload",
-    "VF_DATA": "vff-vf-data",
-    "VF_SETUP": "vff-vf-setup",
-
-    "DATA_READY": "vff-data-ready",
-    "CUSTOM_READY": "vff-custom-ready",
-
-    "PLAYER_STATUS": "vff-player-status",
-    "VIDEO_PLAYING": "vff-video-playing",
-    "VIDEO_STARTED": "vff-video-started",
-    "VIDEO_PAUSED": "vff-video-paused",
-
-    "DEVICE_CHANGE": "vff-device-change",
-
-    "INTERACTION": "vff-interaction",
-    "TOUCH": "taco-touch-element",
-    "MOUSE_MOVE": "taco-mouse-move",
-    "BUBBLE_UP": "taco-bubble-up",
-
-    "PAGES_UPDATE": "vff-pages-update"
-};
-
-/***/ }),
-/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -596,13 +541,69 @@ module.exports = {
 };
 
 /***/ }),
+/* 3 */
+/***/ (function(module, exports) {
+
+var core = module.exports = { version: '2.6.2' };
+if (typeof __e == 'number') __e = core; // eslint-disable-line no-undef
+
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = {
+    "READY": "taco-ready",
+    "GO": "taco-go",
+    "CROP": "vff-crop",
+    "TRANSFORM": "vff-transform",
+    "UPLOAD": "vff-upload-asset",
+    "AUDIO_TRACK": "vff-audio-track",
+    "NEXT": "taco-next",
+    "PREV": "taco-previous",
+    "ADD": "taco-addtemplate",
+    "UPDATE": "taco-update",
+    "PAGES": "taco-pages",
+    "USER_UPDATE": "taco-user-update",
+    "QUERY_PARAMS": "taco-query-params",
+    "OUTGOING_EVENT": "taco-event-sent",
+    "VFF_EVENT": "taco-event-received",
+    "ACK": "taco-ack",
+    "TRACK_EVENT": "vff-track-event",
+    "RELOAD": "vff-reload",
+    "VF_DATA": "vff-vf-data",
+    "VF_SETUP": "vff-vf-setup",
+
+    "DATA_READY": "vff-data-ready",
+    "CUSTOM_READY": "vff-custom-ready",
+
+    "PLAYER_STATUS": "vff-player-status",
+    "VIDEO_PLAYING": "vff-video-playing",
+    "VIDEO_STARTED": "vff-video-started",
+    "VIDEO_PAUSED": "vff-video-paused",
+    "VIDEO_TIME_UPDATE": "vff-time-update",
+
+    "DEVICE_CHANGE": "vff-device-change",
+
+    "INTERACTION": "vff-interaction",
+    "TOUCH": "taco-touch-element",
+    "MOUSE_MOVE": "taco-mouse-move",
+    "BUBBLE_UP": "taco-bubble-up",
+
+    "PAGES_UPDATE": "vff-pages-update"
+};
+
+/***/ }),
 /* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global) {
 
-var _helpers = __webpack_require__(4);
+var _helpers = __webpack_require__(2);
 
 var window = window || global.window;
 var REQUEST_TIMEOUT = 20000;
@@ -714,9 +715,9 @@ var _createClass2 = __webpack_require__(43);
 
 var _createClass3 = _interopRequireDefault(_createClass2);
 
-var _events = __webpack_require__(3);
+var _events = __webpack_require__(4);
 
-var _helpers = __webpack_require__(4);
+var _helpers = __webpack_require__(2);
 
 var _messenger = __webpack_require__(5);
 
@@ -1129,7 +1130,7 @@ module.exports = !__webpack_require__(24)(function () {
 /***/ (function(module, exports, __webpack_require__) {
 
 var global = __webpack_require__(0);
-var core = __webpack_require__(2);
+var core = __webpack_require__(3);
 var ctx = __webpack_require__(20);
 var hide = __webpack_require__(11);
 var has = __webpack_require__(13);
@@ -1570,7 +1571,7 @@ module.exports = function (key) {
 /* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var core = __webpack_require__(2);
+var core = __webpack_require__(3);
 var global = __webpack_require__(0);
 var SHARED = '__core-js_shared__';
 var store = global[SHARED] || (global[SHARED] = {});
@@ -1601,7 +1602,7 @@ module.exports = (
 var classof = __webpack_require__(39);
 var ITERATOR = __webpack_require__(1)('iterator');
 var Iterators = __webpack_require__(15);
-module.exports = __webpack_require__(2).getIteratorMethod = function (it) {
+module.exports = __webpack_require__(3).getIteratorMethod = function (it) {
   if (it != undefined) return it[ITERATOR]
     || it['@@iterator']
     || Iterators[classof(it)];
@@ -1649,7 +1650,7 @@ exports.f = __webpack_require__(1);
 /***/ (function(module, exports, __webpack_require__) {
 
 var global = __webpack_require__(0);
-var core = __webpack_require__(2);
+var core = __webpack_require__(3);
 var LIBRARY = __webpack_require__(19);
 var wksExt = __webpack_require__(40);
 var defineProperty = __webpack_require__(6).f;
@@ -2251,7 +2252,7 @@ var _xpath = __webpack_require__(127);
 
 var _messenger = __webpack_require__(5);
 
-var _events = __webpack_require__(3);
+var _events = __webpack_require__(4);
 
 var events = ['__mouseup__', '__mousedown__', '__mousemove__', '__mouseover__', '__mouseout__', '__mouseenter__', '__mouseleave__', '__click__', '__dblclick__', '__touchstart__', '__touchend__', '__touchmove__', '__drag__', '__dragstart__', '__dragend__', '__dragover__', '__dragenter__', '__dragleave__', '__dragexit__', '__drop__', '__wheel__'];
 
@@ -2461,13 +2462,13 @@ var controllerExists = function () {
 // }
 
 
-var _helpers = __webpack_require__(4);
+var _helpers = __webpack_require__(2);
 
 var _vffData = __webpack_require__(8);
 
 var _consts = __webpack_require__(14);
 
-var _events = __webpack_require__(3);
+var _events = __webpack_require__(4);
 
 var _uploader = __webpack_require__(134);
 
@@ -2876,7 +2877,7 @@ var _messenger = __webpack_require__(5);
 
 var _vffSetup = __webpack_require__(98);
 
-var _events = __webpack_require__(3);
+var _events = __webpack_require__(4);
 
 var _vffData = __webpack_require__(8);
 
@@ -2892,7 +2893,7 @@ var _vffElement2 = _interopRequireDefault(_vffElement);
 
 __webpack_require__(137);
 
-var _helpers = __webpack_require__(4);
+var _helpers = __webpack_require__(2);
 
 var _events2 = __webpack_require__(138);
 
@@ -3095,7 +3096,7 @@ module.exports = { "default": __webpack_require__(73), __esModule: true };
 
 __webpack_require__(18);
 __webpack_require__(81);
-module.exports = __webpack_require__(2).Array.from;
+module.exports = __webpack_require__(3).Array.from;
 
 
 /***/ }),
@@ -3378,7 +3379,7 @@ __webpack_require__(90);
 __webpack_require__(59);
 __webpack_require__(96);
 __webpack_require__(97);
-module.exports = __webpack_require__(2).Symbol;
+module.exports = __webpack_require__(3).Symbol;
 
 
 /***/ }),
@@ -3783,7 +3784,7 @@ __webpack_require__(41)('observable');
 
 var _messenger = __webpack_require__(5);
 
-var _events = __webpack_require__(3);
+var _events = __webpack_require__(4);
 
 function setup(options) {
     if (options) {
@@ -3800,7 +3801,7 @@ module.exports = {
 /***/ (function(module, exports, __webpack_require__) {
 
 __webpack_require__(100);
-var $Object = __webpack_require__(2).Object;
+var $Object = __webpack_require__(3).Object;
 module.exports = function defineProperty(it, key, desc) {
   return $Object.defineProperty(it, key, desc);
 };
@@ -3853,13 +3854,13 @@ var _createClass2 = __webpack_require__(43);
 
 var _createClass3 = _interopRequireDefault(_createClass2);
 
-var _helpers = __webpack_require__(4);
+var _helpers = __webpack_require__(2);
 
 var _consts = __webpack_require__(14);
 
 var _messenger = __webpack_require__(5);
 
-var _events = __webpack_require__(3);
+var _events = __webpack_require__(4);
 
 var _vffData = __webpack_require__(8);
 
@@ -4111,7 +4112,7 @@ var _handlers = __webpack_require__(104);
 
 var handlers = _interopRequireWildcard(_handlers);
 
-var _events = __webpack_require__(3);
+var _events = __webpack_require__(4);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
@@ -4161,7 +4162,7 @@ var _vfDataHandler = __webpack_require__(131);
 
 var _playerHandler = __webpack_require__(132);
 
-var events = __webpack_require__(3);
+var events = __webpack_require__(4);
 
 
 var dataReady = false;
@@ -4267,13 +4268,13 @@ var update = function () {
     };
 }();
 
-var _helpers = __webpack_require__(4);
+var _helpers = __webpack_require__(2);
 
 var _vffData = __webpack_require__(8);
 
 var _interactionEvents = __webpack_require__(67);
 
-var _events = __webpack_require__(3);
+var _events = __webpack_require__(4);
 
 var _consts = __webpack_require__(14);
 
@@ -4426,7 +4427,7 @@ module.exports = __webpack_require__(109);
 var classof = __webpack_require__(39);
 var ITERATOR = __webpack_require__(1)('iterator');
 var Iterators = __webpack_require__(15);
-module.exports = __webpack_require__(2).isIterable = function (it) {
+module.exports = __webpack_require__(3).isIterable = function (it) {
   var O = Object(it);
   return O[ITERATOR] !== undefined
     || '@@iterator' in O
@@ -4456,7 +4457,7 @@ module.exports = __webpack_require__(112);
 
 var anObject = __webpack_require__(7);
 var get = __webpack_require__(38);
-module.exports = __webpack_require__(2).getIterator = function (it) {
+module.exports = __webpack_require__(3).getIterator = function (it) {
   var iterFn = get(it);
   if (typeof iterFn != 'function') throw TypeError(it + ' is not iterable!');
   return anObject(iterFn.call(it));
@@ -5253,7 +5254,7 @@ __webpack_require__(27);
 __webpack_require__(117);
 __webpack_require__(125);
 __webpack_require__(126);
-module.exports = __webpack_require__(2).Promise;
+module.exports = __webpack_require__(3).Promise;
 
 
 /***/ }),
@@ -5485,7 +5486,7 @@ if (!USE_NATIVE) {
 $export($export.G + $export.W + $export.F * !USE_NATIVE, { Promise: $Promise });
 __webpack_require__(26)($Promise, PROMISE);
 __webpack_require__(124)(PROMISE);
-Wrapper = __webpack_require__(2)[PROMISE];
+Wrapper = __webpack_require__(3)[PROMISE];
 
 // statics
 $export($export.S + $export.F * !USE_NATIVE, PROMISE, {
@@ -5718,7 +5719,7 @@ module.exports = function (target, src, safe) {
 "use strict";
 
 var global = __webpack_require__(0);
-var core = __webpack_require__(2);
+var core = __webpack_require__(3);
 var dP = __webpack_require__(6);
 var DESCRIPTORS = __webpack_require__(9);
 var SPECIES = __webpack_require__(1)('species');
@@ -5740,7 +5741,7 @@ module.exports = function (KEY) {
 // https://github.com/tc39/proposal-promise-finally
 
 var $export = __webpack_require__(10);
-var core = __webpack_require__(2);
+var core = __webpack_require__(3);
 var global = __webpack_require__(0);
 var speciesConstructor = __webpack_require__(63);
 var promiseResolve = __webpack_require__(66);
@@ -5919,6 +5920,10 @@ module.exports = {
 "use strict";
 
 
+var _helpers = __webpack_require__(2);
+
+var _events = __webpack_require__(4);
+
 function deviceChange(data) {
     window.vff.isMobile = data.device === 'mobile';
     if (window.vff.isMobile) {
@@ -5929,8 +5934,11 @@ function deviceChange(data) {
 }
 
 function playerStatus(data) {
+    if (!window.vff._playerStatus || data.timecode !== window.vff._playerStatus.timecode) {
+        (0, _helpers.broadcast)(_events.VIDEO_TIME_UPDATE, data.timecode);
+    }
     window.vff._playerStatus = data;
-    //todo handle time change, handle status change
+    //TODO handle status change
 }
 
 module.exports = {
@@ -5953,7 +5961,7 @@ var _defineProperty2 = __webpack_require__(61);
 
 var _defineProperty3 = _interopRequireDefault(_defineProperty2);
 
-var _helpers = __webpack_require__(4);
+var _helpers = __webpack_require__(2);
 
 var _vffData = __webpack_require__(8);
 
@@ -6055,7 +6063,7 @@ module.exports = {
 "use strict";
 
 
-var _helpers = __webpack_require__(4);
+var _helpers = __webpack_require__(2);
 
 var uploads = {};
 
@@ -6250,7 +6258,7 @@ var _typeof2 = __webpack_require__(17);
 
 var _typeof3 = _interopRequireDefault(_typeof2);
 
-var _helpers = __webpack_require__(4);
+var _helpers = __webpack_require__(2);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -6341,7 +6349,7 @@ HTMLImageElement.prototype.expose = function () {
 "use strict";
 
 
-var _events = __webpack_require__(3);
+var _events = __webpack_require__(4);
 
 var _messenger = __webpack_require__(5);
 
@@ -6367,9 +6375,9 @@ module.exports = {
 
 var _messenger = __webpack_require__(5);
 
-var _events = __webpack_require__(3);
+var _events = __webpack_require__(4);
 
-var _helpers = __webpack_require__(4);
+var _helpers = __webpack_require__(2);
 
 function go(target, time) {
     (0, _messenger.send)(_events.GO, {
@@ -6492,7 +6500,7 @@ var currentTime = function () {
 
 var _controllerDOM = __webpack_require__(68);
 
-var _events = __webpack_require__(3);
+var _events = __webpack_require__(4);
 
 var _messenger = __webpack_require__(5);
 
@@ -6523,6 +6531,10 @@ module.exports = {
 
 
 var _messenger = __webpack_require__(5);
+
+var _helpers = __webpack_require__(2);
+
+var _events = __webpack_require__(4);
 
 var api = {};
 
@@ -6568,6 +6580,10 @@ api.goTo = function () {
     (0, _messenger.send)('taco-go', {});
 };
 
+api.onTimeUpdate = function (fn) {
+    (0, _helpers.on)(_events.VIDEO_TIME_UPDATE, fn);
+};
+
 /*
 -- isPlaying //(paused)
 -- currentTime
@@ -6589,7 +6605,7 @@ module.exports = { api: api };
 "use strict";
 
 
-var _helpers = __webpack_require__(4);
+var _helpers = __webpack_require__(2);
 
 function get(url, callback) {
     var deferred = (0, _helpers.defer)();
