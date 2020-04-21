@@ -92,7 +92,7 @@ function convertObjectsToArrays(obj) {
             else{
 //                 console.log(property + "   " + obj[property]);
             }
-            delete obj[property].__isArray;
+            if(obj[property]) delete obj[property].__isArray;
         }
     }
 }
@@ -139,17 +139,8 @@ function getValue(el){
             break;
     }
     switch (el.tagName){
-        case 'VFF-CHECKBOX':
         case 'VFF-RADIO-BUTTON':
             value = el.checked;
-            break;
-        case 'VFF-IMAGE-BROWSER':
-            value = "";
-            if(el.value) value = el.value;
-            if(el.url) value = el.url;
-            if(el.selectedFiles && el.selectedFiles.length){
-                value = el.selectedFiles[0].url || '';
-            }
             break;
     }
     return suffix? (value + suffix) : value;
@@ -158,31 +149,8 @@ function setValue(el, value){
     let suffix = el.getAttribute(ATTRIBUTE.SUFFIX) || '';
     value = suffix? value.slice(0, -suffix.length) : value;
     switch (el.tagName){
-        case 'VFF-CHECKBOX':
         case 'VFF-RADIO-BUTTON':
             el.checked = value;
-            return;
-        case 'VFF-IMAGE-BROWSER':
-            el.value = value;
-            el.url = value;
-            if(value && (!el.selectedFiles.length || el.selectedFiles[0].url !== value)){
-                fetch(value)
-                    .then(res => {
-                        if(res.status === 200){
-                            return res.blob();
-                        } else {
-                            throw new Error("Can't fetch image" + value);
-                        }
-                    })
-                    .then(img => {
-                        el.selectedFiles = [];
-                        let file = new File([img], value, {type: img.type});
-                        file.url = value;
-                        el.value = value;
-                        el.url = value;
-                        el.addFiles([file]);
-                    });
-            }
             return;
     }
     switch (el.constructor.name){
@@ -280,15 +248,13 @@ function updateListener(event){
 }
 
 function imageBrowserListener(event){
-    if(event.target.selectedFiles.length &&
-            flatten(root)[event.target.getAttribute(ATTRIBUTE.DATA).replace(/\[/g,".").replace(/\]/g,".").replace(/\.\./g, ".").replace(/\.$/, "")] !== event.target.selectedFiles[0].url &&
-            event.target.url !== event.target.selectedFiles[0].url){
+    if(event.target.selectedFiles.length){
         window.vff.controller.upload(event.target.selectedFiles[0], (e)=>{
             // eslint-disable-next-line
             console.log("upload file");
             uploadFile(event.target.selectedFiles[0],e.urls.uploadUrl, {
                 onSuccess : ()=> {
-                    event.target.selectedFiles[0].url = e.urls.cdnUrl;
+                    event.target.value = e.urls.cdnUrl;
                     updateListener(event);
                 }
             });
@@ -296,13 +262,12 @@ function imageBrowserListener(event){
         });
     } else {
         event.target.value = '';
-        event.target.url = '';
         updateListener(event);
     }
 }
 
 function attachListeners(element){
-    if(element.tagName === 'VFF-CHECKBOX' || element.tagName === 'VFF-RADIO-BUTTON'){
+    if(element.tagName === 'VFF-RADIO-BUTTON'){
         element.removeEventListener('click', updateListener, false);
         element.addEventListener('click', updateListener, false);
 
@@ -314,6 +279,8 @@ function attachListeners(element){
     else {
         element.removeEventListener('input', updateListener);
         element.addEventListener('input', updateListener);
+        element.removeEventListener('vff:change', updateListener);
+        element.addEventListener('vff:change', updateListener);
     }
 }
 

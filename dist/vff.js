@@ -75,83 +75,6 @@ return /******/ (function(modules) { // webpackBootstrap
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, exports) {
-
-// https://github.com/zloirock/core-js/issues/86#issuecomment-115759028
-var global = module.exports = typeof window != 'undefined' && window.Math == Math
-  ? window : typeof self != 'undefined' && self.Math == Math ? self
-  // eslint-disable-next-line no-new-func
-  : Function('return this')();
-if (typeof __g == 'number') __g = global; // eslint-disable-line no-undef
-
-
-/***/ }),
-/* 1 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var store = __webpack_require__(36)('wks');
-var uid = __webpack_require__(25);
-var Symbol = __webpack_require__(0).Symbol;
-var USE_SYMBOL = typeof Symbol == 'function';
-
-var $exports = module.exports = function (name) {
-  return store[name] || (store[name] =
-    USE_SYMBOL && Symbol[name] || (USE_SYMBOL ? Symbol : uid)('Symbol.' + name));
-};
-
-$exports.store = store;
-
-
-/***/ }),
-/* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = {
-    "READY": "taco-ready",
-    "GO": "taco-go",
-    "CROP": "vff-crop",
-    "TRANSFORM": "vff-transform",
-    "UPLOAD": "vff-upload-asset",
-    "AUDIO_TRACK": "vff-audio-track",
-    "NEXT": "taco-next",
-    "PREV": "taco-previous",
-    "ADD": "taco-addtemplate",
-    "UPDATE": "taco-update",
-    "PAGES": "taco-pages",
-    "USER_UPDATE": "taco-user-update",
-    "QUERY_PARAMS": "taco-query-params",
-    "OUTGOING_EVENT": "taco-event-sent",
-    "VFF_EVENT": "taco-event-received",
-    "ACK": "taco-ack",
-    "TRACK_EVENT": "vff-track-event",
-    "RELOAD": "vff-reload",
-    "VF_DATA": "vff-vf-data",
-    "VF_SETUP": "vff-vf-setup",
-
-    "DATA_READY": "vff-data-ready",
-    "CUSTOM_READY": "vff-custom-ready",
-
-    "PLAYER_STATUS": "vff-player-status",
-    "VIDEO_PLAYING": "vff-video-playing",
-    "VIDEO_STARTED": "vff-video-started",
-    "VIDEO_PAUSED": "vff-video-paused",
-    "VIDEO_TIME_UPDATE": "vff-time-update",
-
-    "DEVICE_CHANGE": "vff-device-change",
-
-    "INTERACTION": "vff-interaction",
-    "TOUCH": "taco-touch-element",
-    "MOUSE_MOVE": "taco-mouse-move",
-    "BUBBLE_UP": "taco-bubble-up",
-
-    "PAGES_UPDATE": "vff-pages-update"
-};
-
-/***/ }),
-/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -589,6 +512,83 @@ module.exports = {
 };
 
 /***/ }),
+/* 1 */
+/***/ (function(module, exports) {
+
+// https://github.com/zloirock/core-js/issues/86#issuecomment-115759028
+var global = module.exports = typeof window != 'undefined' && window.Math == Math
+  ? window : typeof self != 'undefined' && self.Math == Math ? self
+  // eslint-disable-next-line no-new-func
+  : Function('return this')();
+if (typeof __g == 'number') __g = global; // eslint-disable-line no-undef
+
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var store = __webpack_require__(36)('wks');
+var uid = __webpack_require__(25);
+var Symbol = __webpack_require__(1).Symbol;
+var USE_SYMBOL = typeof Symbol == 'function';
+
+var $exports = module.exports = function (name) {
+  return store[name] || (store[name] =
+    USE_SYMBOL && Symbol[name] || (USE_SYMBOL ? Symbol : uid)('Symbol.' + name));
+};
+
+$exports.store = store;
+
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = {
+    "READY": "taco-ready",
+    "GO": "taco-go",
+    "CROP": "vff-crop",
+    "TRANSFORM": "vff-transform",
+    "UPLOAD": "vff-upload-asset",
+    "AUDIO_TRACK": "vff-audio-track",
+    "NEXT": "taco-next",
+    "PREV": "taco-previous",
+    "ADD": "taco-addtemplate",
+    "UPDATE": "taco-update",
+    "PAGES": "taco-pages",
+    "USER_UPDATE": "taco-user-update",
+    "QUERY_PARAMS": "taco-query-params",
+    "OUTGOING_EVENT": "taco-event-sent",
+    "VFF_EVENT": "taco-event-received",
+    "ACK": "taco-ack",
+    "TRACK_EVENT": "vff-track-event",
+    "RELOAD": "vff-reload",
+    "VF_DATA": "vff-vf-data",
+    "VF_SETUP": "vff-vf-setup",
+
+    "DATA_READY": "vff-data-ready",
+    "CUSTOM_READY": "vff-custom-ready",
+
+    "PLAYER_STATUS": "vff-player-status",
+    "VIDEO_PLAYING": "vff-video-playing",
+    "VIDEO_STARTED": "vff-video-started",
+    "VIDEO_PAUSED": "vff-video-paused",
+    "VIDEO_TIME_UPDATE": "vff-time-update",
+
+    "DEVICE_CHANGE": "vff-device-change",
+
+    "INTERACTION": "vff-interaction",
+    "TOUCH": "taco-touch-element",
+    "MOUSE_MOVE": "taco-mouse-move",
+    "BUBBLE_UP": "taco-bubble-up",
+
+    "PAGES_UPDATE": "vff-pages-update"
+};
+
+/***/ }),
 /* 4 */
 /***/ (function(module, exports) {
 
@@ -603,7 +603,7 @@ if (typeof __e == 'number') __e = core; // eslint-disable-line no-undef
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global) {
 
-var _helpers = __webpack_require__(3);
+var _helpers = __webpack_require__(0);
 
 var window = window || global.window;
 var REQUEST_TIMEOUT = 20000;
@@ -715,9 +715,9 @@ var _createClass2 = __webpack_require__(43);
 
 var _createClass3 = _interopRequireDefault(_createClass2);
 
-var _events = __webpack_require__(2);
+var _events = __webpack_require__(3);
 
-var _helpers = __webpack_require__(3);
+var _helpers = __webpack_require__(0);
 
 var _messenger = __webpack_require__(5);
 
@@ -1129,7 +1129,7 @@ module.exports = !__webpack_require__(24)(function () {
 /* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var global = __webpack_require__(0);
+var global = __webpack_require__(1);
 var core = __webpack_require__(4);
 var ctx = __webpack_require__(20);
 var hide = __webpack_require__(11);
@@ -1430,7 +1430,7 @@ module.exports = function (key) {
 
 var def = __webpack_require__(6).f;
 var has = __webpack_require__(13);
-var TAG = __webpack_require__(1)('toStringTag');
+var TAG = __webpack_require__(2)('toStringTag');
 
 module.exports = function (it, tag, stat) {
   if (it && !has(it = stat ? it : it.prototype, TAG)) def(it, TAG, { configurable: true, value: tag });
@@ -1442,10 +1442,10 @@ module.exports = function (it, tag, stat) {
 /***/ (function(module, exports, __webpack_require__) {
 
 __webpack_require__(85);
-var global = __webpack_require__(0);
+var global = __webpack_require__(1);
 var hide = __webpack_require__(11);
 var Iterators = __webpack_require__(15);
-var TO_STRING_TAG = __webpack_require__(1)('toStringTag');
+var TO_STRING_TAG = __webpack_require__(2)('toStringTag');
 
 var DOMIterables = ('CSSRuleList,CSSStyleDeclaration,CSSValueList,ClientRectList,DOMRectList,DOMStringList,' +
   'DOMTokenList,DataTransferItemList,FileList,HTMLAllCollection,HTMLCollection,HTMLFormElement,HTMLSelectElement,' +
@@ -1505,7 +1505,7 @@ module.exports = function (it) {
 /***/ (function(module, exports, __webpack_require__) {
 
 var isObject = __webpack_require__(12);
-var document = __webpack_require__(0).document;
+var document = __webpack_require__(1).document;
 // typeof document.createElement is 'object' in old IE
 var is = isObject(document) && isObject(document.createElement);
 module.exports = function (it) {
@@ -1572,7 +1572,7 @@ module.exports = function (key) {
 /***/ (function(module, exports, __webpack_require__) {
 
 var core = __webpack_require__(4);
-var global = __webpack_require__(0);
+var global = __webpack_require__(1);
 var SHARED = '__core-js_shared__';
 var store = global[SHARED] || (global[SHARED] = {});
 
@@ -1600,7 +1600,7 @@ module.exports = (
 /***/ (function(module, exports, __webpack_require__) {
 
 var classof = __webpack_require__(39);
-var ITERATOR = __webpack_require__(1)('iterator');
+var ITERATOR = __webpack_require__(2)('iterator');
 var Iterators = __webpack_require__(15);
 module.exports = __webpack_require__(4).getIteratorMethod = function (it) {
   if (it != undefined) return it[ITERATOR]
@@ -1615,7 +1615,7 @@ module.exports = __webpack_require__(4).getIteratorMethod = function (it) {
 
 // getting tag from 19.1.3.6 Object.prototype.toString()
 var cof = __webpack_require__(22);
-var TAG = __webpack_require__(1)('toStringTag');
+var TAG = __webpack_require__(2)('toStringTag');
 // ES3 wrong here
 var ARG = cof(function () { return arguments; }()) == 'Arguments';
 
@@ -1642,14 +1642,14 @@ module.exports = function (it) {
 /* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports.f = __webpack_require__(1);
+exports.f = __webpack_require__(2);
 
 
 /***/ }),
 /* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var global = __webpack_require__(0);
+var global = __webpack_require__(1);
 var core = __webpack_require__(4);
 var LIBRARY = __webpack_require__(19);
 var wksExt = __webpack_require__(40);
@@ -1790,7 +1790,7 @@ var Iterators = __webpack_require__(15);
 var $iterCreate = __webpack_require__(75);
 var setToStringTag = __webpack_require__(26);
 var getPrototypeOf = __webpack_require__(80);
-var ITERATOR = __webpack_require__(1)('iterator');
+var ITERATOR = __webpack_require__(2)('iterator');
 var BUGGY = !([].keys && 'next' in [].keys()); // Safari has buggy iterators w/o `next`
 var FF_ITERATOR = '@@iterator';
 var KEYS = 'keys';
@@ -1942,7 +1942,7 @@ module.exports = function (object, names) {
 /* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var document = __webpack_require__(0).document;
+var document = __webpack_require__(1).document;
 module.exports = document && document.documentElement;
 
 
@@ -1981,7 +1981,7 @@ module.exports = function (iterator, fn, value, entries) {
 
 // check on default Array iterator
 var Iterators = __webpack_require__(15);
-var ITERATOR = __webpack_require__(1)('iterator');
+var ITERATOR = __webpack_require__(2)('iterator');
 var ArrayProto = Array.prototype;
 
 module.exports = function (it) {
@@ -1993,7 +1993,7 @@ module.exports = function (it) {
 /* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var ITERATOR = __webpack_require__(1)('iterator');
+var ITERATOR = __webpack_require__(2)('iterator');
 var SAFE_CLOSING = false;
 
 try {
@@ -2112,7 +2112,7 @@ exports.default = VFFEvent;
 // 7.3.20 SpeciesConstructor(O, defaultConstructor)
 var anObject = __webpack_require__(7);
 var aFunction = __webpack_require__(23);
-var SPECIES = __webpack_require__(1)('species');
+var SPECIES = __webpack_require__(2)('species');
 module.exports = function (O, D) {
   var C = anObject(O).constructor;
   var S;
@@ -2128,7 +2128,7 @@ var ctx = __webpack_require__(20);
 var invoke = __webpack_require__(120);
 var html = __webpack_require__(52);
 var cel = __webpack_require__(31);
-var global = __webpack_require__(0);
+var global = __webpack_require__(1);
 var process = global.process;
 var setTask = global.setImmediate;
 var clearTask = global.clearImmediate;
@@ -2252,7 +2252,7 @@ var _xpath = __webpack_require__(127);
 
 var _messenger = __webpack_require__(5);
 
-var _events = __webpack_require__(2);
+var _events = __webpack_require__(3);
 
 var events = ['__mouseup__', '__mousedown__', '__mousemove__', '__mouseover__', '__mouseout__', '__mouseenter__', '__mouseleave__', '__click__', '__dblclick__', '__touchstart__', '__touchend__', '__touchmove__', '__drag__', '__dragstart__', '__dragend__', '__dragover__', '__dragenter__', '__dragleave__', '__dragexit__', '__drop__', '__wheel__'];
 
@@ -2462,13 +2462,13 @@ var controllerExists = function () {
 // }
 
 
-var _helpers = __webpack_require__(3);
+var _helpers = __webpack_require__(0);
 
 var _vffData = __webpack_require__(8);
 
 var _consts = __webpack_require__(14);
 
-var _events = __webpack_require__(2);
+var _events = __webpack_require__(3);
 
 var _uploader = __webpack_require__(134);
 
@@ -2573,7 +2573,7 @@ function convertObjectsToArrays(obj) {
             } else {
                 //                 console.log(property + "   " + obj[property]);
             }
-            delete obj[property].__isArray;
+            if (obj[property]) delete obj[property].__isArray;
         }
     }
 }
@@ -2619,17 +2619,8 @@ function getValue(el) {
             break;
     }
     switch (el.tagName) {
-        case 'VFF-CHECKBOX':
         case 'VFF-RADIO-BUTTON':
             value = el.checked;
-            break;
-        case 'VFF-IMAGE-BROWSER':
-            value = "";
-            if (el.value) value = el.value;
-            if (el.url) value = el.url;
-            if (el.selectedFiles && el.selectedFiles.length) {
-                value = el.selectedFiles[0].url || '';
-            }
             break;
     }
     return suffix ? value + suffix : value;
@@ -2638,29 +2629,8 @@ function setValue(el, value) {
     var suffix = el.getAttribute(_consts.ATTRIBUTE.SUFFIX) || '';
     value = suffix ? value.slice(0, -suffix.length) : value;
     switch (el.tagName) {
-        case 'VFF-CHECKBOX':
         case 'VFF-RADIO-BUTTON':
             el.checked = value;
-            return;
-        case 'VFF-IMAGE-BROWSER':
-            el.value = value;
-            el.url = value;
-            if (value && (!el.selectedFiles.length || el.selectedFiles[0].url !== value)) {
-                fetch(value).then(function (res) {
-                    if (res.status === 200) {
-                        return res.blob();
-                    } else {
-                        throw new Error("Can't fetch image" + value);
-                    }
-                }).then(function (img) {
-                    el.selectedFiles = [];
-                    var file = new File([img], value, { type: img.type });
-                    file.url = value;
-                    el.value = value;
-                    el.url = value;
-                    el.addFiles([file]);
-                });
-            }
             return;
     }
     switch (el.constructor.name) {
@@ -2758,26 +2728,25 @@ function updateListener(event) {
 }
 
 function imageBrowserListener(event) {
-    if (event.target.selectedFiles.length && flatten(root)[event.target.getAttribute(_consts.ATTRIBUTE.DATA).replace(/\[/g, ".").replace(/\]/g, ".").replace(/\.\./g, ".").replace(/\.$/, "")] !== event.target.selectedFiles[0].url && event.target.url !== event.target.selectedFiles[0].url) {
+    if (event.target.selectedFiles.length) {
         window.vff.controller.upload(event.target.selectedFiles[0], function (e) {
             // eslint-disable-next-line
             console.log("upload file");
             (0, _uploader.uploadFile)(event.target.selectedFiles[0], e.urls.uploadUrl, {
                 onSuccess: function onSuccess() {
-                    event.target.selectedFiles[0].url = e.urls.cdnUrl;
+                    event.target.value = e.urls.cdnUrl;
                     updateListener(event);
                 }
             });
         });
     } else {
         event.target.value = '';
-        event.target.url = '';
         updateListener(event);
     }
 }
 
 function attachListeners(element) {
-    if (element.tagName === 'VFF-CHECKBOX' || element.tagName === 'VFF-RADIO-BUTTON') {
+    if (element.tagName === 'VFF-RADIO-BUTTON') {
         element.removeEventListener('click', updateListener, false);
         element.addEventListener('click', updateListener, false);
     } else if (element.tagName === 'VFF-IMAGE-BROWSER') {
@@ -2786,6 +2755,8 @@ function attachListeners(element) {
     } else {
         element.removeEventListener('input', updateListener);
         element.addEventListener('input', updateListener);
+        element.removeEventListener('vff:change', updateListener);
+        element.addEventListener('vff:change', updateListener);
     }
 }
 
@@ -2877,7 +2848,7 @@ var _messenger = __webpack_require__(5);
 
 var _vffSetup = __webpack_require__(98);
 
-var _events = __webpack_require__(2);
+var _events = __webpack_require__(3);
 
 var _vffData = __webpack_require__(8);
 
@@ -2887,31 +2858,31 @@ var _initDOM = __webpack_require__(133);
 
 var _controllerDOM = __webpack_require__(68);
 
-var _resizeHandler = __webpack_require__(144);
+var _resizeHandler = __webpack_require__(135);
 
-var _vffElement = __webpack_require__(135);
+var _vffElement = __webpack_require__(136);
 
 var _vffElement2 = _interopRequireDefault(_vffElement);
 
-__webpack_require__(137);
+__webpack_require__(138);
 
-var _helpers = __webpack_require__(3);
+var _helpers = __webpack_require__(0);
 
-var _events2 = __webpack_require__(138);
+var _events2 = __webpack_require__(139);
 
 var eventsApi = _interopRequireWildcard(_events2);
 
-var _player = __webpack_require__(139);
+var _player = __webpack_require__(140);
 
 var playerApi = _interopRequireWildcard(_player);
 
-var _controller = __webpack_require__(140);
+var _controller = __webpack_require__(141);
 
 var controllerApi = _interopRequireWildcard(_controller);
 
-var _video = __webpack_require__(141);
+var _video = __webpack_require__(142);
 
-var _http = __webpack_require__(142);
+var _http = __webpack_require__(143);
 
 var httpApi = _interopRequireWildcard(_http);
 
@@ -2919,7 +2890,7 @@ var _interactionEvents = __webpack_require__(67);
 
 var _consts = __webpack_require__(14);
 
-var _noOverscroll = __webpack_require__(143);
+var _noOverscroll = __webpack_require__(144);
 
 var noOverScroll = _interopRequireWildcard(_noOverscroll);
 
@@ -3137,7 +3108,7 @@ var setToStringTag = __webpack_require__(26);
 var IteratorPrototype = {};
 
 // 25.1.2.1.1 %IteratorPrototype%[@@iterator]()
-__webpack_require__(11)(IteratorPrototype, __webpack_require__(1)('iterator'), function () { return this; });
+__webpack_require__(11)(IteratorPrototype, __webpack_require__(2)('iterator'), function () { return this; });
 
 module.exports = function (Constructor, NAME, next) {
   Constructor.prototype = create(IteratorPrototype, { next: descriptor(1, next) });
@@ -3392,7 +3363,7 @@ module.exports = __webpack_require__(4).Symbol;
 "use strict";
 
 // ECMAScript 6 symbols shim
-var global = __webpack_require__(0);
+var global = __webpack_require__(1);
 var has = __webpack_require__(13);
 var DESCRIPTORS = __webpack_require__(9);
 var $export = __webpack_require__(10);
@@ -3402,7 +3373,7 @@ var $fails = __webpack_require__(24);
 var shared = __webpack_require__(36);
 var setToStringTag = __webpack_require__(26);
 var uid = __webpack_require__(25);
-var wks = __webpack_require__(1);
+var wks = __webpack_require__(2);
 var wksExt = __webpack_require__(40);
 var wksDefine = __webpack_require__(41);
 var enumKeys = __webpack_require__(92);
@@ -3787,7 +3758,7 @@ __webpack_require__(41)('observable');
 
 var _messenger = __webpack_require__(5);
 
-var _events = __webpack_require__(2);
+var _events = __webpack_require__(3);
 
 function setup(options) {
     if (options) {
@@ -3857,13 +3828,13 @@ var _createClass2 = __webpack_require__(43);
 
 var _createClass3 = _interopRequireDefault(_createClass2);
 
-var _helpers = __webpack_require__(3);
+var _helpers = __webpack_require__(0);
 
 var _consts = __webpack_require__(14);
 
 var _messenger = __webpack_require__(5);
 
-var _events = __webpack_require__(2);
+var _events = __webpack_require__(3);
 
 var _vffData = __webpack_require__(8);
 
@@ -4115,7 +4086,7 @@ var _handlers = __webpack_require__(104);
 
 var handlers = _interopRequireWildcard(_handlers);
 
-var _events = __webpack_require__(2);
+var _events = __webpack_require__(3);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
@@ -4165,7 +4136,7 @@ var _vfDataHandler = __webpack_require__(131);
 
 var _playerHandler = __webpack_require__(132);
 
-var events = __webpack_require__(2);
+var events = __webpack_require__(3);
 
 
 var dataReady = false;
@@ -4271,13 +4242,13 @@ var update = function () {
     };
 }();
 
-var _helpers = __webpack_require__(3);
+var _helpers = __webpack_require__(0);
 
 var _vffData = __webpack_require__(8);
 
 var _interactionEvents = __webpack_require__(67);
 
-var _events = __webpack_require__(2);
+var _events = __webpack_require__(3);
 
 var _consts = __webpack_require__(14);
 
@@ -4428,7 +4399,7 @@ module.exports = __webpack_require__(109);
 /***/ (function(module, exports, __webpack_require__) {
 
 var classof = __webpack_require__(39);
-var ITERATOR = __webpack_require__(1)('iterator');
+var ITERATOR = __webpack_require__(2)('iterator');
 var Iterators = __webpack_require__(15);
 module.exports = __webpack_require__(4).isIterable = function (it) {
   var O = Object(it);
@@ -5267,7 +5238,7 @@ module.exports = __webpack_require__(4).Promise;
 "use strict";
 
 var LIBRARY = __webpack_require__(19);
-var global = __webpack_require__(0);
+var global = __webpack_require__(1);
 var ctx = __webpack_require__(20);
 var classof = __webpack_require__(39);
 var $export = __webpack_require__(10);
@@ -5297,7 +5268,7 @@ var USE_NATIVE = !!function () {
   try {
     // correct subclassing with @@species support
     var promise = $Promise.resolve(1);
-    var FakePromise = (promise.constructor = {})[__webpack_require__(1)('species')] = function (exec) {
+    var FakePromise = (promise.constructor = {})[__webpack_require__(2)('species')] = function (exec) {
       exec(empty, empty);
     };
     // unhandled rejections tracking support, NodeJS Promise without it fails @@species test
@@ -5621,7 +5592,7 @@ module.exports = function (fn, args, that) {
 /* 121 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var global = __webpack_require__(0);
+var global = __webpack_require__(1);
 var macrotask = __webpack_require__(64).set;
 var Observer = global.MutationObserver || global.WebKitMutationObserver;
 var process = global.process;
@@ -5696,7 +5667,7 @@ module.exports = function () {
 /* 122 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var global = __webpack_require__(0);
+var global = __webpack_require__(1);
 var navigator = global.navigator;
 
 module.exports = navigator && navigator.userAgent || '';
@@ -5721,11 +5692,11 @@ module.exports = function (target, src, safe) {
 
 "use strict";
 
-var global = __webpack_require__(0);
+var global = __webpack_require__(1);
 var core = __webpack_require__(4);
 var dP = __webpack_require__(6);
 var DESCRIPTORS = __webpack_require__(9);
-var SPECIES = __webpack_require__(1)('species');
+var SPECIES = __webpack_require__(2)('species');
 
 module.exports = function (KEY) {
   var C = typeof core[KEY] == 'function' ? core[KEY] : global[KEY];
@@ -5745,7 +5716,7 @@ module.exports = function (KEY) {
 
 var $export = __webpack_require__(10);
 var core = __webpack_require__(4);
-var global = __webpack_require__(0);
+var global = __webpack_require__(1);
 var speciesConstructor = __webpack_require__(63);
 var promiseResolve = __webpack_require__(66);
 
@@ -5923,9 +5894,9 @@ module.exports = {
 "use strict";
 
 
-var _helpers = __webpack_require__(3);
+var _helpers = __webpack_require__(0);
 
-var _events = __webpack_require__(2);
+var _events = __webpack_require__(3);
 
 function deviceChange(data) {
     window.vff.isMobile = data.device === 'mobile';
@@ -5964,7 +5935,7 @@ var _defineProperty2 = __webpack_require__(61);
 
 var _defineProperty3 = _interopRequireDefault(_defineProperty2);
 
-var _helpers = __webpack_require__(3);
+var _helpers = __webpack_require__(0);
 
 var _vffData = __webpack_require__(8);
 
@@ -6066,7 +6037,7 @@ module.exports = {
 "use strict";
 
 
-var _helpers = __webpack_require__(3);
+var _helpers = __webpack_require__(0);
 
 var uploads = {};
 
@@ -6169,6 +6140,50 @@ module.exports = {
 "use strict";
 
 
+var _helpers = __webpack_require__(0);
+
+var classes = {
+    'fill': 'vff-fill',
+    'fit': 'vff-fit'
+};
+
+function readDeviceOrientation() {
+    //We are using this method in order no to use window.orientation
+    //window.orientation gives different results on Android and iOS
+    var screenOrientation = window.innerWidth > window.innerHeight ? 'landscape' : 'portrait';
+    var orientation = window.screen.orientation && window.screen.orientation.type.indexOf('portrait') >= 0 || screenOrientation === 'portrait' ? 'Portrait' : 'Landscape';
+    return orientation;
+}
+
+function resizeHandler() {
+    var sizing = '';
+    try {
+        sizing = window.vff._playerStatus['overlaySizing' + (_helpers.isMobile ? readDeviceOrientation() : '')];
+    } catch (e) {
+        //no status yet
+    }
+    Object.values(classes).forEach(function (c) {
+        window.document.body.classList.remove(c);
+    });
+    window.document.body.classList.add(classes[sizing]);
+}
+
+module.exports = {
+    init: function init() {
+        window.addEventListener('resize', function () {
+            resizeHandler();
+        });
+        resizeHandler();
+    }
+};
+
+/***/ }),
+/* 136 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
@@ -6181,7 +6196,7 @@ var _createClass2 = __webpack_require__(43);
 
 var _createClass3 = _interopRequireDefault(_createClass2);
 
-var _htmlAccessorObserver = __webpack_require__(136);
+var _htmlAccessorObserver = __webpack_require__(137);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -6251,7 +6266,7 @@ var VffElement = function () {
 exports.default = VffElement;
 
 /***/ }),
-/* 136 */
+/* 137 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6261,7 +6276,7 @@ var _typeof2 = __webpack_require__(17);
 
 var _typeof3 = _interopRequireDefault(_typeof2);
 
-var _helpers = __webpack_require__(3);
+var _helpers = __webpack_require__(0);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -6326,7 +6341,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 137 */
+/* 138 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6346,13 +6361,13 @@ HTMLImageElement.prototype.expose = function () {
 };
 
 /***/ }),
-/* 138 */
+/* 139 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _events = __webpack_require__(2);
+var _events = __webpack_require__(3);
 
 var _messenger = __webpack_require__(5);
 
@@ -6370,7 +6385,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 139 */
+/* 140 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6378,9 +6393,9 @@ module.exports = {
 
 var _messenger = __webpack_require__(5);
 
-var _events = __webpack_require__(2);
+var _events = __webpack_require__(3);
 
-var _helpers = __webpack_require__(3);
+var _helpers = __webpack_require__(0);
 
 function go(target, time) {
     (0, _messenger.send)(_events.GO, {
@@ -6462,7 +6477,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 140 */
+/* 141 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6503,7 +6518,7 @@ var currentTime = function () {
 
 var _controllerDOM = __webpack_require__(68);
 
-var _events = __webpack_require__(2);
+var _events = __webpack_require__(3);
 
 var _messenger = __webpack_require__(5);
 
@@ -6527,7 +6542,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 141 */
+/* 142 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6535,9 +6550,9 @@ module.exports = {
 
 var _messenger = __webpack_require__(5);
 
-var _helpers = __webpack_require__(3);
+var _helpers = __webpack_require__(0);
 
-var _events = __webpack_require__(2);
+var _events = __webpack_require__(3);
 
 var api = {};
 
@@ -6602,13 +6617,13 @@ onsStateChange(state=>{})
 module.exports = { api: api };
 
 /***/ }),
-/* 142 */
+/* 143 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _helpers = __webpack_require__(3);
+var _helpers = __webpack_require__(0);
 
 function get(url, callback) {
     var deferred = (0, _helpers.defer)();
@@ -6637,7 +6652,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 143 */
+/* 144 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6769,50 +6784,6 @@ module.exports = {
         module.exports = noOverScroll;
     }
 })();
-
-/***/ }),
-/* 144 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _helpers = __webpack_require__(3);
-
-var classes = {
-    'fill': 'vff-fill',
-    'fit': 'vff-fit'
-};
-
-function readDeviceOrientation() {
-    //We are using this method in order no to use window.orientation
-    //window.orientation gives different results on Android and iOS
-    var screenOrientation = window.innerWidth > window.innerHeight ? 'landscape' : 'portrait';
-    var orientation = window.screen.orientation && window.screen.orientation.type.indexOf('portrait') >= 0 || screenOrientation === 'portrait' ? 'Portrait' : 'Landscape';
-    return orientation;
-}
-
-function resizeHandler() {
-    var sizing = '';
-    try {
-        sizing = window.vff._playerStatus['overlaySizing' + (_helpers.isMobile ? readDeviceOrientation() : '')];
-    } catch (e) {
-        //no status yet
-    }
-    Object.values(classes).forEach(function (c) {
-        window.document.body.classList.remove(c);
-    });
-    window.document.body.classList.add(classes[sizing]);
-}
-
-module.exports = {
-    init: function init() {
-        window.addEventListener('resize', function () {
-            resizeHandler();
-        });
-        resizeHandler();
-    }
-};
 
 /***/ })
 /******/ ]);
