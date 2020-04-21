@@ -5,6 +5,7 @@ import {vffData} from './core/vffData.js';
 import {start as startListener} from './utils/listener';
 import {init as initVffDom} from './core/initDOM';
 import {init as initControllerDom} from './core/controllerDOM';
+import {init as initResizeHandler} from './utils/resizeHandler';
 import vffElement from './core/vffElement';
 import './core/defaultExpose';
 // import "../scripts/custom-elements.min";
@@ -23,7 +24,9 @@ startListener();
 initVffDom();
 initControllerDom();
 
+
 window.addEventListener('load', () => {
+    initResizeHandler();
     isMobile ? window.document.body.classList.add('vff-mobile') : window.document.body.classList.remove('vff-mobile');
     send(READY);
 });

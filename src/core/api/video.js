@@ -1,5 +1,5 @@
 import {send} from '../../utils/messenger.js';
-import {on} from '../../utils/helpers.js'
+import {on} from '../../utils/helpers.js';
 import {VIDEO_TIME_UPDATE} from '../../utils/events';
 const api = {};
 
