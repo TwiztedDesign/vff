@@ -105,26 +105,76 @@ function objToArr(obj){
     });
     return arr;
 }
+
+
+function getSelectedIndices(options, selected){
+    return selected.map(selection => options.findIndex(options => options.key === selection.key)).filter(i => i >= 0);
+}
+function pickIndices(arr, indices){
+    return arr.reduce((res, val, index) => {
+        if(indices.includes(index)){
+            res.push(val);
+        }
+        return res;
+    }, []);
+}
+function pickByKeys(arr, keys) {
+    keys = keys.map(o => o['key']);
+    return arr.filter(item => keys.includes(item.key));
+}
+
 function handleSelect(el, data){
     let selectionPath = el.getAttribute(ATTRIBUTE.SELECTION);
-    let selection = getByPath(data, selectionPath) || [];
-    let val = getValue(el);
-    let length = el.options.length;
-    let index = el.selectedIndex;
-    el.innerHTML = '';
-    selection.forEach(s => {
-        var option = document.createElement("option");
-        option.text = s;
-        el.add(option);
 
-    });
-    if(length === el.options.length && el.options[index]){
-        el.value = el.options[index].value;
-    } else if (val){
-        el.value = val;
+    let val = getValue(el);
+    if(el.tagName === 'VFF-SELECT'){
+        let split = selectionPath.split(',');
+        let keyPath = split[0];
+        let valuePath = split[1] || split[0];
+        let selectionKeys = getByPath(data, keyPath) || [];
+        let selectionValues = getByPath(data, valuePath) || [];
+        let options = selectionKeys.map((key, i) => {
+            return {
+                key, value: selectionValues[i]
+            };
+        });
+        let previousOptions = el.options;
+        let length = previousOptions.length;
+        let selectedIndices = getSelectedIndices(previousOptions, el.value);
+        el.options = options;
+        //if length didnt change, set same options by index
+        if(length === options.length){
+            el.value = pickIndices(options, selectedIndices);
+        }
+        // else set same options by key
+        else {
+            el.value = pickByKeys(options, previousOptions);
+        }
+        setByPath(data, el.getAttribute(ATTRIBUTE.DATA), getValue(el));
+
+        // else set same options by key
+        // debugger;
+
+    } else {
+        let selection = getByPath(data, selectionPath) || [];
+        let length = el.options.length;
+        let index = el.selectedIndex;
+        el.innerHTML = '';
+        selection.forEach(s => {
+            var option = document.createElement("option");
+            option.text = s;
+            el.add(option);
+
+        });
+        if(length === el.options.length && el.options[index]){
+            el.value = el.options[index].value;
+        } else if (val){
+            el.value = val;
+        }
+
+        setByPath(data, el.getAttribute(ATTRIBUTE.DATA), getValue(el));
     }
 
-    setByPath(data, el.getAttribute(ATTRIBUTE.DATA), getValue(el));
 }
 function getValue(el){
     let suffix = el.getAttribute(ATTRIBUTE.SUFFIX);

@@ -2586,25 +2586,82 @@ function objToArr(obj) {
     });
     return arr;
 }
+
+function getSelectedIndices(options, selected) {
+    return selected.map(function (selection) {
+        return options.findIndex(function (options) {
+            return options.key === selection.key;
+        });
+    }).filter(function (i) {
+        return i >= 0;
+    });
+}
+function pickIndices(arr, indices) {
+    return arr.reduce(function (res, val, index) {
+        if (indices.includes(index)) {
+            res.push(val);
+        }
+        return res;
+    }, []);
+}
+function pickByKeys(arr, keys) {
+    keys = keys.map(function (o) {
+        return o['key'];
+    });
+    return arr.filter(function (item) {
+        return keys.includes(item.key);
+    });
+}
+
 function handleSelect(el, data) {
     var selectionPath = el.getAttribute(_consts.ATTRIBUTE.SELECTION);
-    var selection = getByPath(data, selectionPath) || [];
-    var val = getValue(el);
-    var length = el.options.length;
-    var index = el.selectedIndex;
-    el.innerHTML = '';
-    selection.forEach(function (s) {
-        var option = document.createElement("option");
-        option.text = s;
-        el.add(option);
-    });
-    if (length === el.options.length && el.options[index]) {
-        el.value = el.options[index].value;
-    } else if (val) {
-        el.value = val;
-    }
 
-    setByPath(data, el.getAttribute(_consts.ATTRIBUTE.DATA), getValue(el));
+    var val = getValue(el);
+    if (el.tagName === 'VFF-SELECT') {
+        var split = selectionPath.split(',');
+        var keyPath = split[0];
+        var valuePath = split[1] || split[0];
+        var selectionKeys = getByPath(data, keyPath) || [];
+        var selectionValues = getByPath(data, valuePath) || [];
+        var options = selectionKeys.map(function (key, i) {
+            return {
+                key: key, value: selectionValues[i]
+            };
+        });
+        var previousOptions = el.options;
+        var length = previousOptions.length;
+        var selectedIndices = getSelectedIndices(previousOptions, el.value);
+        el.options = options;
+        //if length didnt change, set same options by index
+        if (length === options.length) {
+            el.value = pickIndices(options, selectedIndices);
+        }
+        // else set same options by key
+        else {
+                el.value = pickByKeys(options, previousOptions);
+            }
+        setByPath(data, el.getAttribute(_consts.ATTRIBUTE.DATA), getValue(el));
+
+        // else set same options by key
+        // debugger;
+    } else {
+        var selection = getByPath(data, selectionPath) || [];
+        var _length = el.options.length;
+        var index = el.selectedIndex;
+        el.innerHTML = '';
+        selection.forEach(function (s) {
+            var option = document.createElement("option");
+            option.text = s;
+            el.add(option);
+        });
+        if (_length === el.options.length && el.options[index]) {
+            el.value = el.options[index].value;
+        } else if (val) {
+            el.value = val;
+        }
+
+        setByPath(data, el.getAttribute(_consts.ATTRIBUTE.DATA), getValue(el));
+    }
 }
 function getValue(el) {
     var suffix = el.getAttribute(_consts.ATTRIBUTE.SUFFIX);
@@ -6143,8 +6200,12 @@ module.exports = {
 var _helpers = __webpack_require__(0);
 
 var classes = {
-    'fill': 'vff-fill',
-    'fit': 'vff-fit'
+    'overlay-fill': 'vff-overlay-fill',
+    'overlay-fit': 'vff-overlay-fit',
+    'video-fit': 'vff-video-fit',
+    'video-fill': 'vff-video-fill',
+    'video-fitTop': 'vff-video-fit-top',
+    'video-fitBottom': 'vff-video-fit-bottom'
 };
 
 function readDeviceOrientation() {
@@ -6156,16 +6217,19 @@ function readDeviceOrientation() {
 }
 
 function resizeHandler() {
-    var sizing = '';
+    var overlaySizing = '';
+    var videoSizing = '';
     try {
-        sizing = window.vff._playerStatus['overlaySizing' + (_helpers.isMobile ? readDeviceOrientation() : '')];
+        overlaySizing = window.vff._playerStatus['overlaySizing' + (_helpers.isMobile ? readDeviceOrientation() : '')];
+        videoSizing = window.vff._playerStatus['contentSizing' + (_helpers.isMobile ? readDeviceOrientation() : '')];
     } catch (e) {
         //no status yet
     }
     Object.values(classes).forEach(function (c) {
         window.document.body.classList.remove(c);
     });
-    window.document.body.classList.add(classes[sizing]);
+    window.document.body.classList.add(classes['overlay-' + overlaySizing]);
+    window.document.body.classList.add(classes['video-' + videoSizing]);
 }
 
 module.exports = {

@@ -1,8 +1,12 @@
 import {isMobile} from '../utils/helpers';
 
 const classes = {
-    'fill'  : 'vff-fill',
-    'fit'   : 'vff-fit'
+    'overlay-fill'      : 'vff-overlay-fill',
+    'overlay-fit'       : 'vff-overlay-fit',
+    'video-fit'         : 'vff-video-fit',
+    'video-fill'        : 'vff-video-fill',
+    'video-fitTop'      : 'vff-video-fit-top',
+    'video-fitBottom'   : 'vff-video-fit-bottom',
 };
 
 function readDeviceOrientation(){
@@ -14,16 +18,19 @@ function readDeviceOrientation(){
 }
 
 function resizeHandler(){
-    let sizing = '';
+    let overlaySizing = '';
+    let videoSizing = '';
     try {
-        sizing = window.vff._playerStatus[`overlaySizing${isMobile? readDeviceOrientation(): ''}`];
+        overlaySizing = window.vff._playerStatus[`overlaySizing${isMobile? readDeviceOrientation(): ''}`];
+        videoSizing = window.vff._playerStatus[`contentSizing${isMobile? readDeviceOrientation(): ''}`];
     } catch (e) {
         //no status yet
     }
     Object.values(classes).forEach(c => {
         window.document.body.classList.remove(c);
     });
-    window.document.body.classList.add(classes[sizing]);
+    window.document.body.classList.add(classes[`overlay-${overlaySizing}`]);
+    window.document.body.classList.add(classes[`video-${videoSizing}`]);
 }
 
 
