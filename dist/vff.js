@@ -2480,27 +2480,27 @@ var style = {};
 var gatherDataTimeout = 300;
 var initialDataTimeout = 150;
 
-// function debounce(func, wait, immediate) {
-//     let timeout;
-//
-//     return function executedFunction() {
-//         let context = this;
-//         let args = arguments;
-//
-//         let later = function() {
-//             timeout = null;
-//             if (!immediate) func.apply(context, args);
-//         };
-//
-//         let callNow = immediate && !timeout;
-//
-//         clearTimeout(timeout);
-//
-//         timeout = setTimeout(later, wait);
-//
-//         if (callNow) func.apply(context, args);
-//     };
-// }
+function debounce(func, wait, immediate) {
+    var timeout = void 0;
+
+    return function executedFunction() {
+        var context = this;
+        var args = arguments;
+
+        var later = function later() {
+            timeout = null;
+            if (!immediate) func.apply(context, args);
+        };
+
+        var callNow = immediate && !timeout;
+
+        clearTimeout(timeout);
+
+        timeout = setTimeout(later, wait);
+
+        if (callNow) func.apply(context, args);
+    };
+}
 function setByPath(obj, path, value) {
     if (arguments.length !== 3) {
         throw new Error('Missing Arguments!');
@@ -2629,17 +2629,19 @@ function handleSelect(el, data) {
             };
         });
         var previousOptions = el.options;
-        var length = previousOptions.length;
+        var length = previousOptions ? previousOptions.length : 0;
         var selectedIndices = getSelectedIndices(previousOptions, el.value);
         el.options = options;
         //if length didnt change, set same options by index
         if (length === options.length) {
+            // if(pickIndices(options, selectedIndices).length === 0 ) debugger;
             el.value = pickIndices(options, selectedIndices);
         }
         // else set same options by key
         else {
                 el.value = pickByKeys(options, previousOptions);
             }
+
         setByPath(data, el.getAttribute(_consts.ATTRIBUTE.DATA), getValue(el));
 
         // else set same options by key
@@ -2783,6 +2785,7 @@ function updateListener(event) {
         (0, _helpers.broadcast)(_events.VFF_EVENT, { dataChanged: true, root: root });
     });
 }
+var debouncedUpdateListener = debounce(updateListener, 200);
 
 function imageBrowserListener(event) {
     if (event.target.selectedFiles.length) {
@@ -2809,6 +2812,9 @@ function attachListeners(element) {
     } else if (element.tagName === 'VFF-IMAGE-BROWSER') {
         element.removeEventListener('vff:change', imageBrowserListener, false);
         element.addEventListener('vff:change', imageBrowserListener, false);
+    } else if (element.tagName === 'VFF-COLOR-PICKER') {
+        element.removeEventListener('vff:change', debouncedUpdateListener);
+        element.addEventListener('vff:change', debouncedUpdateListener);
     } else {
         element.removeEventListener('input', updateListener);
         element.addEventListener('input', updateListener);

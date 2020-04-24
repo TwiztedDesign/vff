@@ -9,27 +9,27 @@ let style = {};
 const gatherDataTimeout = 300;
 const initialDataTimeout = 150;
 
-// function debounce(func, wait, immediate) {
-//     let timeout;
-//
-//     return function executedFunction() {
-//         let context = this;
-//         let args = arguments;
-//
-//         let later = function() {
-//             timeout = null;
-//             if (!immediate) func.apply(context, args);
-//         };
-//
-//         let callNow = immediate && !timeout;
-//
-//         clearTimeout(timeout);
-//
-//         timeout = setTimeout(later, wait);
-//
-//         if (callNow) func.apply(context, args);
-//     };
-// }
+function debounce(func, wait, immediate) {
+    let timeout;
+
+    return function executedFunction() {
+        let context = this;
+        let args = arguments;
+
+        let later = function() {
+            timeout = null;
+            if (!immediate) func.apply(context, args);
+        };
+
+        let callNow = immediate && !timeout;
+
+        clearTimeout(timeout);
+
+        timeout = setTimeout(later, wait);
+
+        if (callNow) func.apply(context, args);
+    };
+}
 function setByPath(obj, path, value){
     if(arguments.length !== 3){
         throw new Error('Missing Arguments!');
@@ -139,17 +139,19 @@ function handleSelect(el, data){
             };
         });
         let previousOptions = el.options;
-        let length = previousOptions.length;
+        let length = previousOptions? previousOptions.length : 0;
         let selectedIndices = getSelectedIndices(previousOptions, el.value);
         el.options = options;
         //if length didnt change, set same options by index
         if(length === options.length){
+            // if(pickIndices(options, selectedIndices).length === 0 ) debugger;
             el.value = pickIndices(options, selectedIndices);
         }
         // else set same options by key
         else {
             el.value = pickByKeys(options, previousOptions);
         }
+
         setByPath(data, el.getAttribute(ATTRIBUTE.DATA), getValue(el));
 
         // else set same options by key
@@ -296,6 +298,7 @@ function updateListener(event){
         broadcast(VFF_EVENT, { dataChanged: true, root});
     });
 }
+const debouncedUpdateListener = debounce(updateListener, 200);
 
 function imageBrowserListener(event){
     if(event.target.selectedFiles.length){
@@ -325,6 +328,10 @@ function attachListeners(element){
     else if(element.tagName === 'VFF-IMAGE-BROWSER'){
         element.removeEventListener('vff:change', imageBrowserListener, false);
         element.addEventListener('vff:change', imageBrowserListener, false);
+    }
+    else if(element.tagName === 'VFF-COLOR-PICKER'){
+        element.removeEventListener('vff:change', debouncedUpdateListener);
+        element.addEventListener('vff:change', debouncedUpdateListener);
     }
     else {
         element.removeEventListener('input', updateListener);
