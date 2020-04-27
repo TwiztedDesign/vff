@@ -4,7 +4,7 @@ import {READY, CUSTOM_READY} from './utils/events.js';
 import {vffData} from './core/vffData.js';
 import {start as startListener} from './utils/listener';
 import {init as initVffDom} from './core/initDOM';
-import {init as initControllerDom} from './core/controllerDOM';
+import {init as initControllerDom} from './core/controllerDOM2';
 import {init as initResizeHandler} from './utils/resizeHandler';
 import vffElement from './core/vffElement';
 import './core/defaultExpose';

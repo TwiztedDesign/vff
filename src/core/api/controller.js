@@ -1,4 +1,4 @@
-import {update} from '../controllerDOM';
+// import {update} from '../controllerDOM';
 import {UPLOAD} from "../../utils/events";
 import {request,send} from '../../utils/messenger.js';
 
@@ -23,7 +23,7 @@ function go(time){
 
 
 module.exports = {
-    update,
+    // update,
     upload,
     currentTime,
     go
