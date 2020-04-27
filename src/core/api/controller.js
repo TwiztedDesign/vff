@@ -14,7 +14,7 @@ async function currentTime(){
         request('vff-current-time',{}, res => {
             let time = res.payload.currentTime;
             try{
-                time = parseFloat(res.payload.currentTime);
+                time = parseFloat(res.payload.currentTime).toFixed(3);
             } catch(e){
                 time = 0;
             }
