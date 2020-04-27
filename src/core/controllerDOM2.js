@@ -1,37 +1,19 @@
-import {broadcast, searchAttribute, trim, debounce, flatten, unflatten} from "../utils/helpers";
+import {broadcast, searchAttribute, flatten, unflatten} from "../utils/helpers";
 import {vffData} from "./vffData";
 import {ATTRIBUTE} from './consts';
 import {VFF_EVENT} from "../utils/events";
 import {uploadFile} from "../utils/uploader";
-let root = {};
-let style = {};
+
 let _data = {};
-let _style = {};
 let _initial = {};
 
 
-function getSelectedIndices(options, selected){
-	return selected.map(selection => options.findIndex(options => options.key === selection.key)).filter(i => i >= 0);
-}
-function pickIndices(arr, indices){
-	return arr.reduce((res, val, index) => {
-		if(indices.includes(index)){
-			res.push(val);
-		}
-		return res;
-	}, []);
-}
-function pickByKeys(arr, keys) {
-	keys = keys.map(o => o['key']);
-	return arr.filter(item => keys.includes(item.key));
-}
-
 function getArray(object, path){
-	let arrPath = path.substr(0, path.lastIndexOf('.'))
-	let keyPath = path.substr(path.lastIndexOf('.')+1, path.length)
+	let arrPath = path.substr(0, path.lastIndexOf('.'));
+	let keyPath = path.substr(path.lastIndexOf('.')+1, path.length);
 	let arr = [];
 	for(let key in object){
-		let regex = new RegExp(`${arrPath}\\.\\d+\\.${keyPath}`)
+		let regex = new RegExp(`${arrPath}\\.\\d+\\.${keyPath}`);
 		if(key.match(regex)){
 			arr.push(object[key]);
 		}
@@ -42,7 +24,6 @@ function getArray(object, path){
 function handleSelect(el, data){
 	let selectionPath = el.getAttribute(ATTRIBUTE.SELECTION);
 
-	let val = getValue(el) || [];
 	if(el.tagName === 'VFF-SELECT'){
 		let split = selectionPath.split(',');
 		let keyPath = split[0];
@@ -54,20 +35,9 @@ function handleSelect(el, data){
 				key, value: selectionValues[i]
 			};
 		});
-		// let previousOptions = el.options || [];
-		// let length = previousOptions? previousOptions.length : 0;
-		// let selectedIndices = getSelectedIndices(previousOptions, val);
-		// console.log('Set Options', options );
+
 		el.options = options;
-		//if length didnt change, set same options by index
-		// if(length === options.length){
-		// 	// if(pickIndices(options, selectedIndices).length === 0 ) debugger;
-		// 	el.value = pickIndices(options, selectedIndices);
-		// }
-		// // else set same options by key
-		// else {
-		// 	el.value = pickByKeys(options, previousOptions);
-		// }
+
 		data[el.getAttribute(ATTRIBUTE.DATA)] = getValue(el);
 	}
 }
@@ -87,6 +57,9 @@ function getValue(el){
 		case 'VFF-RADIO-BUTTON':
 			value = el.checked;
 			break;
+		case 'VFF-SELECT':
+			value = JSON.stringify(el.value);
+			break;
 	}
 	return suffix? (value + suffix) : value;
 }
@@ -96,6 +69,9 @@ function setValue(el, value){
 	switch (el.tagName){
 		case 'VFF-RADIO-BUTTON':
 			el.checked = value;
+			return;
+		case 'VFF-SELECT':
+			el.value = JSON.parse(value);
 			return;
 	}
 	switch (el.constructor.name){
@@ -153,14 +129,15 @@ function onVFFInit(event){
 
 	}
 	// console.log("vff:init", getVFFAttributes(event.target));
+	let val;
 	switch (event.target.tagName) {
 		case 'VFF-IMAGE-BROWSER':
 			// imageBrowserListener(event)
 			break;
 		default:
-			let val = _data[event.target.getAttribute(ATTRIBUTE.DATA)];
+			val = _data[event.target.getAttribute(ATTRIBUTE.DATA)];
 			if(val !== undefined){
-				event.target.value = val;
+				setValue(event.target, val);
 			}
 			break;
 	}
@@ -177,6 +154,7 @@ function onVFFRemove(event){
 		delete _data['__style.' + attrs[attr]];
 
 	}
+	scanSelectFrom();
 }
 
 function _update(event){
@@ -188,8 +166,7 @@ function _update(event){
 		_data['__style.' + event.target.getAttribute(ATTRIBUTE.STYLE)] = getValue(event.target);
 	}
 	//todo handle elements with same vff-data ot vff-style
-	// scanSelectFrom(); //todo handle select-from
-	//todo handle style
+	scanSelectFrom(); //todo handle select-from
 
 	let d = unflatten(_data);
 	vffData.updateController(d);
@@ -202,13 +179,13 @@ function onVFFChange(event){
 	// console.log("vff:change", event);
 	switch (event.target.tagName) {
 		case 'VFF-IMAGE-BROWSER':
-			imageBrowserListener(event)
-			if(event.target.selectedFiles.length) break;
-		case 'VFF-RADIO-BUTTON':
-
+			imageBrowserListener(event);
+			if(!event.target.selectedFiles.length){
+				_update(event);
+			}
+			break;
 		default:
 			_update(event);
-
 			break;
 	}
 
@@ -253,10 +230,12 @@ module.exports = {
 					Object.assign(_initial, flat);
 					// console.log("Controller:", flat);
 					Object.keys(flat).forEach(key => {
+						let val = flat[key];
+						try {val = JSON.parse(val);} catch (e) {  /*do nothing*/ }
 						if(key.startsWith('__style.')){
-							broadcast("vff:update", {dataAttrName : 'vff-style', dataAttrValue: key.substr(8), value: flat[key]});
+							broadcast("vff:update", {dataAttrName : 'vff-style', dataAttrValue: key.substr(8), value: val});
 						} else {
-							broadcast("vff:update", {dataAttrName : 'vff-data', dataAttrValue: key, value: flat[key]});
+							broadcast("vff:update", {dataAttrName : 'vff-data', dataAttrValue: key, value: val});
 						}
 
 					});

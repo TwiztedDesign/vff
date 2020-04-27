@@ -424,7 +424,7 @@ function debounce(func, wait, immediate) {
 }
 
 
-function flatten(data) {
+function flatten(data, keepObjects) {
     const result = {};
 
     function recurse(cur, prop) {
@@ -432,7 +432,7 @@ function flatten(data) {
             result[prop] = cur;
         } else if (Array.isArray(cur)) {
             let l = cur.length;
-            // result[prop] = cur; //add for full array reference
+            if(keepObjects) result[prop] = cur; //add for full array reference
             for (let i = 0 ; i < l; i++)
                 recurse(cur[i], prop + "." + i);
             if (l === 0) result[prop] = [];
@@ -440,7 +440,7 @@ function flatten(data) {
             let isEmpty = true;
             for (let p in cur) {
                 isEmpty = false;
-                // result[prop ? prop + "." + p : p] = cur[p]; //add for full object reference
+                if(keepObjects) result[prop ? prop + "." + p : p] = cur[p]; //add for full object reference
                 recurse(cur[p], prop ? prop + "." + p : p);
             }
             if (isEmpty && prop) result[prop] = {};
