@@ -500,7 +500,7 @@ function debounce(func, wait, immediate) {
     };
 }
 
-function flatten(data) {
+function flatten(data, keepObjects) {
     var result = {};
 
     function recurse(cur, prop) {
@@ -508,7 +508,7 @@ function flatten(data) {
             result[prop] = cur;
         } else if (Array.isArray(cur)) {
             var l = cur.length;
-            // result[prop] = cur; //add for full array reference
+            if (keepObjects) result[prop] = cur; //add for full array reference
             for (var i = 0; i < l; i++) {
                 recurse(cur[i], prop + "." + i);
             }if (l === 0) result[prop] = [];
@@ -516,7 +516,7 @@ function flatten(data) {
             var isEmpty = true;
             for (var p in cur) {
                 isEmpty = false;
-                // result[prop ? prop + "." + p : p] = cur[p]; //add for full object reference
+                if (keepObjects) result[prop ? prop + "." + p : p] = cur[p]; //add for full object reference
                 recurse(cur[p], prop ? prop + "." + p : p);
             }
             if (isEmpty && prop) result[prop] = {};
@@ -5687,37 +5687,8 @@ var _uploader = __webpack_require__(134);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var root = {};
-var style = {};
 var _data = {};
-var _style = {};
 var _initial = {};
-
-function getSelectedIndices(options, selected) {
-	return selected.map(function (selection) {
-		return options.findIndex(function (options) {
-			return options.key === selection.key;
-		});
-	}).filter(function (i) {
-		return i >= 0;
-	});
-}
-function pickIndices(arr, indices) {
-	return arr.reduce(function (res, val, index) {
-		if (indices.includes(index)) {
-			res.push(val);
-		}
-		return res;
-	}, []);
-}
-function pickByKeys(arr, keys) {
-	keys = keys.map(function (o) {
-		return o['key'];
-	});
-	return arr.filter(function (item) {
-		return keys.includes(item.key);
-	});
-}
 
 function getArray(object, path) {
 	var arrPath = path.substr(0, path.lastIndexOf('.'));
@@ -5735,7 +5706,6 @@ function getArray(object, path) {
 function handleSelect(el, data) {
 	var selectionPath = el.getAttribute(_consts.ATTRIBUTE.SELECTION);
 
-	var val = getValue(el) || [];
 	if (el.tagName === 'VFF-SELECT') {
 		var split = selectionPath.split(',');
 		var keyPath = split[0];
@@ -5747,20 +5717,9 @@ function handleSelect(el, data) {
 				key: key, value: selectionValues[i]
 			};
 		});
-		// let previousOptions = el.options || [];
-		// let length = previousOptions? previousOptions.length : 0;
-		// let selectedIndices = getSelectedIndices(previousOptions, val);
-		// console.log('Set Options', options );
+
 		el.options = options;
-		//if length didnt change, set same options by index
-		// if(length === options.length){
-		// 	// if(pickIndices(options, selectedIndices).length === 0 ) debugger;
-		// 	el.value = pickIndices(options, selectedIndices);
-		// }
-		// // else set same options by key
-		// else {
-		// 	el.value = pickByKeys(options, previousOptions);
-		// }
+
 		data[el.getAttribute(_consts.ATTRIBUTE.DATA)] = getValue(el);
 	}
 }
@@ -5780,6 +5739,9 @@ function getValue(el) {
 		case 'VFF-RADIO-BUTTON':
 			value = el.checked;
 			break;
+		case 'VFF-SELECT':
+			value = JSON.stringify(el.value);
+			break;
 	}
 	return suffix ? value + suffix : value;
 }
@@ -5789,6 +5751,9 @@ function setValue(el, value) {
 	switch (el.tagName) {
 		case 'VFF-RADIO-BUTTON':
 			el.checked = value;
+			return;
+		case 'VFF-SELECT':
+			el.value = JSON.parse(value);
 			return;
 	}
 	switch (el.constructor.name) {
@@ -5844,14 +5809,15 @@ function onVFFInit(event) {
 		_data[(key === 'vff-style' ? '__style.' : '') + attrs[key]] = value;
 	}
 	// console.log("vff:init", getVFFAttributes(event.target));
+	var val = void 0;
 	switch (event.target.tagName) {
 		case 'VFF-IMAGE-BROWSER':
 			// imageBrowserListener(event)
 			break;
 		default:
-			var val = _data[event.target.getAttribute(_consts.ATTRIBUTE.DATA)];
+			val = _data[event.target.getAttribute(_consts.ATTRIBUTE.DATA)];
 			if (val !== undefined) {
-				event.target.value = val;
+				setValue(event.target, val);
 			}
 			break;
 	}
@@ -5867,6 +5833,7 @@ function onVFFRemove(event) {
 		delete _data[attrs[attr]];
 		delete _data['__style.' + attrs[attr]];
 	}
+	scanSelectFrom();
 }
 
 function _update(event) {
@@ -5878,8 +5845,7 @@ function _update(event) {
 		_data['__style.' + event.target.getAttribute(_consts.ATTRIBUTE.STYLE)] = getValue(event.target);
 	}
 	//todo handle elements with same vff-data ot vff-style
-	// scanSelectFrom(); //todo handle select-from
-	//todo handle style
+	scanSelectFrom(); //todo handle select-from
 
 	var d = (0, _helpers.unflatten)(_data);
 	_vffData.vffData.updateController(d);
@@ -5892,12 +5858,12 @@ function onVFFChange(event) {
 	switch (event.target.tagName) {
 		case 'VFF-IMAGE-BROWSER':
 			imageBrowserListener(event);
-			if (event.target.selectedFiles.length) break;
-		case 'VFF-RADIO-BUTTON':
-
+			if (!event.target.selectedFiles.length) {
+				_update(event);
+			}
+			break;
 		default:
 			_update(event);
-
 			break;
 	}
 }
@@ -5918,10 +5884,14 @@ module.exports = {
 					Object.assign(_initial, flat);
 					// console.log("Controller:", flat);
 					Object.keys(flat).forEach(function (key) {
+						var val = flat[key];
+						try {
+							val = JSON.parse(val);
+						} catch (e) {/*do nothing*/}
 						if (key.startsWith('__style.')) {
-							(0, _helpers.broadcast)("vff:update", { dataAttrName: 'vff-style', dataAttrValue: key.substr(8), value: flat[key] });
+							(0, _helpers.broadcast)("vff:update", { dataAttrName: 'vff-style', dataAttrValue: key.substr(8), value: val });
 						} else {
-							(0, _helpers.broadcast)("vff:update", { dataAttrName: 'vff-data', dataAttrValue: key, value: flat[key] });
+							(0, _helpers.broadcast)("vff:update", { dataAttrName: 'vff-data', dataAttrValue: key, value: val });
 						}
 					});
 				}, { changeOnly: false, throttle: 0 });
@@ -6412,7 +6382,13 @@ var currentTime = function () {
                     case 0:
                         return _context.abrupt('return', new Promise(function (resolve) {
                             (0, _messenger.request)('vff-current-time', {}, function (res) {
-                                resolve(res.payload.currentTime);
+                                var time = res.payload.currentTime;
+                                try {
+                                    time = parseFloat(res.payload.currentTime);
+                                } catch (e) {
+                                    time = 0;
+                                }
+                                resolve(time);
                             });
                         }));
 

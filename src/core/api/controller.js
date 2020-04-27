@@ -12,7 +12,13 @@ function upload(asset, cb){
 async function currentTime(){
     return new Promise((resolve) => {
         request('vff-current-time',{}, res => {
-            resolve(res.payload.currentTime);
+            let time = res.payload.currentTime;
+            try{
+                time = parseFloat(res.payload.currentTime);
+            } catch(e){
+                time = 0;
+            }
+            resolve(time);
         });
     });
 }
