@@ -5688,7 +5688,36 @@ var _uploader = __webpack_require__(134);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var _data = {};
-var _initial = {};
+var __initial = {
+	data: {},
+	keys: new Set(),
+	add: function add(key, value) {
+		if (!this.keys.has(key)) {
+			this.data[key] = value;
+			this.keys.add(key);
+		}
+	},
+	remove: function remove(key) {
+		delete this.data[key];
+	},
+	get: function get(key, remove) {
+		var value = this.data[key];
+		if (remove) this.remove(key);
+		return value;
+	},
+	extend: function extend(obj) {
+		for (var key in obj) {
+			this.add(key, obj[key]);
+		}
+	},
+	has: function has(key) {
+		return this.data.hasOwnProperty(key);
+	},
+	reset: function reset() {
+		this.data = {};
+		this.keys = new Set();
+	}
+};
 
 function getArray(object, path) {
 	var arrPath = path.substr(0, path.lastIndexOf('.'));
@@ -5724,6 +5753,11 @@ function handleSelect(el, data) {
 	}
 }
 function getValue(el) {
+	var event = void 0;
+	if (!(el instanceof HTMLElement) && el.target) {
+		event = el;
+		el = el.target;
+	}
 	var suffix = el.getAttribute(_consts.ATTRIBUTE.SUFFIX);
 	var value = void 0;
 	switch (el.constructor.name) {
@@ -5732,7 +5766,7 @@ function getValue(el) {
 			value = el.value;
 			break;
 		default:
-			value = el.value;
+			value = event && event.detail && event.detail.data !== undefined ? event.detail.data : el.value;
 			break;
 	}
 	switch (el.tagName) {
@@ -5799,12 +5833,24 @@ function getVFFAttributes(el) {
 	}, {});
 }
 
+function updateController() {
+	var d = (0, _helpers.unflatten)(_data);
+	scanSelectFrom();
+	_vffData.vffData.updateController(d);
+	(0, _helpers.broadcast)(_events.VFF_EVENT, { dataChanged: true, d: d });
+}
+
+var updateControllerLongDebounce = (0, _helpers.debounce)(updateController, 500);
+var updateControllerLShortDebounce = (0, _helpers.debounce)(updateController, 50);
+
 function onVFFInit(event) {
 	var attrs = getVFFAttributes(event.target);
 	for (var key in attrs) {
-		if (_initial[attrs[key]] !== undefined) {
-			setValue(event.target, _initial[attrs[key]]);
+
+		if (__initial.has(attrs[key])) {
+			setValue(event.target, __initial.get(attrs[key], true));
 		}
+
 		var value = getValue(event.target);
 		_data[(key === 'vff-style' ? '__style.' : '') + attrs[key]] = value;
 	}
@@ -5821,9 +5867,11 @@ function onVFFInit(event) {
 			}
 			break;
 	}
-	var d = (0, _helpers.unflatten)(_data);
-	scanSelectFrom();
-	_vffData.vffData.updateController(d);
+
+	updateControllerLongDebounce();
+	// let d = unflatten(_data);
+	// scanSelectFrom();
+	// vffData.updateController(d);
 }
 
 function onVFFRemove(event) {
@@ -5837,19 +5885,22 @@ function onVFFRemove(event) {
 }
 
 function _update(event) {
+	var value = getValue(event);
 	if (event.target.hasAttribute(_consts.ATTRIBUTE.DATA)) {
-		_data[event.target.getAttribute(_consts.ATTRIBUTE.DATA)] = getValue(event.target);
+		_data[event.target.getAttribute(_consts.ATTRIBUTE.DATA)] = value;
 	}
 
 	if (event.target.hasAttribute(_consts.ATTRIBUTE.STYLE)) {
-		_data['__style.' + event.target.getAttribute(_consts.ATTRIBUTE.STYLE)] = getValue(event.target);
+		_data['__style.' + event.target.getAttribute(_consts.ATTRIBUTE.STYLE)] = value;
 	}
 	//todo handle elements with same vff-data ot vff-style
-	scanSelectFrom(); //todo handle select-from
+	updateControllerLShortDebounce();
+	// scanSelectFrom(); //todo handle select-from
+	// let d = unflatten(_data);
+	// vffData.updateController(d);
+	// broadcast(VFF_EVENT, { dataChanged: true, d});
 
-	var d = (0, _helpers.unflatten)(_data);
-	_vffData.vffData.updateController(d);
-	(0, _helpers.broadcast)(_events.VFF_EVENT, { dataChanged: true, d: d });
+
 	// broadcast("vff:update", { vffData: event.target.getAttribute(ATTRIBUTE.DATA), data: d});
 }
 
@@ -5876,12 +5927,19 @@ module.exports = {
 	init: function init() {
 		window.addEventListener('load', function () {
 			if ((0, _helpers.searchAttribute)(_consts.ATTRIBUTE.CONTROLLER).length) {
-				// registerControls();
-				_vffData.vffData.registerController().on(function (e) {
 
+				// registerControls();
+
+				_vffData.vffData.registerController().on(function (e) {
+					if (e.data.__initial) {
+						delete e.data.__initial;
+						__initial.reset();
+					}
 					var flat = (0, _helpers.flatten)(e.data);
+					console.log("Controller update");
 					Object.assign(_data, flat);
-					Object.assign(_initial, flat);
+					__initial.extend(flat);
+					// Object.assign(_initial, flat);
 					// console.log("Controller:", flat);
 					Object.keys(flat).forEach(function (key) {
 						var val = flat[key];
@@ -6384,7 +6442,7 @@ var currentTime = function () {
                             (0, _messenger.request)('vff-current-time', {}, function (res) {
                                 var time = res.payload.currentTime;
                                 try {
-                                    time = parseFloat(res.payload.currentTime);
+                                    time = parseFloat(res.payload.currentTime).toFixed(3);
                                 } catch (e) {
                                     time = 0;
                                 }

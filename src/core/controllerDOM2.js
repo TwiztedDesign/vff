@@ -29,6 +29,10 @@ let __initial = {
 	},
 	has : function (key){
 		return this.data.hasOwnProperty(key);
+	},
+	reset : function(){
+		this.data = {};
+		this.keys = new Set();
 	}
 };
 
@@ -273,7 +277,12 @@ module.exports = {
 				// registerControls();
 
 				vffData.registerController().on(e => {
+					if(e.data.__initial){
+						delete e.data.__initial;
+						__initial.reset();
+					}
 					let flat = flatten(e.data);
+					console.log("Controller update");
 					Object.assign(_data, flat);
 					__initial.extend(flat);
 					// Object.assign(_initial, flat);
