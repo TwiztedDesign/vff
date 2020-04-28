@@ -1,11 +1,36 @@
-import {broadcast, searchAttribute, flatten, unflatten} from "../utils/helpers";
+import {broadcast, searchAttribute, flatten, unflatten, debounce} from "../utils/helpers";
 import {vffData} from "./vffData";
 import {ATTRIBUTE} from './consts';
 import {VFF_EVENT} from "../utils/events";
 import {uploadFile} from "../utils/uploader";
 
 let _data = {};
-let _initial = {};
+let __initial = {
+	data : {},
+	keys : new Set(),
+	add  : function(key, value){
+		if(!this.keys.has(key)){
+			this.data[key] = value;
+			this.keys.add(key);
+		}
+	},
+	remove : function(key){
+		delete this.data[key];
+	},
+	get : function(key, remove){
+		let value = this.data[key];
+		if(remove) this.remove(key);
+		return value;
+	},
+	extend : function(obj){
+		for(let key in obj){
+			this.add(key, obj[key]);
+		}
+	},
+	has : function (key){
+		return this.data.hasOwnProperty(key);
+	}
+};
 
 
 function getArray(object, path){
@@ -42,6 +67,11 @@ function handleSelect(el, data){
 	}
 }
 function getValue(el){
+	let event;
+	if(!(el instanceof HTMLElement) && el.target){
+		event = el;
+		el = el.target;
+	}
 	let suffix = el.getAttribute(ATTRIBUTE.SUFFIX);
 	let value;
 	switch (el.constructor.name){
@@ -50,7 +80,7 @@ function getValue(el){
 			value = el.value;
 			break;
 		default:
-			value = el.value;
+			value = (event && event.detail && event.detail.data !== undefined)? event.detail.data : el.value;
 			break;
 	}
 	switch (el.tagName){
@@ -118,12 +148,24 @@ function getVFFAttributes(el){
 	}, {});
 }
 
+function updateController(){
+	let d = unflatten(_data);
+	scanSelectFrom();
+	vffData.updateController(d);
+	broadcast(VFF_EVENT, { dataChanged: true, d});
+}
+
+let updateControllerLongDebounce = debounce(updateController,500);
+let updateControllerLShortDebounce = debounce(updateController,50);
+
 function onVFFInit(event){
 	let attrs = getVFFAttributes(event.target);
 	for(let key in attrs){
-		if(_initial[attrs[key]] !== undefined){
-			setValue(event.target, _initial[attrs[key]]);
+
+		if(__initial.has(attrs[key])){
+			setValue(event.target, __initial.get(attrs[key], true));
 		}
+
 		let value = getValue(event.target);
 		_data[(key === 'vff-style'? '__style.' : '') + attrs[key]] = value;
 
@@ -141,9 +183,11 @@ function onVFFInit(event){
 			}
 			break;
 	}
-	let d = unflatten(_data);
-	scanSelectFrom();
-	vffData.updateController(d);
+
+	updateControllerLongDebounce();
+	// let d = unflatten(_data);
+	// scanSelectFrom();
+	// vffData.updateController(d);
 }
 
 function onVFFRemove(event){
@@ -158,19 +202,22 @@ function onVFFRemove(event){
 }
 
 function _update(event){
+	let value = getValue(event);
 	if(event.target.hasAttribute(ATTRIBUTE.DATA)){
-		_data[event.target.getAttribute(ATTRIBUTE.DATA)] = getValue(event.target);
+		_data[event.target.getAttribute(ATTRIBUTE.DATA)] = value;
 	}
 
 	if(event.target.hasAttribute(ATTRIBUTE.STYLE)){
-		_data['__style.' + event.target.getAttribute(ATTRIBUTE.STYLE)] = getValue(event.target);
+		_data['__style.' + event.target.getAttribute(ATTRIBUTE.STYLE)] = value;
 	}
 	//todo handle elements with same vff-data ot vff-style
-	scanSelectFrom(); //todo handle select-from
+	updateControllerLShortDebounce();
+	// scanSelectFrom(); //todo handle select-from
+	// let d = unflatten(_data);
+	// vffData.updateController(d);
+	// broadcast(VFF_EVENT, { dataChanged: true, d});
 
-	let d = unflatten(_data);
-	vffData.updateController(d);
-	broadcast(VFF_EVENT, { dataChanged: true, d});
+
 	// broadcast("vff:update", { vffData: event.target.getAttribute(ATTRIBUTE.DATA), data: d});
 }
 
@@ -222,12 +269,14 @@ module.exports = {
 	init : () => {
 		window.addEventListener('load', function(){
 			if(searchAttribute(ATTRIBUTE.CONTROLLER).length){
-				// registerControls();
-				vffData.registerController().on(e => {
 
+				// registerControls();
+
+				vffData.registerController().on(e => {
 					let flat = flatten(e.data);
 					Object.assign(_data, flat);
-					Object.assign(_initial, flat);
+					__initial.extend(flat);
+					// Object.assign(_initial, flat);
 					// console.log("Controller:", flat);
 					Object.keys(flat).forEach(key => {
 						let val = flat[key];
