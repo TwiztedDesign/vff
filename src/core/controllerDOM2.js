@@ -35,6 +35,17 @@ let __initial = {
 		this.keys = new Set();
 	}
 };
+// const __selectFrom = {
+// 	data : {},
+// 	set : function(key, value){
+// 		let set = this.data[key] || new Set();
+// 		set.add(value);
+// 		this.data[key] = set;
+// 	},
+// 	get : function(key){
+// 		return this.data[key];
+// 	}
+// };
 
 
 function getArray(object, path){
@@ -132,6 +143,7 @@ function imageBrowserListener(event){
 			uploadFile(event.target.selectedFiles[0],e.urls.uploadUrl, {
 				onSuccess : ()=> {
 					event.target.value = e.urls.cdnUrl;
+					event.detail.data = undefined;
 					_update(event);
 				}
 			});
@@ -232,6 +244,7 @@ function onVFFChange(event){
 		case 'VFF-IMAGE-BROWSER':
 			imageBrowserListener(event);
 			if(!event.target.selectedFiles.length){
+				event.detail.data = undefined;
 				_update(event);
 			}
 			break;
@@ -239,7 +252,6 @@ function onVFFChange(event){
 			_update(event);
 			break;
 	}
-
 }
 
 window.addEventListener('vff:init', onVFFInit);
@@ -282,7 +294,6 @@ module.exports = {
 						__initial.reset();
 					}
 					let flat = flatten(e.data);
-					console.log("Controller update");
 					Object.assign(_data, flat);
 					__initial.extend(flat);
 					// Object.assign(_initial, flat);
