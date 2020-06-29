@@ -1,11 +1,28 @@
-import {broadcast, searchAttribute, flatten, unflatten, debounce} from "../utils/helpers";
+import {broadcast, searchAttribute, flatten, unflatten, debounce, format, unformat} from "../utils/helpers";
 import {vffData} from "./vffData";
 import {ATTRIBUTE} from './consts';
 import {VFF_EVENT} from "../utils/events";
 import {uploadFile} from "../utils/uploader";
 
-let _data = {};
-let __initial = {
+const stylePrefix = "__style.";
+const EVENT = {
+	UPDATE : 'vff:update',
+	INIT   : 'vff:init',
+	REMOVE : 'vff:remove',
+	CHANGE : 'vff:change'
+};
+const TAG = {
+	IMAGE   : 'VFF-IMAGE-BROWSER',
+	TABLE   : 'VFF-TABLE',
+	RADIO   : 'VFF-RADIO-BUTTON',
+	SELECT  : 'VFF-SELECT',
+	TEXT    : 'VFF-TEXT',
+	CHECKBOX: 'VFF-CHECKBOX',
+	COLOR   : 'VFF-COLOR-PICKER'
+};
+
+const _data = {};
+const __initial = {
 	data : {},
 	keys : new Set(),
 	add  : function(key, value){
@@ -64,7 +81,7 @@ function getArray(object, path){
 function handleSelect(el, data){
 	let selectionPath = el.getAttribute(ATTRIBUTE.SELECTION);
 
-	if(el.tagName === 'VFF-SELECT'){
+	if(el.tagName === TAG.SELECT){
 		let split = selectionPath.split(',');
 		let keyPath = split[0];
 		let valuePath = split[1] || split[0];
@@ -88,6 +105,7 @@ function getValue(el){
 		el = el.target;
 	}
 	let suffix = el.getAttribute(ATTRIBUTE.SUFFIX);
+	let pattern = el.getAttribute(ATTRIBUTE.FORMAT);
 	let value;
 	switch (el.constructor.name){
 		case 'HTMLSelectElement':
@@ -99,23 +117,28 @@ function getValue(el){
 			break;
 	}
 	switch (el.tagName){
-		case 'VFF-RADIO-BUTTON':
+		case TAG.RADIO:
 			value = el.checked;
 			break;
-		case 'VFF-SELECT':
+		case TAG.SELECT:
 			value = JSON.stringify(el.value);
 			break;
+	}
+	if(pattern){
+		value = format(pattern, value);
 	}
 	return suffix? (value + suffix) : value;
 }
 function setValue(el, value){
 	let suffix = el.getAttribute(ATTRIBUTE.SUFFIX) || '';
+	let pattern = el.getAttribute(ATTRIBUTE.FORMAT) || '';
+	value = pattern? unformat(value, pattern) : value;
 	value = suffix? value.slice(0, -suffix.length) : value;
 	switch (el.tagName){
-		case 'VFF-RADIO-BUTTON':
+		case TAG.RADIO:
 			el.checked = value;
 			return;
-		case 'VFF-SELECT':
+		case TAG.SELECT:
 			el.value = JSON.parse(value);
 			return;
 	}
@@ -133,6 +156,45 @@ function scanSelectFrom(){
 	selectElements.forEach(element => {
 		handleSelect(element, _data);
 	});
+}
+
+function scanTable(table){
+	let elements = searchAttribute([ATTRIBUTE.DATA, ATTRIBUTE.STYLE], undefined, table);
+	elements.forEach(el => {
+		onVFFInit2(el);
+	});
+}
+
+function onVFFInit2(el){
+	let attrs = getVFFAttributes(el);
+	for(let key in attrs){
+
+		if(__initial.has(attrs[key])){
+			setValue(el, __initial.get(attrs[key], true));
+		}
+
+		let value = getValue(el);
+		_data[(key === ATTRIBUTE.STYLE? stylePrefix : '') + attrs[key]] = value;
+
+	}
+	// console.log("vff:init", getVFFAttributes(event.target));
+	let val;
+	switch (el.tagName) {
+		case TAG.IMAGE:
+			// imageBrowserListener(event)
+			break;
+		default:
+			val = _data[el.getAttribute(ATTRIBUTE.DATA)];
+			if(val !== undefined){
+				setValue(el, val);
+			}
+			break;
+	}
+
+	updateControllerLongDebounce();
+	// let d = unflatten(_data);
+	// scanSelectFrom();
+	// vffData.updateController(d);
 }
 
 function imageBrowserListener(event){
@@ -183,13 +245,13 @@ function onVFFInit(event){
 		}
 
 		let value = getValue(event.target);
-		_data[(key === 'vff-style'? '__style.' : '') + attrs[key]] = value;
+		_data[(key === ATTRIBUTE.STYLE? stylePrefix : '') + attrs[key]] = value;
 
 	}
 	// console.log("vff:init", getVFFAttributes(event.target));
 	let val;
 	switch (event.target.tagName) {
-		case 'VFF-IMAGE-BROWSER':
+		case TAG.IMAGE:
 			// imageBrowserListener(event)
 			break;
 		default:
@@ -211,7 +273,7 @@ function onVFFRemove(event){
 	let attrs = getVFFAttributes(event.detail.el);
 	for(let attr in attrs){
 		delete _data[attrs[attr]];
-		delete _data['__style.' + attrs[attr]];
+		delete _data[stylePrefix + attrs[attr]];
 
 	}
 	scanSelectFrom();
@@ -224,7 +286,7 @@ function _update(event){
 	}
 
 	if(event.target.hasAttribute(ATTRIBUTE.STYLE)){
-		_data['__style.' + event.target.getAttribute(ATTRIBUTE.STYLE)] = value;
+		_data[stylePrefix + event.target.getAttribute(ATTRIBUTE.STYLE)] = value;
 	}
 	//todo handle elements with same vff-data ot vff-style
 	updateControllerLShortDebounce();
@@ -241,7 +303,7 @@ function _update(event){
 function onVFFChange(event){
 	// console.log("vff:change", event);
 	switch (event.target.tagName) {
-		case 'VFF-IMAGE-BROWSER':
+		case TAG.IMAGE:
 			imageBrowserListener(event);
 			if(!event.target.selectedFiles.length){
 				event.detail.data = undefined;
@@ -254,9 +316,9 @@ function onVFFChange(event){
 	}
 }
 
-window.addEventListener('vff:init', onVFFInit);
-window.addEventListener('vff:remove', onVFFRemove);
-window.addEventListener('vff:change', onVFFChange);
+window.addEventListener(EVENT.INIT, onVFFInit);
+window.addEventListener(EVENT.REMOVE, onVFFRemove);
+window.addEventListener(EVENT.CHANGE, onVFFChange);
 
 async function controllerExists(url){
 	return new Promise((resolve, reject) => {
@@ -265,7 +327,7 @@ async function controllerExists(url){
 		xhr.open("GET", url, true);
 		xhr.onload = function () {
 			if (xhr.readyState === 4) {
-				if (xhr.status === 200 && xhr.response && new DOMParser().parseFromString(xhr.response, 'text/html').querySelector('[vff-controller]')) {
+				if (xhr.status === 200 && xhr.response && new DOMParser().parseFromString(xhr.response, 'text/html').querySelector(`[${ATTRIBUTE.CONTROLLER}]`)) {
 					resolve(url);
 				} else {
 					reject();
@@ -301,10 +363,10 @@ module.exports = {
 					Object.keys(flat).forEach(key => {
 						let val = flat[key];
 						try {val = JSON.parse(val);} catch (e) {  /*do nothing*/ }
-						if(key.startsWith('__style.')){
-							broadcast("vff:update", {dataAttrName : 'vff-style', dataAttrValue: key.substr(8), value: val});
+						if(key.startsWith(stylePrefix)){
+							broadcast(EVENT.UPDATE, {dataAttrName : ATTRIBUTE.STYLE, dataAttrValue: key.substr(8), value: val});
 						} else {
-							broadcast("vff:update", {dataAttrName : 'vff-data', dataAttrValue: key, value: val});
+							broadcast(EVENT.UPDATE, {dataAttrName : ATTRIBUTE.DATA, dataAttrValue: key, value: val});
 						}
 
 					});

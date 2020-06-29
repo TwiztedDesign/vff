@@ -18,7 +18,8 @@ module.exports = {
         DATA            : "vff-data",
         STYLE           : "vff-style",
         SELECTION       : "vff-select-from",
-        SUFFIX          : "vff-suffix"
+        SUFFIX          : "vff-suffix",
+        FORMAT          : "vff-format"
     },
     MODE                : {
         NORMAL          : "normal",

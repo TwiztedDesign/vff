@@ -547,6 +547,26 @@ function unflatten(data) {
     return result[""];
 }
 
+function format(string) {
+    for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+        args[_key - 1] = arguments[_key];
+    }
+
+    return string.replace(/{(\d+)}/g, function (match, number) {
+        return typeof args[number] != 'undefined' ? args[number] : match;
+    });
+}
+function escapeRegExp(string) {
+    return string.replace(/[.*+?^$(){}|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}
+function unformat(string, pattern) {
+    var r = new RegExp(escapeRegExp(pattern).replace(/\\{(\d+)\\}/g, "(.*)"));
+    var match = string.match(r);
+    if (match && match.length > 1) {
+        return match[1];
+    }
+}
+
 function noop() {}
 
 module.exports = {
@@ -580,7 +600,9 @@ module.exports = {
     searchAttribute: searchAttribute,
     debounce: debounce,
     flatten: flatten,
-    unflatten: unflatten
+    unflatten: unflatten,
+    format: format,
+    unformat: unformat
 };
 
 /***/ }),
@@ -1325,7 +1347,8 @@ module.exports = {
         DATA: "vff-data",
         STYLE: "vff-style",
         SELECTION: "vff-select-from",
-        SUFFIX: "vff-suffix"
+        SUFFIX: "vff-suffix",
+        FORMAT: "vff-format"
     },
     MODE: {
         NORMAL: "normal",
@@ -5649,7 +5672,7 @@ var controllerExists = function () {
 							xhr.open("GET", url, true);
 							xhr.onload = function () {
 								if (xhr.readyState === 4) {
-									if (xhr.status === 200 && xhr.response && new DOMParser().parseFromString(xhr.response, 'text/html').querySelector('[vff-controller]')) {
+									if (xhr.status === 200 && xhr.response && new DOMParser().parseFromString(xhr.response, 'text/html').querySelector("[" + _consts.ATTRIBUTE.CONTROLLER + "]")) {
 										resolve(url);
 									} else {
 										reject();
@@ -5686,6 +5709,23 @@ var _events = __webpack_require__(3);
 var _uploader = __webpack_require__(134);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var stylePrefix = "__style.";
+var EVENT = {
+	UPDATE: 'vff:update',
+	INIT: 'vff:init',
+	REMOVE: 'vff:remove',
+	CHANGE: 'vff:change'
+};
+var TAG = {
+	IMAGE: 'VFF-IMAGE-BROWSER',
+	TABLE: 'VFF-TABLE',
+	RADIO: 'VFF-RADIO-BUTTON',
+	SELECT: 'VFF-SELECT',
+	TEXT: 'VFF-TEXT',
+	CHECKBOX: 'VFF-CHECKBOX',
+	COLOR: 'VFF-COLOR-PICKER'
+};
 
 var _data = {};
 var __initial = {
@@ -5747,7 +5787,7 @@ function getArray(object, path) {
 function handleSelect(el, data) {
 	var selectionPath = el.getAttribute(_consts.ATTRIBUTE.SELECTION);
 
-	if (el.tagName === 'VFF-SELECT') {
+	if (el.tagName === TAG.SELECT) {
 		var split = selectionPath.split(',');
 		var keyPath = split[0];
 		var valuePath = split[1] || split[0];
@@ -5771,6 +5811,7 @@ function getValue(el) {
 		el = el.target;
 	}
 	var suffix = el.getAttribute(_consts.ATTRIBUTE.SUFFIX);
+	var pattern = el.getAttribute(_consts.ATTRIBUTE.FORMAT);
 	var value = void 0;
 	switch (el.constructor.name) {
 		case 'HTMLSelectElement':
@@ -5782,23 +5823,28 @@ function getValue(el) {
 			break;
 	}
 	switch (el.tagName) {
-		case 'VFF-RADIO-BUTTON':
+		case TAG.RADIO:
 			value = el.checked;
 			break;
-		case 'VFF-SELECT':
+		case TAG.SELECT:
 			value = JSON.stringify(el.value);
 			break;
+	}
+	if (pattern) {
+		value = (0, _helpers.format)(pattern, value);
 	}
 	return suffix ? value + suffix : value;
 }
 function setValue(el, value) {
 	var suffix = el.getAttribute(_consts.ATTRIBUTE.SUFFIX) || '';
+	var pattern = el.getAttribute(_consts.ATTRIBUTE.FORMAT) || '';
+	value = pattern ? (0, _helpers.unformat)(value, pattern) : value;
 	value = suffix ? value.slice(0, -suffix.length) : value;
 	switch (el.tagName) {
-		case 'VFF-RADIO-BUTTON':
+		case TAG.RADIO:
 			el.checked = value;
 			return;
-		case 'VFF-SELECT':
+		case TAG.SELECT:
 			el.value = JSON.parse(value);
 			return;
 	}
@@ -5816,6 +5862,44 @@ function scanSelectFrom() {
 	selectElements.forEach(function (element) {
 		handleSelect(element, _data);
 	});
+}
+
+function scanTable(table) {
+	var elements = (0, _helpers.searchAttribute)([_consts.ATTRIBUTE.DATA, _consts.ATTRIBUTE.STYLE], undefined, table);
+	elements.forEach(function (el) {
+		onVFFInit2(el);
+	});
+}
+
+function onVFFInit2(el) {
+	var attrs = getVFFAttributes(el);
+	for (var key in attrs) {
+
+		if (__initial.has(attrs[key])) {
+			setValue(el, __initial.get(attrs[key], true));
+		}
+
+		var value = getValue(el);
+		_data[(key === _consts.ATTRIBUTE.STYLE ? stylePrefix : '') + attrs[key]] = value;
+	}
+	// console.log("vff:init", getVFFAttributes(event.target));
+	var val = void 0;
+	switch (el.tagName) {
+		case TAG.IMAGE:
+			// imageBrowserListener(event)
+			break;
+		default:
+			val = _data[el.getAttribute(_consts.ATTRIBUTE.DATA)];
+			if (val !== undefined) {
+				setValue(el, val);
+			}
+			break;
+	}
+
+	updateControllerLongDebounce();
+	// let d = unflatten(_data);
+	// scanSelectFrom();
+	// vffData.updateController(d);
 }
 
 function imageBrowserListener(event) {
@@ -5865,12 +5949,12 @@ function onVFFInit(event) {
 		}
 
 		var value = getValue(event.target);
-		_data[(key === 'vff-style' ? '__style.' : '') + attrs[key]] = value;
+		_data[(key === _consts.ATTRIBUTE.STYLE ? stylePrefix : '') + attrs[key]] = value;
 	}
 	// console.log("vff:init", getVFFAttributes(event.target));
 	var val = void 0;
 	switch (event.target.tagName) {
-		case 'VFF-IMAGE-BROWSER':
+		case TAG.IMAGE:
 			// imageBrowserListener(event)
 			break;
 		default:
@@ -5892,7 +5976,7 @@ function onVFFRemove(event) {
 	var attrs = getVFFAttributes(event.detail.el);
 	for (var attr in attrs) {
 		delete _data[attrs[attr]];
-		delete _data['__style.' + attrs[attr]];
+		delete _data[stylePrefix + attrs[attr]];
 	}
 	scanSelectFrom();
 }
@@ -5904,7 +5988,7 @@ function _update(event) {
 	}
 
 	if (event.target.hasAttribute(_consts.ATTRIBUTE.STYLE)) {
-		_data['__style.' + event.target.getAttribute(_consts.ATTRIBUTE.STYLE)] = value;
+		_data[stylePrefix + event.target.getAttribute(_consts.ATTRIBUTE.STYLE)] = value;
 	}
 	//todo handle elements with same vff-data ot vff-style
 	updateControllerLShortDebounce();
@@ -5920,7 +6004,7 @@ function _update(event) {
 function onVFFChange(event) {
 	// console.log("vff:change", event);
 	switch (event.target.tagName) {
-		case 'VFF-IMAGE-BROWSER':
+		case TAG.IMAGE:
 			imageBrowserListener(event);
 			if (!event.target.selectedFiles.length) {
 				event.detail.data = undefined;
@@ -5933,9 +6017,9 @@ function onVFFChange(event) {
 	}
 }
 
-window.addEventListener('vff:init', onVFFInit);
-window.addEventListener('vff:remove', onVFFRemove);
-window.addEventListener('vff:change', onVFFChange);
+window.addEventListener(EVENT.INIT, onVFFInit);
+window.addEventListener(EVENT.REMOVE, onVFFRemove);
+window.addEventListener(EVENT.CHANGE, onVFFChange);
 
 module.exports = {
 	init: function init() {
@@ -5959,10 +6043,10 @@ module.exports = {
 						try {
 							val = JSON.parse(val);
 						} catch (e) {/*do nothing*/}
-						if (key.startsWith('__style.')) {
-							(0, _helpers.broadcast)("vff:update", { dataAttrName: 'vff-style', dataAttrValue: key.substr(8), value: val });
+						if (key.startsWith(stylePrefix)) {
+							(0, _helpers.broadcast)(EVENT.UPDATE, { dataAttrName: _consts.ATTRIBUTE.STYLE, dataAttrValue: key.substr(8), value: val });
 						} else {
-							(0, _helpers.broadcast)("vff:update", { dataAttrName: 'vff-data', dataAttrValue: key, value: val });
+							(0, _helpers.broadcast)(EVENT.UPDATE, { dataAttrName: _consts.ATTRIBUTE.DATA, dataAttrValue: key, value: val });
 						}
 					});
 				}, { changeOnly: false, throttle: 0 });

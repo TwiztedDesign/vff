@@ -467,6 +467,23 @@ function unflatten(data) {
     return result[""];
 }
 
+function format(string, ...args) {
+    return string.replace(/{(\d+)}/g, function(match, number) {
+        return typeof args[number] != 'undefined' ? args[number] : match;
+    });
+}
+function escapeRegExp(string) {
+    return string.replace(/[.*+?^$(){}|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}
+function unformat(string, pattern){
+    let r = new RegExp(escapeRegExp(pattern).replace(/\\{(\d+)\\}/g, "(.*)"));
+    let match = string.match(r);
+    if(match && match.length > 1){
+        return match[1];
+    }
+}
+
+
 function noop(){}
 
 
@@ -502,5 +519,7 @@ module.exports = {
     searchAttribute,
     debounce,
     flatten,
-    unflatten
+    unflatten,
+    format,
+    unformat
 };
