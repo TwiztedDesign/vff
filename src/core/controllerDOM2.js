@@ -158,44 +158,44 @@ function scanSelectFrom(){
 	});
 }
 
-function scanTable(table){
-	let elements = searchAttribute([ATTRIBUTE.DATA, ATTRIBUTE.STYLE], undefined, table);
-	elements.forEach(el => {
-		onVFFInit2(el);
-	});
-}
+// function scanTable(table){
+// 	let elements = searchAttribute([ATTRIBUTE.DATA, ATTRIBUTE.STYLE], undefined, table);
+// 	elements.forEach(el => {
+// 		onVFFInit2(el);
+// 	});
+// }
 
-function onVFFInit2(el){
-	let attrs = getVFFAttributes(el);
-	for(let key in attrs){
-
-		if(__initial.has(attrs[key])){
-			setValue(el, __initial.get(attrs[key], true));
-		}
-
-		let value = getValue(el);
-		_data[(key === ATTRIBUTE.STYLE? stylePrefix : '') + attrs[key]] = value;
-
-	}
-	// console.log("vff:init", getVFFAttributes(event.target));
-	let val;
-	switch (el.tagName) {
-		case TAG.IMAGE:
-			// imageBrowserListener(event)
-			break;
-		default:
-			val = _data[el.getAttribute(ATTRIBUTE.DATA)];
-			if(val !== undefined){
-				setValue(el, val);
-			}
-			break;
-	}
-
-	updateControllerLongDebounce();
-	// let d = unflatten(_data);
-	// scanSelectFrom();
-	// vffData.updateController(d);
-}
+// function onVFFInit2(el){
+// 	let attrs = getVFFAttributes(el);
+// 	for(let key in attrs){
+//
+// 		if(__initial.has(attrs[key])){
+// 			setValue(el, __initial.get(attrs[key], true));
+// 		}
+//
+// 		let value = getValue(el);
+// 		_data[(key === ATTRIBUTE.STYLE? stylePrefix : '') + attrs[key]] = value;
+//
+// 	}
+// 	// console.log("vff:init", getVFFAttributes(event.target));
+// 	let val;
+// 	switch (el.tagName) {
+// 		case TAG.IMAGE:
+// 			// imageBrowserListener(event)
+// 			break;
+// 		default:
+// 			val = _data[el.getAttribute(ATTRIBUTE.DATA)];
+// 			if(val !== undefined){
+// 				setValue(el, val);
+// 			}
+// 			break;
+// 	}
+//
+// 	updateControllerLongDebounce();
+// 	// let d = unflatten(_data);
+// 	// scanSelectFrom();
+// 	// vffData.updateController(d);
+// }
 
 function imageBrowserListener(event){
 	if(event.target.selectedFiles.length){

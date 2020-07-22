@@ -1,5 +1,6 @@
 import {broadcast} from '../../utils/helpers.js';
 import {vffData} from '../vffData.js';
+import {vffState} from '../vffState.js';
 import {isInteractionEvent, dispatchEvent} from '../interactionEvents';
 import {VFF_EVENT} from '../../utils/events';
 import {NAMESPACE_DELIMITER, EXPOSE_DELIMITER, TIMECODE} from '../consts';
@@ -78,7 +79,21 @@ function updateInteraction(data){
     }
 }
 
+async function update2(data){
+    let oldVal = JSON.parse(JSON.stringify(vffState.data || {}));
+
+    let noStyle = Object.keys(data)
+        .filter((key) => ['__style'].indexOf(key) < 0)
+        .reduce((newObj, key) => Object.assign(newObj, { [key]: data[key] }), {});
+
+
+    Object.assign(vffState.data , noStyle);
+    Object.assign(vffState.data.__style, data.__style);
+    broadcast(VFF_EVENT, { dataChanged: true, data : vffState.data, oldVal});
+}
+
 module.exports = {
+    update2:update2,
     update : update,
     updateInteraction : updateInteraction,
     updateStyles

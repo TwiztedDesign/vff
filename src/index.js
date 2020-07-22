@@ -2,6 +2,7 @@ import {send, request} from './utils/messenger.js';
 import {setup} from './core/vffSetup';
 import {READY, CUSTOM_READY} from './utils/events.js';
 import {vffData} from './core/vffData.js';
+import {vffState} from './core/vffState.js';
 import {start as startListener} from './utils/listener';
 import {init as initVffDom} from './core/initDOM';
 import {init as initControllerDom} from './core/controllerDOM2';
@@ -77,6 +78,7 @@ extend(vff, playerApi);
 extend(vff, eventsApi);
 
 vff._playerStatus = {};
+vff.state = vffState;
 
 vff.extend('controller', controllerApi);
 vff.extend('video', videoApi);

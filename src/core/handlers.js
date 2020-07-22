@@ -1,6 +1,6 @@
 import {send} from "../utils/messenger";
 let events = require("../utils/events.js");
-import {update, updateStyles} from "./handlers/updateHandler.js";
+import {update, update2, updateStyles} from "./handlers/updateHandler.js";
 import {pages} from "./handlers/pagesHandler.js";
 import {queryParams} from "./handlers/queryParamsHandler.js";
 import {reload} from "./handlers/reloadHandler.js";
@@ -9,6 +9,10 @@ import {deviceChange, playerStatus} from './handlers/playerHandler';
 
 let dataReady = false;
 let handlers = {};
+handlers['vff-update'] = (e) => {
+    update2(e.event.data);
+};
+
 handlers[events.UPDATE] = (e) => {
     if(!dataReady) {
         dataReady = true;
