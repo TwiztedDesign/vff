@@ -618,6 +618,7 @@ module.exports = {
     "CROP": "vff-crop",
     "TRANSFORM": "vff-transform",
     "UPLOAD": "vff-upload-asset",
+    "UPLOAD_ASSET": "vff-upload",
     "AUDIO_TRACK": "vff-audio-track",
     "NEXT": "taco-next",
     "PREV": "taco-previous",
@@ -2297,6 +2298,13 @@ var VffState = function () {
         value: function take(path) {
             console.log("TAKE"); // eslint-disable-line
             (0, _messenger.send)('vff-state', { data: this.data, path: path });
+        }
+    }, {
+        key: 'upload',
+        value: function upload(asset, cb) {
+            (0, _messenger.request)(_events.UPLOAD_ASSET, { asset: { name: asset.name, type: asset.type } }, function (res) {
+                cb(res.payload);
+            });
         }
     }, {
         key: 'on',

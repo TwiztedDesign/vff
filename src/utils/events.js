@@ -4,6 +4,7 @@ module.exports = {
     "CROP"          : "vff-crop",
     "TRANSFORM"     : "vff-transform",
     "UPLOAD"        : "vff-upload-asset",
+    "UPLOAD_ASSET"  : "vff-upload",
     "AUDIO_TRACK"   : "vff-audio-track",
     "NEXT"          : "taco-next",
     "PREV"          : "taco-previous",

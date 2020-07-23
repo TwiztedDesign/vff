@@ -1,6 +1,6 @@
 import {isFunction, on} from '../utils/helpers.js';
-import {send} from '../utils/messenger';
-import {VFF_EVENT} from "../utils/events";
+import {request, send} from '../utils/messenger';
+import {UPLOAD_ASSET, VFF_EVENT} from "../utils/events";
 import VFFEvent from "./vffEvent";
 
 
@@ -54,8 +54,11 @@ class VffState {
         console.log("TAKE"); // eslint-disable-line
         send('vff-state', {data : this.data, path});
     }
-
-
+    upload(asset, cb){
+        request(UPLOAD_ASSET , {asset : {name :asset.name, type : asset.type}}, res => {
+            cb(res.payload);
+        });
+    }
     on(namespace, cb, options){
         if(isFunction(namespace)){
             options = cb; cb = namespace; namespace = '';
