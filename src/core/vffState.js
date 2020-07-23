@@ -44,6 +44,11 @@ class VffState {
         return this.data.hasOwnProperty(key);
     }
     reset(){
+        for (let variableKey in this.data) {
+            if (this.data.hasOwnProperty(variableKey)) {
+                delete this.data[variableKey];
+            }
+        }
         this.data = {};
     }
 
