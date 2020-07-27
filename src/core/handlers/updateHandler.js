@@ -1,4 +1,4 @@
-import {broadcast} from '../../utils/helpers.js';
+import {broadcast, flatten, deepCompare, getByPath} from '../../utils/helpers.js';
 import {vffData} from '../vffData.js';
 import {vffState} from '../vffState.js';
 import {isInteractionEvent, dispatchEvent} from '../interactionEvents';
@@ -82,13 +82,13 @@ function updateInteraction(data){
 async function update2(data){
     let oldVal = JSON.parse(JSON.stringify(vffState.data || {}));
 
-    let noStyle = Object.keys(data)
-        .filter((key) => ['__style'].indexOf(key) < 0)
-        .reduce((newObj, key) => Object.assign(newObj, { [key]: data[key] }), {});
+    vffState._update(data);
 
-
-    Object.assign(vffState.data , noStyle);
-    Object.assign(vffState.data.__style, data.__style);
+    let flat = flatten(vffState.data, true);
+    for(let key in flat){
+        let equal = deepCompare(flat[key], getByPath(oldVal, key));
+        broadcast(VFF_EVENT + key.toLowerCase(), { dataChanged: !equal, data : flat[key]});
+    }
     broadcast(VFF_EVENT, { dataChanged: true, data : vffState.data, oldVal});
 }
 

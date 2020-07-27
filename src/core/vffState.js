@@ -16,8 +16,11 @@ const styleHandler = {
     }
 };
 
+const proxyKeys = ['__style'];
 
 class VffState {
+
+
 
     constructor(){
         let style = {};
@@ -25,7 +28,25 @@ class VffState {
         this.data.__style = new Proxy(style, styleHandler);
     }
 
+    /********/
+    style(){
+        return this.data.__style;
+    }
+    copy(){
+        JSON.parse(JSON.stringify(this.data));
+    }
+    _update(data){
+        let noProxies = Object.keys(data)
+            .filter((key) => proxyKeys.indexOf(key) < 0)
+            .reduce((newObj, key) => Object.assign(newObj, { [key]: data[key] }), {});
 
+        Object.assign(this.data , noProxies);
+
+        proxyKeys.forEach(key => {
+            Object.assign(this.data[key], data[key]);
+        });
+    }
+    /*********/
     add(key, value){
         this.data[key] = value;
     }

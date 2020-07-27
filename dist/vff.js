@@ -2213,6 +2213,10 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.vffState = undefined;
 
+var _defineProperty2 = __webpack_require__(44);
+
+var _defineProperty3 = _interopRequireDefault(_defineProperty2);
+
 var _classCallCheck2 = __webpack_require__(23);
 
 var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
@@ -2247,6 +2251,8 @@ var styleHandler = {
     }
 };
 
+var proxyKeys = ['__style'];
+
 var VffState = function () {
     function VffState() {
         (0, _classCallCheck3.default)(this, VffState);
@@ -2256,7 +2262,39 @@ var VffState = function () {
         this.data.__style = new Proxy(style, styleHandler);
     }
 
+    /********/
+
+
     (0, _createClass3.default)(VffState, [{
+        key: 'style',
+        value: function style() {
+            return this.data.__style;
+        }
+    }, {
+        key: 'copy',
+        value: function copy() {
+            JSON.parse(JSON.stringify(this.data));
+        }
+    }, {
+        key: '_update',
+        value: function _update(data) {
+            var _this = this;
+
+            var noProxies = Object.keys(data).filter(function (key) {
+                return proxyKeys.indexOf(key) < 0;
+            }).reduce(function (newObj, key) {
+                return Object.assign(newObj, (0, _defineProperty3.default)({}, key, data[key]));
+            }, {});
+
+            Object.assign(this.data, noProxies);
+
+            proxyKeys.forEach(function (key) {
+                Object.assign(_this.data[key], data[key]);
+            });
+        }
+        /*********/
+
+    }, {
         key: 'add',
         value: function add(key, value) {
             this.data[key] = value;
@@ -2286,6 +2324,11 @@ var VffState = function () {
     }, {
         key: 'reset',
         value: function reset() {
+            for (var variableKey in this.data) {
+                if (this.data.hasOwnProperty(variableKey)) {
+                    delete this.data[variableKey];
+                }
+            }
             this.data = {};
         }
     }, {
@@ -2744,7 +2787,12 @@ vff.disableOverscroll = function () {
 (0, _helpers.extend)(vff, eventsApi);
 
 vff._playerStatus = {};
-vff.state = _vffState.vffState;
+/*** State ***/
+vff.state = _vffState.vffState.data;
+vff.take = _vffState.vffState.take;
+vff.style = _vffState.vffState.style();
+vff.onStateChange = _vffState.vffState.on;
+/*************/
 
 vff.extend('controller', controllerApi);
 vff.extend('video', _video.api);
@@ -3917,10 +3965,6 @@ module.exports = handlers;
 "use strict";
 
 
-var _defineProperty2 = __webpack_require__(44);
-
-var _defineProperty3 = _interopRequireDefault(_defineProperty2);
-
 var _slicedToArray2 = __webpack_require__(106);
 
 var _slicedToArray3 = _interopRequireDefault(_slicedToArray2);
@@ -4000,21 +4044,23 @@ var update = function () {
 
 var update2 = function () {
     var _ref4 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2(data) {
-        var oldVal, noStyle;
+        var oldVal, flat, key, equal;
         return _regenerator2.default.wrap(function _callee2$(_context2) {
             while (1) {
                 switch (_context2.prev = _context2.next) {
                     case 0:
                         oldVal = JSON.parse(JSON.stringify(_vffState.vffState.data || {}));
-                        noStyle = Object.keys(data).filter(function (key) {
-                            return ['__style'].indexOf(key) < 0;
-                        }).reduce(function (newObj, key) {
-                            return Object.assign(newObj, (0, _defineProperty3.default)({}, key, data[key]));
-                        }, {});
 
 
-                        Object.assign(_vffState.vffState.data, noStyle);
-                        Object.assign(_vffState.vffState.data.__style, data.__style);
+                        _vffState.vffState._update(data);
+
+                        flat = (0, _helpers.flatten)(_vffState.vffState.data, true);
+
+                        for (key in flat) {
+                            equal = (0, _helpers.deepCompare)(flat[key], (0, _helpers.getByPath)(oldVal, key));
+
+                            (0, _helpers.broadcast)(_events.VFF_EVENT + key.toLowerCase(), { dataChanged: !equal, data: flat[key] });
+                        }
                         (0, _helpers.broadcast)(_events.VFF_EVENT, { dataChanged: true, data: _vffState.vffState.data, oldVal: oldVal });
 
                     case 5:

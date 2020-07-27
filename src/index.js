@@ -78,7 +78,13 @@ extend(vff, playerApi);
 extend(vff, eventsApi);
 
 vff._playerStatus = {};
-vff.state = vffState;
+/*** State ***/
+vff.state = vffState.data;
+vff.take = vffState.take;
+vff.style = vffState.style();
+vff.onStateChange = vffState.on;
+/*************/
+
 
 vff.extend('controller', controllerApi);
 vff.extend('video', videoApi);
