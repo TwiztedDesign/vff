@@ -2789,9 +2789,13 @@ vff.disableOverscroll = function () {
 vff._playerStatus = {};
 /*** State ***/
 vff.state = _vffState.vffState.data;
-vff.take = _vffState.vffState.take;
+vff.take = function (path) {
+    return _vffState.vffState.take(path);
+};
 vff.style = _vffState.vffState.style();
-vff.onStateChange = _vffState.vffState.on;
+vff.onStateChange = function (namespace, cb, options) {
+    return _vffState.vffState.on(namespace, cb, options);
+};
 /*************/
 
 vff.extend('controller', controllerApi);
