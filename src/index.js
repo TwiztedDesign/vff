@@ -80,9 +80,9 @@ extend(vff, eventsApi);
 vff._playerStatus = {};
 /*** State ***/
 vff.state = vffState.data;
-vff.take = vffState.take;
+vff.take = (path) => { return vffState.take(path);};
 vff.style = vffState.style();
-vff.onStateChange = vffState.on;
+vff.onStateChange = (namespace, cb, options) => {return vffState.on(namespace, cb, options);};
 /*************/
 
 
